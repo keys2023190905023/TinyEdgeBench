@@ -35,3 +35,12 @@
 - Verified `python -m pytest` passes with 11 tests.
 - Verified both `configs/default.yaml` and `configs/extended_operators.yaml` run successfully.
 - Verified the active local Web UI exposes the new single-operator/network-preset selector.
+
+## 2026-05-28 Larger Operator And Preset Catalog
+
+- Expanded the catalog to 79 supported operator microbenchmarks.
+- Added more activation, unary math, binary elementwise, reduction, normalization, layout, gather/one-hot, causal attention, and rotary embedding operators.
+- Expanded network/block presets from 5 to 29 presets, covering CNN, MobileNet/EfficientNet, ConvNeXt, UNet, DeepLab, FPN, YOLO/PAN, ViT, Swin, BERT, GPT, recommendation, speech, autoencoder, generator, super-resolution, recurrent-gate, PointNet, GraphSAGE, and anomaly-detection style blocks.
+- Added `configs/model_presets.yaml` for preset-heavy benchmarking.
+- Verified `python -m pytest` passes with all supported operators and all presets exercised.
+- Verified `configs/default.yaml`, `configs/extended_operators.yaml`, and `configs/model_presets.yaml` run successfully.

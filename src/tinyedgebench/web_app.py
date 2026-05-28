@@ -83,9 +83,9 @@ def build_web_case(
             embedding_dim=embedding_dim,
         )
 
-    if operator == "scaled_dot_product_attention":
+    if operator in {"scaled_dot_product_attention", "causal_self_attention"}:
         return BenchmarkCase(
-            name="web_scaled_dot_product_attention",
+            name=f"web_{operator}",
             operator=operator,
             precision_modes=precision_modes,
             batch_size=batch_size,
@@ -262,7 +262,7 @@ def main() -> None:
         kernel_size = (3, 3)
         stride = 1
         padding = 1
-    elif operator == "scaled_dot_product_attention":
+    elif operator in {"scaled_dot_product_attention", "causal_self_attention"}:
         col_b, col_s, col_e, col_h = st.columns(4)
         with col_b:
             batch_size = st.number_input("Batch size", min_value=1, max_value=128, value=1, step=1)

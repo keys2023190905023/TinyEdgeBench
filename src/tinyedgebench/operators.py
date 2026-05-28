@@ -179,6 +179,44 @@ def leaky_relu(x: np.ndarray, negative_slope: float = 0.01) -> np.ndarray:
     return np.where(x > 0, x, negative_slope * x).astype(np.float32, copy=False)
 
 
+def elu(x: np.ndarray, alpha: float = 1.0) -> np.ndarray:
+    return np.where(x > 0, x, alpha * (np.exp(x) - 1.0)).astype(np.float32, copy=False)
+
+
+def selu(x: np.ndarray) -> np.ndarray:
+    alpha = 1.6732632423543772
+    scale = 1.0507009873554805
+    return (scale * elu(x, alpha=alpha)).astype(np.float32, copy=False)
+
+
+def celu(x: np.ndarray, alpha: float = 1.0) -> np.ndarray:
+    return np.maximum(0, x) + np.minimum(0, alpha * (np.exp(x / alpha) - 1.0)).astype(np.float32, copy=False)
+
+
+def softplus(x: np.ndarray) -> np.ndarray:
+    return np.log1p(np.exp(-np.abs(x))) + np.maximum(x, 0).astype(np.float32, copy=False)
+
+
+def softsign(x: np.ndarray) -> np.ndarray:
+    return (x / (1.0 + np.abs(x))).astype(np.float32, copy=False)
+
+
+def hard_sigmoid(x: np.ndarray) -> np.ndarray:
+    return np.clip((x + 3.0) / 6.0, 0.0, 1.0).astype(np.float32, copy=False)
+
+
+def hard_swish(x: np.ndarray) -> np.ndarray:
+    return (x * hard_sigmoid(x)).astype(np.float32, copy=False)
+
+
+def mish(x: np.ndarray) -> np.ndarray:
+    return (x * np.tanh(softplus(x))).astype(np.float32, copy=False)
+
+
+def prelu(x: np.ndarray, slope: np.ndarray) -> np.ndarray:
+    return np.where(x > 0, x, slope * x).astype(np.float32, copy=False)
+
+
 def softmax(x: np.ndarray, axis: int = -1) -> np.ndarray:
     shifted = x - np.max(x, axis=axis, keepdims=True)
     exp = np.exp(shifted)
@@ -247,12 +285,49 @@ def groupnorm(x: np.ndarray, gamma: np.ndarray, beta: np.ndarray, groups: int = 
     return (normed * gamma.reshape(1, -1, 1, 1) + beta.reshape(1, -1, 1, 1)).astype(np.float32, copy=False)
 
 
+def instance_norm(x: np.ndarray, gamma: np.ndarray, beta: np.ndarray, eps: float = 1e-5) -> np.ndarray:
+    x = x.astype(np.float32, copy=False)
+    mean = np.mean(x, axis=(2, 3), keepdims=True)
+    var = np.var(x, axis=(2, 3), keepdims=True)
+    return ((x - mean) / np.sqrt(var + eps) * gamma.reshape(1, -1, 1, 1) + beta.reshape(1, -1, 1, 1)).astype(
+        np.float32,
+        copy=False,
+    )
+
+
+def l2_normalize(x: np.ndarray, axis: int = -1, eps: float = 1e-12) -> np.ndarray:
+    denom = np.sqrt(np.sum(np.square(x), axis=axis, keepdims=True) + eps)
+    return (x / denom).astype(np.float32, copy=False)
+
+
 def add(a: np.ndarray, b: np.ndarray) -> np.ndarray:
     return (a.astype(np.float32, copy=False) + b.astype(np.float32, copy=False)).astype(np.float32, copy=False)
 
 
+def sub(a: np.ndarray, b: np.ndarray) -> np.ndarray:
+    return (a.astype(np.float32, copy=False) - b.astype(np.float32, copy=False)).astype(np.float32, copy=False)
+
+
 def mul(a: np.ndarray, b: np.ndarray) -> np.ndarray:
     return (a.astype(np.float32, copy=False) * b.astype(np.float32, copy=False)).astype(np.float32, copy=False)
+
+
+def div(a: np.ndarray, b: np.ndarray) -> np.ndarray:
+    return (a.astype(np.float32, copy=False) / (b.astype(np.float32, copy=False) + 1e-3)).astype(np.float32, copy=False)
+
+
+def maximum(a: np.ndarray, b: np.ndarray) -> np.ndarray:
+    return np.maximum(a.astype(np.float32, copy=False), b.astype(np.float32, copy=False)).astype(np.float32, copy=False)
+
+
+def minimum(a: np.ndarray, b: np.ndarray) -> np.ndarray:
+    return np.minimum(a.astype(np.float32, copy=False), b.astype(np.float32, copy=False)).astype(np.float32, copy=False)
+
+
+def bias_add(x: np.ndarray, bias: np.ndarray) -> np.ndarray:
+    if x.ndim == 4:
+        return (x + bias.reshape(1, -1, 1, 1)).astype(np.float32, copy=False)
+    return (x + bias).astype(np.float32, copy=False)
 
 
 def concat(a: np.ndarray, b: np.ndarray, axis: int = 1) -> np.ndarray:
@@ -276,6 +351,34 @@ def flatten(x: np.ndarray) -> np.ndarray:
     return x.reshape(x.shape[0], -1).astype(np.float32, copy=False)
 
 
+def squeeze(x: np.ndarray) -> np.ndarray:
+    return np.squeeze(x).astype(np.float32, copy=False)
+
+
+def expand_dims(x: np.ndarray, axis: int = 1) -> np.ndarray:
+    safe_axis = max(0, min(axis, x.ndim))
+    return np.expand_dims(x, axis=safe_axis).astype(np.float32, copy=False)
+
+
+def tile(x: np.ndarray, repeats: int = 2) -> np.ndarray:
+    reps = (1,) * (x.ndim - 1) + (repeats,)
+    return np.tile(x, reps).astype(np.float32, copy=False)
+
+
+def slice_tensor(x: np.ndarray) -> np.ndarray:
+    slices = tuple(slice(0, max(1, dim // 2)) for dim in x.shape)
+    return x[slices].astype(np.float32, copy=False)
+
+
+def gather(x: np.ndarray, indices: np.ndarray, axis: int = 0) -> np.ndarray:
+    safe_axis = axis if -x.ndim <= axis < x.ndim else 0
+    return np.take(x, indices, axis=safe_axis).astype(np.float32, copy=False)
+
+
+def one_hot(indices: np.ndarray, depth: int) -> np.ndarray:
+    return np.eye(depth, dtype=np.float32)[indices]
+
+
 def upsample_nearest2d(x: np.ndarray, scale_factor: int = 2) -> np.ndarray:
     return np.repeat(np.repeat(x.astype(np.float32, copy=False), scale_factor, axis=2), scale_factor, axis=3).astype(
         np.float32,
@@ -291,12 +394,118 @@ def pad(x: np.ndarray, padding: int = 1) -> np.ndarray:
     return np.pad(x.astype(np.float32, copy=False), pads, mode="constant").astype(np.float32, copy=False)
 
 
+def channel_shuffle(x: np.ndarray, groups: int = 2) -> np.ndarray:
+    n, c, h, w = x.shape
+    groups = groups if c % groups == 0 else 1
+    return x.reshape(n, groups, c // groups, h, w).transpose(0, 2, 1, 3, 4).reshape(n, c, h, w).astype(
+        np.float32,
+        copy=False,
+    )
+
+
+def space_to_depth(x: np.ndarray, block_size: int = 2) -> np.ndarray:
+    n, c, h, w = x.shape
+    block_size = min(block_size, h, w)
+    h_trim = h - (h % block_size)
+    w_trim = w - (w % block_size)
+    x = x[:, :, :h_trim, :w_trim]
+    return x.reshape(n, c, h_trim // block_size, block_size, w_trim // block_size, block_size).transpose(
+        0, 1, 3, 5, 2, 4
+    ).reshape(n, c * block_size * block_size, h_trim // block_size, w_trim // block_size).astype(np.float32, copy=False)
+
+
+def depth_to_space(x: np.ndarray, block_size: int = 2) -> np.ndarray:
+    n, c, h, w = x.shape
+    block_area = block_size * block_size
+    if c % block_area != 0:
+        block_size = 1
+        block_area = 1
+    return x.reshape(n, c // block_area, block_size, block_size, h, w).transpose(0, 1, 4, 2, 5, 3).reshape(
+        n,
+        c // block_area,
+        h * block_size,
+        w * block_size,
+    ).astype(np.float32, copy=False)
+
+
 def reduce_mean(x: np.ndarray, axis: int = -1) -> np.ndarray:
     return np.mean(x.astype(np.float32, copy=False), axis=axis).astype(np.float32, copy=False)
 
 
 def reduce_sum(x: np.ndarray, axis: int = -1) -> np.ndarray:
     return np.sum(x.astype(np.float32, copy=False), axis=axis).astype(np.float32, copy=False)
+
+
+def reduce_max(x: np.ndarray, axis: int = -1) -> np.ndarray:
+    return np.max(x.astype(np.float32, copy=False), axis=axis).astype(np.float32, copy=False)
+
+
+def reduce_min(x: np.ndarray, axis: int = -1) -> np.ndarray:
+    return np.min(x.astype(np.float32, copy=False), axis=axis).astype(np.float32, copy=False)
+
+
+def reduce_prod(x: np.ndarray, axis: int = -1) -> np.ndarray:
+    return np.prod(x.astype(np.float32, copy=False), axis=axis).astype(np.float32, copy=False)
+
+
+def identity(x: np.ndarray) -> np.ndarray:
+    return x.astype(np.float32, copy=True)
+
+
+def abs_tensor(x: np.ndarray) -> np.ndarray:
+    return np.abs(x).astype(np.float32, copy=False)
+
+
+def neg(x: np.ndarray) -> np.ndarray:
+    return (-x).astype(np.float32, copy=False)
+
+
+def square(x: np.ndarray) -> np.ndarray:
+    return np.square(x).astype(np.float32, copy=False)
+
+
+def sqrt(x: np.ndarray) -> np.ndarray:
+    return np.sqrt(np.abs(x) + 1e-6).astype(np.float32, copy=False)
+
+
+def rsqrt(x: np.ndarray) -> np.ndarray:
+    return (1.0 / sqrt(x)).astype(np.float32, copy=False)
+
+
+def exp(x: np.ndarray) -> np.ndarray:
+    return np.exp(np.clip(x, -20, 20)).astype(np.float32, copy=False)
+
+
+def log(x: np.ndarray) -> np.ndarray:
+    return np.log(np.abs(x) + 1e-6).astype(np.float32, copy=False)
+
+
+def reciprocal(x: np.ndarray) -> np.ndarray:
+    return (1.0 / (x + np.sign(x) * 1e-3 + (x == 0) * 1e-3)).astype(np.float32, copy=False)
+
+
+def floor(x: np.ndarray) -> np.ndarray:
+    return np.floor(x).astype(np.float32, copy=False)
+
+
+def ceil(x: np.ndarray) -> np.ndarray:
+    return np.ceil(x).astype(np.float32, copy=False)
+
+
+def round_tensor(x: np.ndarray) -> np.ndarray:
+    return np.round(x).astype(np.float32, copy=False)
+
+
+def clip(x: np.ndarray, min_value: float = -1.0, max_value: float = 1.0) -> np.ndarray:
+    return np.clip(x, min_value, max_value).astype(np.float32, copy=False)
+
+
+def sign(x: np.ndarray) -> np.ndarray:
+    return np.sign(x).astype(np.float32, copy=False)
+
+
+def dropout_inference(x: np.ndarray) -> np.ndarray:
+    return x.astype(np.float32, copy=True)
 
 
 def embedding(indices: np.ndarray, table: np.ndarray) -> np.ndarray:
@@ -308,6 +517,35 @@ def scaled_dot_product_attention(q: np.ndarray, k: np.ndarray, v: np.ndarray) ->
     scores = np.matmul(q, np.swapaxes(k, -1, -2)) / scale
     weights = softmax(scores, axis=-1)
     return np.matmul(weights, v).astype(np.float32, copy=False)
+
+
+def causal_self_attention(q: np.ndarray, k: np.ndarray, v: np.ndarray) -> np.ndarray:
+    scale = np.sqrt(q.shape[-1])
+    scores = np.matmul(q, np.swapaxes(k, -1, -2)) / scale
+    seq = scores.shape[-1]
+    mask = np.triu(np.ones((seq, seq), dtype=bool), k=1)
+    scores = np.where(mask, -1e9, scores)
+    weights = softmax(scores, axis=-1)
+    return np.matmul(weights, v).astype(np.float32, copy=False)
+
+
+def rotary_embedding(x: np.ndarray) -> np.ndarray:
+    x = x.astype(np.float32, copy=False)
+    dim = x.shape[-1]
+    if dim < 2:
+        return x.copy()
+    even = x[..., 0::2]
+    odd = x[..., 1::2]
+    pair_dim = min(even.shape[-1], odd.shape[-1])
+    positions = np.arange(x.shape[-2], dtype=np.float32)[..., None]
+    inv_freq = 1.0 / (10000 ** (np.arange(pair_dim, dtype=np.float32) / max(1, pair_dim)))
+    angles = positions * inv_freq
+    cos = np.cos(angles)
+    sin = np.sin(angles)
+    out = x.copy()
+    out[..., 0 : pair_dim * 2 : 2] = even[..., :pair_dim] * cos - odd[..., :pair_dim] * sin
+    out[..., 1 : pair_dim * 2 : 2] = even[..., :pair_dim] * sin + odd[..., :pair_dim] * cos
+    return out.astype(np.float32, copy=False)
 
 
 def quantize_symmetric_int8(values: np.ndarray) -> tuple[np.ndarray, float]:

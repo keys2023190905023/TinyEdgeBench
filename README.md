@@ -28,6 +28,8 @@ TinyEdgeBench gives you a lightweight local baseline for those questions. It is 
 | Interactive CLI wizard | Supported |
 | Streamlit Web UI | Supported |
 | CSV, Markdown, and PNG outputs | Supported |
+| 70+ operator microbenchmarks | Supported |
+| 25+ network/block presets | Supported |
 | FP32 baseline | Supported |
 | Simulated INT8 | Supported |
 | Shift-only approximation | Supported |
@@ -138,7 +140,7 @@ Run it:
 python -m tinyedgebench.benchmark --config path/to/config.yaml
 ```
 
-See [configs/default.yaml](configs/default.yaml) and [configs/extended_operators.yaml](configs/extended_operators.yaml) for complete examples.
+See [configs/default.yaml](configs/default.yaml), [configs/extended_operators.yaml](configs/extended_operators.yaml), and [configs/model_presets.yaml](configs/model_presets.yaml) for complete examples.
 
 ## Network Presets
 
@@ -151,6 +153,30 @@ TinyEdgeBench can run lightweight suites that approximate common model blocks:
 | `resnet_basic_block` | Residual Conv/BN/ReLU/Add block |
 | `transformer_encoder_tiny` | Attention, normalization, MLP, and softmax block |
 | `mlp_edge` | Small MLP-style matrix and activation block |
+| `efficientnet_mbconv` | Mobile inverted bottleneck convolution block |
+| `convnext_block` | ConvNeXt-style depthwise convolution and pointwise MLP block |
+| `unet_encoder_block` | UNet downsampling encoder block |
+| `unet_decoder_block` | UNet upsampling decoder block |
+| `deeplab_aspp_tiny` | Tiny segmentation ASPP-style block |
+| `fpn_lateral_block` | Feature pyramid lateral fusion block |
+| `yolo_head_tiny` | Tiny detection head block |
+| `detection_neck_pan` | PAN-style detection neck fusion block |
+| `segmentation_head` | Lightweight semantic segmentation head |
+| `vit_patch_embed` | Vision Transformer patch embedding block |
+| `swin_window_attention_tiny` | Tiny Swin-style attention and MLP block |
+| `bert_ffn_block` | BERT-style feed-forward block |
+| `gpt_decoder_tiny` | Tiny causal decoder block |
+| `recommender_embedding_mlp` | Embedding plus MLP recommendation block |
+| `speech_command_cnn` | Small speech-command CNN block |
+| `wav2vec_conv_frontend` | Speech representation frontend approximation |
+| `autoencoder_bottleneck` | Encoder bottleneck and decoder projection block |
+| `gan_generator_block` | Generator-style upsampling convolution block |
+| `super_resolution_block` | Pixel-shuffle-like super-resolution block |
+| `lstm_gate_block` | LSTM gate approximation block |
+| `gru_gate_block` | GRU gate approximation block |
+| `pointnet_mlp_block` | PointNet-style per-point MLP and global reduction block |
+| `graphsage_mlp_block` | GraphSAGE-style aggregate and projection block |
+| `anomaly_mlp` | Small anomaly-detection MLP block |
 
 Example:
 
@@ -168,12 +194,14 @@ network_presets:
 | --- | --- |
 | Convolution | `conv2d`, `depthwise_conv2d`, `pointwise_conv2d` |
 | Matrix and linear | `matmul`, `batch_matmul`, `linear` |
-| Activations | `relu`, `relu6`, `sigmoid`, `tanh`, `gelu`, `silu`, `leaky_relu` |
+| Activations | `relu`, `relu6`, `sigmoid`, `tanh`, `gelu`, `silu`, `leaky_relu`, `elu`, `selu`, `celu`, `softplus`, `softsign`, `hard_sigmoid`, `hard_swish`, `mish`, `prelu` |
 | Pooling and image ops | `maxpool2d`, `avgpool2d`, `global_avgpool2d`, `upsample_nearest2d`, `pad` |
-| Normalization | `batchnorm2d`, `layernorm`, `rmsnorm`, `groupnorm` |
-| Tensor ops | `add`, `mul`, `concat`, `transpose`, `reshape`, `flatten` |
-| Reductions and probabilities | `softmax`, `log_softmax`, `reduce_mean`, `reduce_sum` |
-| Sequence/model ops | `embedding`, `scaled_dot_product_attention` |
+| Normalization | `batchnorm2d`, `layernorm`, `rmsnorm`, `groupnorm`, `instance_norm`, `l2_normalize` |
+| Tensor ops | `add`, `sub`, `mul`, `div`, `maximum`, `minimum`, `bias_add`, `concat`, `transpose`, `reshape`, `flatten`, `squeeze`, `expand_dims`, `tile`, `slice`, `gather`, `one_hot` |
+| Layout/image transforms | `channel_shuffle`, `space_to_depth`, `depth_to_space` |
+| Reductions and probabilities | `softmax`, `log_softmax`, `reduce_mean`, `reduce_sum`, `reduce_max`, `reduce_min`, `reduce_prod` |
+| Unary math | `identity`, `abs`, `neg`, `square`, `sqrt`, `rsqrt`, `exp`, `log`, `reciprocal`, `floor`, `ceil`, `round`, `clip`, `sign`, `dropout_inference` |
+| Sequence/model ops | `embedding`, `scaled_dot_product_attention`, `causal_self_attention`, `rotary_embedding` |
 
 ## Precision Modes
 
@@ -236,6 +264,7 @@ Run end-to-end examples:
 ```bash
 python -m tinyedgebench.benchmark --config configs/default.yaml
 python -m tinyedgebench.benchmark --config configs/extended_operators.yaml
+python -m tinyedgebench.benchmark --config configs/model_presets.yaml
 ```
 
 ## Screenshots

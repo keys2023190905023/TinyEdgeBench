@@ -99,7 +99,7 @@ def _make_inputs(case: BenchmarkCase, rng: np.random.Generator) -> dict[str, np.
             "table": rng.normal(0, 0.5, size=(case.vocab_size, case.embedding_dim)).astype(np.float32),
         }
 
-    if case.operator == "scaled_dot_product_attention":
+    if case.operator in {"scaled_dot_product_attention", "causal_self_attention"}:
         assert case.batch_size and case.sequence_length and case.embedding_dim and case.num_heads
         head_dim = max(1, case.embedding_dim // case.num_heads)
         shape = (case.batch_size, case.num_heads, case.sequence_length, head_dim)
@@ -112,8 +112,20 @@ def _make_inputs(case: BenchmarkCase, rng: np.random.Generator) -> dict[str, np.
     assert case.input_shape_generic
     x = rng.normal(0, 0.5, size=case.input_shape_generic).astype(np.float32)
     inputs = {"x": x}
-    if case.operator in {"add", "mul", "concat"}:
+    if case.operator in {"add", "sub", "mul", "div", "maximum", "minimum", "concat"}:
         inputs["y"] = rng.normal(0, 0.5, size=case.input_shape_generic).astype(np.float32)
+    if case.operator in {"bias_add", "prelu"}:
+        if len(case.input_shape_generic) == 4:
+            channels = case.input_shape_generic[1]
+            shape = (channels,)
+        else:
+            shape = (case.input_shape_generic[-1],)
+        inputs["bias"] = rng.normal(0.05, 0.02, size=shape).astype(np.float32)
+    if case.operator == "gather":
+        axis_len = case.input_shape_generic[0]
+        inputs["indices"] = rng.integers(0, axis_len, size=(max(1, axis_len // 2),))
+    if case.operator == "one_hot":
+        inputs["indices"] = rng.integers(0, case.input_shape_generic[-1], size=case.input_shape_generic[:-1] or (1,))
     if case.operator == "batchnorm2d":
         channels = case.input_shape_generic[1]
         inputs.update(
@@ -124,7 +136,7 @@ def _make_inputs(case: BenchmarkCase, rng: np.random.Generator) -> dict[str, np.
                 "running_var": np.abs(rng.normal(1, 0.1, size=(channels,))).astype(np.float32),
             }
         )
-    if case.operator in {"groupnorm"}:
+    if case.operator in {"groupnorm", "instance_norm"}:
         channels = case.input_shape_generic[1]
         inputs["gamma"] = rng.normal(1, 0.05, size=(channels,)).astype(np.float32)
         inputs["beta"] = rng.normal(0, 0.05, size=(channels,)).astype(np.float32)
@@ -213,7 +225,7 @@ def _estimate_ops(case: BenchmarkCase) -> int:
     if case.operator == "embedding":
         assert case.batch_size and case.sequence_length and case.embedding_dim
         return case.batch_size * case.sequence_length * case.embedding_dim
-    if case.operator == "scaled_dot_product_attention":
+    if case.operator in {"scaled_dot_product_attention", "causal_self_attention"}:
         assert case.batch_size and case.sequence_length and case.embedding_dim and case.num_heads
         head_dim = max(1, case.embedding_dim // case.num_heads)
         return 4 * case.batch_size * case.num_heads * case.sequence_length * case.sequence_length * head_dim
@@ -240,7 +252,7 @@ def _describe_case(case: BenchmarkCase) -> str:
             f"batch={case.batch_size}, seq={case.sequence_length}, "
             f"vocab={case.vocab_size}, dim={case.embedding_dim}"
         )
-    if case.operator == "scaled_dot_product_attention":
+    if case.operator in {"scaled_dot_product_attention", "causal_self_attention"}:
         return (
             f"batch={case.batch_size}, heads={case.num_heads}, "
             f"seq={case.sequence_length}, dim={case.embedding_dim}"
@@ -264,6 +276,24 @@ def _run_generic_case(case: BenchmarkCase, inputs: dict[str, np.ndarray]) -> np.
         return operators.silu(x)
     if case.operator == "leaky_relu":
         return operators.leaky_relu(x)
+    if case.operator == "elu":
+        return operators.elu(x)
+    if case.operator == "selu":
+        return operators.selu(x)
+    if case.operator == "celu":
+        return operators.celu(x)
+    if case.operator == "softplus":
+        return operators.softplus(x)
+    if case.operator == "softsign":
+        return operators.softsign(x)
+    if case.operator == "hard_sigmoid":
+        return operators.hard_sigmoid(x)
+    if case.operator == "hard_swish":
+        return operators.hard_swish(x)
+    if case.operator == "mish":
+        return operators.mish(x)
+    if case.operator == "prelu":
+        return operators.prelu(inputs["x"], inputs["bias"])
     if case.operator == "softmax":
         return operators.softmax(x, axis=case.axis)
     if case.operator == "log_softmax":
@@ -284,10 +314,24 @@ def _run_generic_case(case: BenchmarkCase, inputs: dict[str, np.ndarray]) -> np.
         return operators.rmsnorm(inputs["x"], inputs["gamma"])
     if case.operator == "groupnorm":
         return operators.groupnorm(inputs["x"], inputs["gamma"], inputs["beta"], groups=case.groups)
+    if case.operator == "instance_norm":
+        return operators.instance_norm(inputs["x"], inputs["gamma"], inputs["beta"])
+    if case.operator == "l2_normalize":
+        return operators.l2_normalize(x, case.axis)
     if case.operator == "add":
         return operators.add(inputs["x"], inputs["y"])
+    if case.operator == "sub":
+        return operators.sub(inputs["x"], inputs["y"])
     if case.operator == "mul":
         return operators.mul(inputs["x"], inputs["y"])
+    if case.operator == "div":
+        return operators.div(inputs["x"], inputs["y"])
+    if case.operator == "maximum":
+        return operators.maximum(inputs["x"], inputs["y"])
+    if case.operator == "minimum":
+        return operators.minimum(inputs["x"], inputs["y"])
+    if case.operator == "bias_add":
+        return operators.bias_add(inputs["x"], inputs["bias"])
     if case.operator == "concat":
         return operators.concat(inputs["x"], inputs["y"], axis=case.axis)
     if case.operator == "transpose":
@@ -297,18 +341,76 @@ def _run_generic_case(case: BenchmarkCase, inputs: dict[str, np.ndarray]) -> np.
         return operators.reshape(x, case.target_shape)
     if case.operator == "flatten":
         return operators.flatten(x)
+    if case.operator == "squeeze":
+        return operators.squeeze(x)
+    if case.operator == "expand_dims":
+        return operators.expand_dims(x, case.axis)
+    if case.operator == "tile":
+        return operators.tile(x, case.scale_factor)
+    if case.operator == "slice":
+        return operators.slice_tensor(x)
+    if case.operator == "gather":
+        return operators.gather(x, inputs["indices"], axis=0)
+    if case.operator == "one_hot":
+        return operators.one_hot(inputs["indices"], depth=case.input_shape_generic[-1])
     if case.operator == "upsample_nearest2d":
         return operators.upsample_nearest2d(x, case.scale_factor)
     if case.operator == "pad":
         return operators.pad(x, case.padding)
+    if case.operator == "channel_shuffle":
+        return operators.channel_shuffle(x, case.groups)
+    if case.operator == "space_to_depth":
+        return operators.space_to_depth(x, case.scale_factor)
+    if case.operator == "depth_to_space":
+        return operators.depth_to_space(x, case.scale_factor)
     if case.operator == "reduce_mean":
         return operators.reduce_mean(x, case.axis)
     if case.operator == "reduce_sum":
         return operators.reduce_sum(x, case.axis)
+    if case.operator == "reduce_max":
+        return operators.reduce_max(x, case.axis)
+    if case.operator == "reduce_min":
+        return operators.reduce_min(x, case.axis)
+    if case.operator == "reduce_prod":
+        return operators.reduce_prod(x, case.axis)
+    if case.operator == "identity":
+        return operators.identity(x)
+    if case.operator == "abs":
+        return operators.abs_tensor(x)
+    if case.operator == "neg":
+        return operators.neg(x)
+    if case.operator == "square":
+        return operators.square(x)
+    if case.operator == "sqrt":
+        return operators.sqrt(x)
+    if case.operator == "rsqrt":
+        return operators.rsqrt(x)
+    if case.operator == "exp":
+        return operators.exp(x)
+    if case.operator == "log":
+        return operators.log(x)
+    if case.operator == "reciprocal":
+        return operators.reciprocal(x)
+    if case.operator == "floor":
+        return operators.floor(x)
+    if case.operator == "ceil":
+        return operators.ceil(x)
+    if case.operator == "round":
+        return operators.round_tensor(x)
+    if case.operator == "clip":
+        return operators.clip(x)
+    if case.operator == "sign":
+        return operators.sign(x)
+    if case.operator == "dropout_inference":
+        return operators.dropout_inference(x)
     if case.operator == "embedding":
         return operators.embedding(inputs["indices"], inputs["table"])
     if case.operator == "scaled_dot_product_attention":
         return operators.scaled_dot_product_attention(inputs["q"], inputs["k"], inputs["v"])
+    if case.operator == "causal_self_attention":
+        return operators.causal_self_attention(inputs["q"], inputs["k"], inputs["v"])
+    if case.operator == "rotary_embedding":
+        return operators.rotary_embedding(x)
     raise ValueError(f"Unsupported benchmark operator: {case.operator}")
 
 

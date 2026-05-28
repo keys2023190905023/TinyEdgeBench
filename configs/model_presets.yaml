@@ -1,0 +1,16 @@
+output_dir: results_model_presets
+warmup: 1
+runs: 3
+backend: cpu
+seed: 42
+network_presets:
+  - name: efficientnet_mbconv
+    precision_modes: [fp32, int8_sim, shift_only]
+  - name: convnext_block
+    precision_modes: [fp32, int8_sim]
+  - name: unet_encoder_block
+    precision_modes: [fp32, int8_sim]
+  - name: gpt_decoder_tiny
+    precision_modes: [fp32, int8_sim]
+  - name: recommender_embedding_mlp
+    precision_modes: [fp32, int8_sim]
