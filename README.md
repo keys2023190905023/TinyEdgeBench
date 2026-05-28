@@ -1,20 +1,49 @@
 # TinyEdgeBench
 
-TinyEdgeBench is a local, CPU-first benchmark tool for low-bit edge-AI operators. It is designed for quick experiments on a developer laptop or edge box, where users want reproducible latency, approximation error, plots, and a small Markdown report without depending on CUDA or cloud services.
+[![Python](https://img.shields.io/badge/python-3.9%2B-blue)](https://www.python.org/)
+[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![Backend](https://img.shields.io/badge/backend-CPU%20local-lightgrey)](#why-tinyedgebench)
 
-## Motivation
+TinyEdgeBench is a local benchmark tool for low-bit edge-AI operators. It lets you configure operators or common model blocks, run benchmarks on your own machine, and generate CSV results, plots, and a Markdown report.
 
-Edge-AI deployment often starts with practical questions: how fast is this operator on my machine, how much error does a low-bit approximation introduce, and what shape regime should I optimize next? TinyEdgeBench answers those questions with a compact benchmark loop for FP32, simulated INT8, and shift-only arithmetic experiments.
+The project is CPU-first, NumPy-based, and designed for fast operator-level exploration before moving to heavier runtime, GPU, FPGA, or NPU profiling stacks.
 
-The current release focuses on NumPy CPU kernels so the tool is easy to install and inspect. It is not a replacement for vendor profilers or production inference runtimes; it is a lightweight baseline for operator-level exploration.
+## Why TinyEdgeBench
+
+Edge-AI work often starts with practical questions:
+
+- How fast is this operator on my laptop or edge box?
+- How much error does an INT8-style approximation introduce?
+- Which layer family is the likely latency bottleneck?
+- Can I get a quick local report without setting up CUDA or vendor SDKs?
+
+TinyEdgeBench gives you a lightweight local baseline for those questions. It is not a production inference runtime; it is a small, inspectable benchmarking harness for early design and optimization work.
+
+## Highlights
+
+| Capability | Status |
+| --- | --- |
+| Local CPU execution | Supported by default |
+| YAML benchmark configs | Supported |
+| Interactive CLI wizard | Supported |
+| Streamlit Web UI | Supported |
+| CSV, Markdown, and PNG outputs | Supported |
+| FP32 baseline | Supported |
+| Simulated INT8 | Supported |
+| Shift-only approximation | Supported |
+| CUDA/GPU execution | Future work |
 
 ## Installation
 
+Clone the repository and install it in editable mode:
+
 ```bash
+git clone https://github.com/keys2023190905023/TinyEdgeBench.git
+cd TinyEdgeBench
 python -m pip install -e ".[dev]"
 ```
 
-TinyEdgeBench requires Python 3.9 or newer. CPU execution is supported by default. CUDA is checked only for reporting and is not required.
+TinyEdgeBench requires Python 3.9 or newer. CUDA is not required.
 
 ## Quick Start
 
@@ -24,16 +53,60 @@ Run the default benchmark suite:
 python -m tinyedgebench.benchmark --config configs/default.yaml
 ```
 
-The command writes:
+Outputs are written to `results/`:
 
-- `results/summary.csv`
-- `results/report.md`
-- `results/latency_plot.png`
-- `results/error_plot.png`
+```text
+results/
+  summary.csv
+  report.md
+  latency_plot.png
+  error_plot.png
+```
+
+## Web UI
+
+Launch the local Streamlit application:
+
+```bash
+tinyedgebench web
+```
+
+Then open:
+
+```text
+http://localhost:8501
+```
+
+The Web UI runs locally on your own computer. From the browser you can choose:
+
+- single-operator benchmarks
+- network or model-block presets
+- precision modes
+- tensor or matrix shapes
+- warmup runs and benchmark runs
+- output directory
+
+After a run, the app shows a summary table, latency chart, numerical error chart, Markdown report preview, and download buttons for generated artifacts.
+
+To choose a different Streamlit port:
+
+```bash
+tinyedgebench web -- --server.port 8502
+```
+
+## CLI Wizard
+
+Use the interactive terminal wizard:
+
+```bash
+tinyedgebench wizard
+```
+
+The wizard asks for the operator, shape parameters, precision modes, backend, and output directory. CPU is the default supported backend.
 
 ## YAML Usage
 
-Create or edit a YAML file with one or more benchmark cases:
+Create a benchmark config:
 
 ```yaml
 output_dir: results
@@ -50,6 +123,7 @@ benchmarks:
     stride: 1
     padding: 1
     precision_modes: [fp32, int8_sim, shift_only]
+
   - name: matmul_small
     operator: matmul
     matrix_m: 32
@@ -58,28 +132,27 @@ benchmarks:
     precision_modes: [fp32, int8_sim, shift_only]
 ```
 
-Then run:
+Run it:
 
 ```bash
 python -m tinyedgebench.benchmark --config path/to/config.yaml
 ```
 
-Supported operators are:
+See [configs/default.yaml](configs/default.yaml) and [configs/extended_operators.yaml](configs/extended_operators.yaml) for complete examples.
 
-- `conv2d`
-- `matmul`
-- `depthwise_conv2d`
-- `pointwise_conv2d`
-- `batch_matmul`
-- `linear`
-- activations: `relu`, `relu6`, `sigmoid`, `tanh`, `gelu`, `silu`, `leaky_relu`
-- reductions and probabilities: `softmax`, `log_softmax`, `reduce_mean`, `reduce_sum`
-- pooling and image layout: `maxpool2d`, `avgpool2d`, `global_avgpool2d`, `upsample_nearest2d`, `pad`
-- normalization: `batchnorm2d`, `layernorm`, `rmsnorm`, `groupnorm`
-- tensor ops: `add`, `mul`, `concat`, `transpose`, `reshape`, `flatten`
-- sequence/model ops: `embedding`, `scaled_dot_product_attention`
+## Network Presets
 
-Network and block presets can also be included in YAML:
+TinyEdgeBench can run lightweight suites that approximate common model blocks:
+
+| Preset | Description |
+| --- | --- |
+| `tiny_cnn` | Conv/BN/ReLU/Pool/Linear image pipeline |
+| `mobilenet_block` | Depthwise separable convolution block |
+| `resnet_basic_block` | Residual Conv/BN/ReLU/Add block |
+| `transformer_encoder_tiny` | Attention, normalization, MLP, and softmax block |
+| `mlp_edge` | Small MLP-style matrix and activation block |
+
+Example:
 
 ```yaml
 network_presets:
@@ -89,77 +162,95 @@ network_presets:
     precision_modes: [fp32, int8_sim]
 ```
 
-Available presets are `tiny_cnn`, `mobilenet_block`, `resnet_basic_block`, `transformer_encoder_tiny`, and `mlp_edge`. See `configs/extended_operators.yaml` for a broader example.
+## Supported Operators
 
-Supported precision modes are:
+| Category | Operators |
+| --- | --- |
+| Convolution | `conv2d`, `depthwise_conv2d`, `pointwise_conv2d` |
+| Matrix and linear | `matmul`, `batch_matmul`, `linear` |
+| Activations | `relu`, `relu6`, `sigmoid`, `tanh`, `gelu`, `silu`, `leaky_relu` |
+| Pooling and image ops | `maxpool2d`, `avgpool2d`, `global_avgpool2d`, `upsample_nearest2d`, `pad` |
+| Normalization | `batchnorm2d`, `layernorm`, `rmsnorm`, `groupnorm` |
+| Tensor ops | `add`, `mul`, `concat`, `transpose`, `reshape`, `flatten` |
+| Reductions and probabilities | `softmax`, `log_softmax`, `reduce_mean`, `reduce_sum` |
+| Sequence/model ops | `embedding`, `scaled_dot_product_attention` |
 
-- `fp32`
-- `int8_sim`
-- `shift_only`
+## Precision Modes
 
-## Interactive CLI Usage
+| Mode | Meaning |
+| --- | --- |
+| `fp32` | Float32 reference path |
+| `int8_sim` | Symmetric INT8-style quantization simulation with float dequantization |
+| `shift_only` | Signed power-of-two operand approximation for shift-like experiments |
 
-After installation, launch the wizard:
+## Output Files
 
-```bash
-tinyedgebench wizard
-```
+| File | Purpose |
+| --- | --- |
+| `summary.csv` | Machine-readable benchmark summary |
+| `report.md` | Markdown report with system information and result table |
+| `latency_plot.png` | Latency comparison chart |
+| `error_plot.png` | Numerical error chart |
 
-The wizard asks for the operator type, tensor or matrix shape, kernel size when needed, precision modes, backend, and output directory. The CPU backend is the default and currently supported backend.
+The report records operating system, Python version, CPU information when available, and whether CUDA is visible on the machine.
 
-## Web UI
-
-TinyEdgeBench also includes a local Streamlit web application:
-
-```bash
-tinyedgebench web
-```
-
-The web UI runs on the user's own computer and executes benchmarks locally on the same CPU backend as the CLI. From the browser, users can choose either a single operator or a network/block preset, then configure tensor or matrix dimensions, precision modes, warmup runs, benchmark runs, and output directory. After a run, the app shows a summary table, latency and error charts, a Markdown report preview, and download buttons for `summary.csv`, `report.md`, `latency_plot.png`, and `error_plot.png`.
-
-Advanced Streamlit arguments can be passed after `--`:
-
-```bash
-tinyedgebench web -- --server.port 8502
-```
-
-## Screenshots
-
-Screenshots will be added here as the UI stabilizes.
-
-## Example Output
-
-`results/summary.csv` contains one row per benchmark and precision mode:
+## Example CSV
 
 ```csv
 name,operator,precision,backend,input_description,latency_ms,throughput_ops_per_s,mean_abs_error,max_abs_error
 conv2d_small,conv2d,fp32,cpu,"NCHW=(1, 3, 16, 16), out_channels=8, kernel=(3, 3), stride=1, padding=1",0.250000,44236800.00,0.00000000,0.00000000
 ```
 
-`results/report.md` records system information, a Markdown result table, and links to latency and error plots.
+## Project Layout
+
+```text
+TinyEdgeBench/
+  configs/                  YAML benchmark examples
+  src/tinyedgebench/         package source
+    benchmark.py             YAML entry point
+    cli.py                   CLI commands
+    web_app.py               Streamlit application
+    runner.py                benchmark orchestration
+    operators.py             NumPy operator implementations
+    artifacts.py             CSV, report, and plot generation
+    network_presets.py       common model-block presets
+  tests/                     pytest suite
+```
 
 ## Development
+
+Install development dependencies:
+
+```bash
+python -m pip install -e ".[dev]"
+```
 
 Run tests:
 
 ```bash
-pytest
+python -m pytest
 ```
 
-Run the end-to-end default benchmark:
+Run end-to-end examples:
 
 ```bash
 python -m tinyedgebench.benchmark --config configs/default.yaml
+python -m tinyedgebench.benchmark --config configs/extended_operators.yaml
 ```
 
-## License
+## Screenshots
 
-MIT License. See `LICENSE`.
+Screenshots will be added as the Web UI stabilizes.
 
 ## Roadmap
 
-- Add optional CUDA backends through CuPy or PyTorch when available.
-- Add FPGA benchmarking adapters for exported operator traces and board-side timing logs.
-- Add NPU benchmarking adapters for vendor SDK command-line runners.
-- Add more operator families, including pooling, normalization, activation, and fused kernels.
-- Add JSON export and historical comparison reports.
+- Optional CUDA backends through CuPy or PyTorch
+- FPGA benchmarking adapters for exported operator traces and board-side timing logs
+- NPU benchmarking adapters for vendor SDK command-line runners
+- More fused kernels and model-specific operator groups
+- JSON export and historical comparison reports
+- Richer Web UI presets and saved benchmark sessions
+
+## License
+
+TinyEdgeBench is released under the MIT License. See [LICENSE](LICENSE).
