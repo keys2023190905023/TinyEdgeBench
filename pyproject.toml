@@ -33,6 +33,18 @@ dependencies = [
 dev = [
   "pytest>=7.4"
 ]
+torch = [
+  "torch>=2.2"
+]
+onnx = [
+  "onnx>=1.16",
+  "onnxruntime>=1.17"
+]
+real-backends = [
+  "torch>=2.2",
+  "onnx>=1.16",
+  "onnxruntime>=1.17"
+]
 
 [project.scripts]
 tinyedgebench = "tinyedgebench.cli:main"

@@ -31,6 +31,7 @@ TinyEdgeBench gives you a lightweight local baseline for those questions. It is 
 | 100+ operator microbenchmarks | Supported |
 | 25+ network/block presets | Supported |
 | FP32 baseline | Supported |
+| Real `torch_cpu` / `onnxruntime_cpu` comparison | Optional |
 | Simulated INT8 | Supported |
 | Shift-only approximation | Supported |
 | CUDA/GPU execution | Future work |
@@ -155,6 +156,46 @@ python -m tinyedgebench.benchmark --config path/to/config.yaml
 ```
 
 See [configs/default.yaml](configs/default.yaml), [configs/extended_operators.yaml](configs/extended_operators.yaml), and [configs/model_presets.yaml](configs/model_presets.yaml) for complete examples.
+
+## Real Backend Comparison
+
+By default, `cpu` uses the built-in NumPy benchmark path. TinyEdgeBench can also compare against real local deployment-style CPU kernels through optional backends:
+
+| Backend | What it measures |
+| --- | --- |
+| `cpu` | Default NumPy CPU implementation |
+| `torch_cpu` | PyTorch CPU operator kernels |
+| `onnxruntime_cpu` | ONNX Runtime CPUExecutionProvider kernels |
+
+Install optional backend dependencies:
+
+```bash
+python -m pip install -e ".[real-backends]"
+```
+
+Run a backend comparison suite:
+
+```bash
+python -m tinyedgebench.benchmark --config configs/real_backends.yaml
+```
+
+Example config:
+
+```yaml
+output_dir: results_real_backends
+warmup: 2
+runs: 10
+backends: [cpu, torch_cpu, onnxruntime_cpu]
+benchmarks:
+  - name: deploy_matmul
+    operator: matmul
+    matrix_m: 128
+    matrix_k: 256
+    matrix_n: 128
+    precision_modes: [fp32]
+```
+
+These backend rows are measured on your local machine and reflect the installed PyTorch or ONNX Runtime CPU kernels. ONNX Runtime benchmark graphs freeze weights as model initializers where practical, which is closer to deployment-style inference than feeding every tensor as an input. `int8_sim` and `shift_only` remain simulation modes unless a backend-specific quantized kernel is added.
 
 ## Network Presets
 
@@ -281,6 +322,7 @@ Run end-to-end examples:
 python -m tinyedgebench.benchmark --config configs/default.yaml
 python -m tinyedgebench.benchmark --config configs/extended_operators.yaml
 python -m tinyedgebench.benchmark --config configs/model_presets.yaml
+python -m tinyedgebench.benchmark --config configs/real_backends.yaml
 ```
 
 ## Screenshots

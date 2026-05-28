@@ -85,6 +85,8 @@ def write_report(
         f"- Python version: {system_info['python_version']}",
         f"- CPU information: {system_info['cpu_info']}",
         f"- CUDA available: {system_info['cuda_available']}",
+        f"- PyTorch version: {system_info['torch_version']}",
+        f"- ONNX Runtime version: {system_info['onnxruntime_version']}",
         "",
         "## Results",
         "",
@@ -110,7 +112,10 @@ def write_report(
             "",
             "- `int8_sim` uses symmetric int8 quantization with int32 accumulation and float dequantization.",
             "- `shift_only` rounds operands to signed powers of two to approximate shift-only arithmetic.",
-            "- CPU execution is the default local backend; GPU, FPGA, and NPU backends are roadmap items.",
+            "- `cpu` is the default NumPy backend and remains available without optional dependencies.",
+            "- `torch_cpu` and `onnxruntime_cpu` measure real local CPU backend kernels when the optional dependencies are installed.",
+            "- Real backend comparison currently reports FP32 timings; `int8_sim` and `shift_only` are simulation modes unless a backend-specific quantized kernel is added.",
+            "- GPU, FPGA, and NPU backends are roadmap items.",
         ]
     )
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")

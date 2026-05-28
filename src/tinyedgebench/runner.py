@@ -7,6 +7,7 @@ import numpy as np
 
 from tinyedgebench.config import CONV_OPERATORS, MATRIX_OPERATORS, BenchmarkCase, BenchmarkConfig
 from tinyedgebench import operators
+from tinyedgebench.real_backends import build_onnxruntime_cpu, run_torch_cpu, supports_real_backend
 
 
 @dataclass(frozen=True)
@@ -27,33 +28,35 @@ def run_benchmarks(config: BenchmarkConfig) -> list[BenchmarkResult]:
     results: list[BenchmarkResult] = []
     for case in config.benchmarks:
         inputs = _make_inputs(case, rng)
-        reference = _run_case(case, "fp32", inputs)
+        reference = _run_case(case, "fp32", inputs, backend="cpu")
         estimated_ops = _estimate_ops(case)
-        for precision in case.precision_modes:
-            for _ in range(config.warmup):
-                _run_case(case, precision, inputs)
-            timings = []
-            output = reference
-            for _ in range(config.runs):
-                start = time.perf_counter()
-                output = _run_case(case, precision, inputs)
-                timings.append((time.perf_counter() - start) * 1000.0)
-            latency_ms = float(np.median(timings))
-            error = np.abs(output - reference)
-            throughput = estimated_ops / (latency_ms / 1000.0) if latency_ms > 0 else 0.0
-            results.append(
-                BenchmarkResult(
-                    name=case.name,
-                    operator=case.operator,
-                    precision=precision,
-                    backend=config.backend,
-                    input_description=_describe_case(case),
-                    latency_ms=latency_ms,
-                    throughput_ops_per_s=float(throughput),
-                    mean_abs_error=float(error.mean()),
-                    max_abs_error=float(error.max()),
+        for backend in getattr(config, "backends", (config.backend,)):
+            for precision in case.precision_modes:
+                executor = _build_executor(case, precision, inputs, backend)
+                for _ in range(config.warmup):
+                    executor()
+                timings = []
+                output = reference
+                for _ in range(config.runs):
+                    start = time.perf_counter()
+                    output = executor()
+                    timings.append((time.perf_counter() - start) * 1000.0)
+                latency_ms = float(np.median(timings))
+                error = np.abs(output - reference)
+                throughput = estimated_ops / (latency_ms / 1000.0) if latency_ms > 0 else 0.0
+                results.append(
+                    BenchmarkResult(
+                        name=case.name,
+                        operator=case.operator,
+                        precision=precision,
+                        backend=backend,
+                        input_description=_describe_case(case),
+                        latency_ms=latency_ms,
+                        throughput_ops_per_s=float(throughput),
+                        mean_abs_error=float(error.mean()),
+                        max_abs_error=float(error.max()),
+                    )
                 )
-            )
     return results
 
 
@@ -165,7 +168,26 @@ def _make_inputs(case: BenchmarkCase, rng: np.random.Generator) -> dict[str, np.
     return inputs
 
 
-def _run_case(case: BenchmarkCase, precision: str, inputs: dict[str, np.ndarray]) -> np.ndarray:
+def _build_executor(case: BenchmarkCase, precision: str, inputs: dict[str, np.ndarray], backend: str):
+    if backend in {"cpu", "numpy_cpu"}:
+        return lambda: _run_case(case, precision, inputs, backend="cpu")
+    if precision != "fp32":
+        raise ValueError(
+            f"Backend '{backend}' currently reports real backend timings for fp32 only. "
+            "Use backend 'cpu' for int8_sim and shift_only simulations."
+        )
+    if not supports_real_backend(case.operator):
+        raise ValueError(f"Backend '{backend}' does not support operator '{case.operator}' yet.")
+    if backend == "torch_cpu":
+        return lambda: run_torch_cpu(case, inputs)
+    if backend == "onnxruntime_cpu":
+        return build_onnxruntime_cpu(case, inputs)
+    raise ValueError(f"Unsupported backend: {backend}")
+
+
+def _run_case(case: BenchmarkCase, precision: str, inputs: dict[str, np.ndarray], backend: str = "cpu") -> np.ndarray:
+    if backend not in {"cpu", "numpy_cpu"}:
+        return _build_executor(case, precision, inputs, backend)()
     if case.operator == "matmul":
         if precision == "fp32":
             return operators.matmul_fp32(inputs["a"], inputs["b"])

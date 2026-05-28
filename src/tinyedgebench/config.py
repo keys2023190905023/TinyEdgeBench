@@ -112,7 +112,7 @@ TENSOR_OPERATORS = {
 }
 SUPPORTED_OPERATORS = CONV_OPERATORS | MATRIX_OPERATORS | TENSOR_OPERATORS
 SUPPORTED_PRECISIONS = {"fp32", "int8_sim", "shift_only"}
-SUPPORTED_BACKENDS = {"cpu"}
+SUPPORTED_BACKENDS = {"cpu", "numpy_cpu", "torch_cpu", "onnxruntime_cpu"}
 
 
 @dataclass(frozen=True)
@@ -146,6 +146,7 @@ class BenchmarkConfig:
     warmup: int = 2
     runs: int = 5
     backend: str = "cpu"
+    backends: tuple[str, ...] = ("cpu",)
     seed: int = 42
     benchmarks: list[BenchmarkCase] = field(default_factory=list)
 
@@ -158,9 +159,14 @@ def load_config(path: str | Path) -> BenchmarkConfig:
 
 
 def parse_config(raw: dict[str, Any]) -> BenchmarkConfig:
-    backend = str(raw.get("backend", "cpu")).lower()
-    if backend not in SUPPORTED_BACKENDS:
-        raise ValueError(f"Unsupported backend '{backend}'. CPU is supported by default.")
+    raw_backends = raw.get("backends", [raw.get("backend", "cpu")])
+    if isinstance(raw_backends, str):
+        raw_backends = [raw_backends]
+    backends = tuple(str(item).lower() for item in raw_backends)
+    bad_backends = [backend for backend in backends if backend not in SUPPORTED_BACKENDS]
+    if bad_backends:
+        raise ValueError(f"Unsupported backend(s): {', '.join(bad_backends)}. CPU is supported by default.")
+    backend = backends[0]
 
     warmup = _positive_int(raw.get("warmup", 2), "warmup", allow_zero=True)
     runs = _positive_int(raw.get("runs", 5), "runs")
@@ -186,6 +192,7 @@ def parse_config(raw: dict[str, Any]) -> BenchmarkConfig:
         warmup=warmup,
         runs=runs,
         backend=backend,
+        backends=backends,
         seed=seed,
         benchmarks=benchmarks,
     )

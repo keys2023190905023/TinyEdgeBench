@@ -51,3 +51,11 @@
 - Added comparison, masking, sorting, top-k, cumulative reduction, GLU/SwiGLU/GEGLU, adaptive pooling, similarity, distance, additional unary math, and normalization-style operators.
 - Added a GitHub Pages-ready static website under `docs/` with a generated hero image, animated signal canvas, operator catalog section, preset overview, workflow section, and install commands.
 - Verified the static website through a local HTTP server and browser DOM inspection.
+
+## 2026-05-28 Real Backend Comparison
+
+- Added optional `torch_cpu` and `onnxruntime_cpu` backend comparison paths alongside the default NumPy `cpu` backend.
+- Added `backends: [...]` YAML support for multi-backend benchmark runs.
+- Added optional dependency extras: `torch`, `onnx`, and `real-backends`.
+- Added `configs/real_backends.yaml` for local deployment-style FP32 backend comparison.
+- Updated reports to clearly distinguish real backend FP32 measurements from simulated INT8 and shift-only modes.

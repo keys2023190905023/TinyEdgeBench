@@ -6,13 +6,21 @@ from typing import Any
 import streamlit as st
 
 from tinyedgebench.artifacts import write_artifacts
-from tinyedgebench.config import CONV_OPERATORS, MATRIX_OPERATORS, SUPPORTED_OPERATORS, BenchmarkCase, BenchmarkConfig
+from tinyedgebench.config import (
+    CONV_OPERATORS,
+    MATRIX_OPERATORS,
+    SUPPORTED_BACKENDS,
+    SUPPORTED_OPERATORS,
+    BenchmarkCase,
+    BenchmarkConfig,
+)
 from tinyedgebench.network_presets import NETWORK_PRESETS, build_network_preset
 from tinyedgebench.runner import BenchmarkResult, run_benchmarks
 
 
 PRECISION_OPTIONS = ["fp32", "int8_sim", "shift_only"]
 OPERATOR_OPTIONS = sorted(SUPPORTED_OPERATORS)
+BACKEND_OPTIONS = ["cpu", "torch_cpu", "onnxruntime_cpu"]
 
 
 def build_web_case(
@@ -114,13 +122,16 @@ def build_web_config(
     warmup: int,
     runs: int,
     output_dir: str | Path,
+    backends: list[str] | None = None,
     seed: int = 42,
 ) -> BenchmarkConfig:
+    selected_backends = tuple(backends or ["cpu"])
     return BenchmarkConfig(
         output_dir=Path(output_dir),
         warmup=warmup,
         runs=runs,
-        backend="cpu",
+        backend=selected_backends[0],
+        backends=selected_backends,
         seed=seed,
         benchmarks=case if isinstance(case, list) else [case],
     )
@@ -158,9 +169,12 @@ def main() -> None:
         st.header("Benchmark")
         benchmark_mode = st.radio("Benchmark mode", ["Single operator", "Network preset"], horizontal=True)
         precision_modes = st.multiselect("Precision modes", PRECISION_OPTIONS, default=PRECISION_OPTIONS)
+        backends = st.multiselect("Backends", BACKEND_OPTIONS, default=["cpu"])
         warmup = st.number_input("Warmup runs", min_value=0, max_value=100, value=2, step=1)
         runs = st.number_input("Benchmark runs", min_value=1, max_value=1000, value=5, step=1)
         output_dir = st.text_input("Output directory", value="results")
+        if any(backend != "cpu" for backend in backends) and any(mode != "fp32" for mode in precision_modes):
+            st.warning("Real backend comparison currently supports fp32. Use cpu for int8_sim and shift_only simulations.")
 
     if benchmark_mode == "Network preset":
         preset = st.selectbox(
@@ -173,7 +187,7 @@ def main() -> None:
         if run_button:
             try:
                 cases = build_network_preset(preset, list(precision_modes))
-                config = build_web_config(cases, warmup=int(warmup), runs=int(runs), output_dir=output_dir)
+                config = build_web_config(cases, warmup=int(warmup), runs=int(runs), output_dir=output_dir, backends=backends)
                 with st.spinner("Running preset benchmarks locally..."):
                     results, artifacts = run_web_benchmark(config)
             except Exception as exc:
@@ -327,7 +341,7 @@ def main() -> None:
                 embedding_dim=int(embedding_dim),
                 num_heads=int(num_heads),
             )
-            config = build_web_config(case, warmup=int(warmup), runs=int(runs), output_dir=output_dir)
+            config = build_web_config(case, warmup=int(warmup), runs=int(runs), output_dir=output_dir, backends=backends)
             with st.spinner("Running benchmarks locally..."):
                 results, artifacts = run_web_benchmark(config)
         except Exception as exc:

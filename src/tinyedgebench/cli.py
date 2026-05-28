@@ -11,6 +11,7 @@ from tinyedgebench.benchmark import run_config
 from tinyedgebench.config import (
     SUPPORTED_OPERATORS,
     SUPPORTED_PRECISIONS,
+    SUPPORTED_BACKENDS,
     BenchmarkCase,
     CONV_OPERATORS,
     MATRIX_OPERATORS,
@@ -101,11 +102,18 @@ def build_wizard_case(input_func: InputFunc = input, print_func: Callable[[str],
 
 def wizard(input_func: InputFunc = input, print_func: Callable[[str], None] = print) -> dict[str, Path]:
     case = build_wizard_case(input_func=input_func, print_func=print_func)
-    backend = _choice("Backend", {"cpu"}, input_func, default="cpu")
+    backend = _choice("Backend", SUPPORTED_BACKENDS, input_func, default="cpu")
     output_dir = input_func("Output directory [results]: ").strip() or "results"
     config = wizard_case_to_config(case, output_dir=output_dir)
-    if backend != config.backend:
-        raise ValueError("Only CPU backend is currently supported.")
+    config = type(config)(
+        output_dir=config.output_dir,
+        warmup=config.warmup,
+        runs=config.runs,
+        backend=backend,
+        backends=(backend,),
+        seed=config.seed,
+        benchmarks=config.benchmarks,
+    )
     artifacts = run_config(config)
     print_func("TinyEdgeBench completed.")
     for label, path in artifacts.items():

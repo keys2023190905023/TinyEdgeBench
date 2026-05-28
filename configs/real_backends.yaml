@@ -1,0 +1,24 @@
+output_dir: results_real_backends
+warmup: 2
+runs: 10
+backends: [cpu, torch_cpu, onnxruntime_cpu]
+seed: 42
+benchmarks:
+  - name: deploy_matmul
+    operator: matmul
+    matrix_m: 128
+    matrix_k: 256
+    matrix_n: 128
+    precision_modes: [fp32]
+  - name: deploy_conv2d
+    operator: conv2d
+    input_shape: [1, 16, 32, 32]
+    output_channels: 32
+    kernel_size: [3, 3]
+    stride: 1
+    padding: 1
+    precision_modes: [fp32]
+  - name: deploy_relu
+    operator: relu
+    input_shape: [1, 32, 32, 32]
+    precision_modes: [fp32]

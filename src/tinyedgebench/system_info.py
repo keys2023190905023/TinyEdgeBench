@@ -11,6 +11,8 @@ def get_system_info() -> dict[str, str]:
         "python_version": sys.version.replace("\n", " "),
         "cpu_info": _cpu_info(),
         "cuda_available": str(_cuda_available()),
+        "torch_version": _module_version("torch"),
+        "onnxruntime_version": _module_version("onnxruntime"),
     }
 
 
@@ -41,3 +43,11 @@ def _cuda_available() -> bool:
         return result.returncode == 0
     except (OSError, subprocess.SubprocessError):
         return False
+
+
+def _module_version(module_name: str) -> str:
+    try:
+        module = __import__(module_name)
+        return str(getattr(module, "__version__", "installed"))
+    except ImportError:
+        return "not installed"
