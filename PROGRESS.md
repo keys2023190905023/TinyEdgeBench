@@ -44,3 +44,10 @@
 - Added `configs/model_presets.yaml` for preset-heavy benchmarking.
 - Verified `python -m pytest` passes with all supported operators and all presets exercised.
 - Verified `configs/default.yaml`, `configs/extended_operators.yaml`, and `configs/model_presets.yaml` run successfully.
+
+## 2026-05-28 Operator 100+ And Website
+
+- Expanded supported operator microbenchmarks from 79 to 105.
+- Added comparison, masking, sorting, top-k, cumulative reduction, GLU/SwiGLU/GEGLU, adaptive pooling, similarity, distance, additional unary math, and normalization-style operators.
+- Added a GitHub Pages-ready static website under `docs/` with a generated hero image, animated signal canvas, operator catalog section, preset overview, workflow section, and install commands.
+- Verified the static website through a local HTTP server and browser DOM inspection.

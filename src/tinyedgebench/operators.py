@@ -190,11 +190,11 @@ def selu(x: np.ndarray) -> np.ndarray:
 
 
 def celu(x: np.ndarray, alpha: float = 1.0) -> np.ndarray:
-    return np.maximum(0, x) + np.minimum(0, alpha * (np.exp(x / alpha) - 1.0)).astype(np.float32, copy=False)
+    return (np.maximum(0, x) + np.minimum(0, alpha * (np.exp(x / alpha) - 1.0))).astype(np.float32, copy=False)
 
 
 def softplus(x: np.ndarray) -> np.ndarray:
-    return np.log1p(np.exp(-np.abs(x))) + np.maximum(x, 0).astype(np.float32, copy=False)
+    return (np.log1p(np.exp(-np.abs(x))) + np.maximum(x, 0)).astype(np.float32, copy=False)
 
 
 def softsign(x: np.ndarray) -> np.ndarray:
@@ -480,6 +480,22 @@ def log(x: np.ndarray) -> np.ndarray:
     return np.log(np.abs(x) + 1e-6).astype(np.float32, copy=False)
 
 
+def log1p(x: np.ndarray) -> np.ndarray:
+    return np.log1p(np.abs(x)).astype(np.float32, copy=False)
+
+
+def pow_tensor(x: np.ndarray, exponent: float = 2.0) -> np.ndarray:
+    return np.power(np.abs(x) + 1e-6, exponent).astype(np.float32, copy=False)
+
+
+def sin(x: np.ndarray) -> np.ndarray:
+    return np.sin(x).astype(np.float32, copy=False)
+
+
+def cos(x: np.ndarray) -> np.ndarray:
+    return np.cos(x).astype(np.float32, copy=False)
+
+
 def reciprocal(x: np.ndarray) -> np.ndarray:
     return (1.0 / (x + np.sign(x) * 1e-3 + (x == 0) * 1e-3)).astype(np.float32, copy=False)
 
@@ -504,8 +520,110 @@ def sign(x: np.ndarray) -> np.ndarray:
     return np.sign(x).astype(np.float32, copy=False)
 
 
+def standardize(x: np.ndarray, axis: int = -1, eps: float = 1e-6) -> np.ndarray:
+    mean = np.mean(x, axis=axis, keepdims=True)
+    std = np.std(x, axis=axis, keepdims=True)
+    return ((x - mean) / (std + eps)).astype(np.float32, copy=False)
+
+
+def minmax_normalize(x: np.ndarray, axis: int = -1, eps: float = 1e-6) -> np.ndarray:
+    min_value = np.min(x, axis=axis, keepdims=True)
+    max_value = np.max(x, axis=axis, keepdims=True)
+    return ((x - min_value) / (max_value - min_value + eps)).astype(np.float32, copy=False)
+
+
+def pixel_norm(x: np.ndarray, eps: float = 1e-8) -> np.ndarray:
+    axis = 1 if x.ndim == 4 else -1
+    return (x / np.sqrt(np.mean(np.square(x), axis=axis, keepdims=True) + eps)).astype(np.float32, copy=False)
+
+
 def dropout_inference(x: np.ndarray) -> np.ndarray:
     return x.astype(np.float32, copy=True)
+
+
+def where(mask: np.ndarray, a: np.ndarray, b: np.ndarray) -> np.ndarray:
+    return np.where(mask, a, b).astype(np.float32, copy=False)
+
+
+def masked_fill(x: np.ndarray, mask: np.ndarray, value: float = 0.0) -> np.ndarray:
+    return np.where(mask, value, x).astype(np.float32, copy=False)
+
+
+def greater(a: np.ndarray, b: np.ndarray) -> np.ndarray:
+    return (a > b).astype(np.float32)
+
+
+def less(a: np.ndarray, b: np.ndarray) -> np.ndarray:
+    return (a < b).astype(np.float32)
+
+
+def equal(a: np.ndarray, b: np.ndarray) -> np.ndarray:
+    return np.isclose(a, b, atol=1e-3).astype(np.float32)
+
+
+def not_equal(a: np.ndarray, b: np.ndarray) -> np.ndarray:
+    return np.logical_not(np.isclose(a, b, atol=1e-3)).astype(np.float32)
+
+
+def argmax(x: np.ndarray, axis: int = -1) -> np.ndarray:
+    return np.argmax(x, axis=axis).astype(np.float32)
+
+
+def argmin(x: np.ndarray, axis: int = -1) -> np.ndarray:
+    return np.argmin(x, axis=axis).astype(np.float32)
+
+
+def topk(x: np.ndarray, k: int = 3, axis: int = -1) -> np.ndarray:
+    axis_len = x.shape[axis]
+    k = max(1, min(k, axis_len))
+    partitioned = np.partition(x, axis_len - k, axis=axis)
+    top = np.take(partitioned, indices=range(axis_len - k, axis_len), axis=axis)
+    return np.flip(np.sort(top, axis=axis), axis=axis).astype(np.float32, copy=False)
+
+
+def sort(x: np.ndarray, axis: int = -1) -> np.ndarray:
+    return np.sort(x, axis=axis).astype(np.float32, copy=False)
+
+
+def cumsum(x: np.ndarray, axis: int = -1) -> np.ndarray:
+    return np.cumsum(x, axis=axis).astype(np.float32, copy=False)
+
+
+def cumprod(x: np.ndarray, axis: int = -1) -> np.ndarray:
+    return np.cumprod(np.clip(x, -2.0, 2.0), axis=axis).astype(np.float32, copy=False)
+
+
+def adaptive_avgpool2d(x: np.ndarray, output_size: int = 2) -> np.ndarray:
+    return _adaptive_pool2d(x, output_size, reducer=np.mean)
+
+
+def adaptive_maxpool2d(x: np.ndarray, output_size: int = 2) -> np.ndarray:
+    return _adaptive_pool2d(x, output_size, reducer=np.max)
+
+
+def cosine_similarity(a: np.ndarray, b: np.ndarray, axis: int = -1, eps: float = 1e-8) -> np.ndarray:
+    numerator = np.sum(a * b, axis=axis)
+    denominator = np.sqrt(np.sum(a * a, axis=axis) * np.sum(b * b, axis=axis)) + eps
+    return (numerator / denominator).astype(np.float32, copy=False)
+
+
+def pairwise_distance(a: np.ndarray, b: np.ndarray, axis: int = -1) -> np.ndarray:
+    return np.sqrt(np.sum(np.square(a - b), axis=axis) + 1e-8).astype(np.float32, copy=False)
+
+
+def glu(x: np.ndarray) -> np.ndarray:
+    a, b = _split_last_dim(x)
+    return (a * sigmoid(b)).astype(np.float32, copy=False)
+
+
+def swiglu(x: np.ndarray) -> np.ndarray:
+    a, b = _split_last_dim(x)
+    return (a * silu(b)).astype(np.float32, copy=False)
+
+
+def geglu(x: np.ndarray) -> np.ndarray:
+    a, b = _split_last_dim(x)
+    return (a * gelu(b)).astype(np.float32, copy=False)
 
 
 def embedding(indices: np.ndarray, table: np.ndarray) -> np.ndarray:
@@ -576,3 +694,25 @@ def _conv_windows(x: np.ndarray, kernel_size: tuple[int, int], stride: int, padd
 def _pool_windows(x: np.ndarray, kernel_size: tuple[int, int], stride: int) -> np.ndarray:
     windows = sliding_window_view(x, kernel_size, axis=(2, 3))
     return windows[:, :, ::stride, ::stride, :, :]
+
+
+def _adaptive_pool2d(x: np.ndarray, output_size: int, reducer) -> np.ndarray:
+    x = x.astype(np.float32, copy=False)
+    n, c, h, w = x.shape
+    output_size = max(1, min(output_size, h, w))
+    out = np.empty((n, c, output_size, output_size), dtype=np.float32)
+    for i in range(output_size):
+        h0 = int(np.floor(i * h / output_size))
+        h1 = int(np.ceil((i + 1) * h / output_size))
+        for j in range(output_size):
+            w0 = int(np.floor(j * w / output_size))
+            w1 = int(np.ceil((j + 1) * w / output_size))
+            out[:, :, i, j] = reducer(x[:, :, h0:h1, w0:w1], axis=(2, 3))
+    return out
+
+
+def _split_last_dim(x: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    split = max(1, x.shape[-1] // 2)
+    if x.shape[-1] < 2:
+        return x, x
+    return x[..., :split], x[..., split : split * 2]

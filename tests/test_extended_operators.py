@@ -32,6 +32,9 @@ def test_all_supported_operators_run_fp32() -> None:
             "channel_shuffle",
             "space_to_depth",
             "depth_to_space",
+            "adaptive_avgpool2d",
+            "adaptive_maxpool2d",
+            "pixel_norm",
         }
         shape = (1, 4, 8, 8) if op in image_ops else (2, 4, 8)
         cases.append(

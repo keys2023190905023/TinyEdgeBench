@@ -112,8 +112,25 @@ def _make_inputs(case: BenchmarkCase, rng: np.random.Generator) -> dict[str, np.
     assert case.input_shape_generic
     x = rng.normal(0, 0.5, size=case.input_shape_generic).astype(np.float32)
     inputs = {"x": x}
-    if case.operator in {"add", "sub", "mul", "div", "maximum", "minimum", "concat"}:
+    if case.operator in {
+        "add",
+        "sub",
+        "mul",
+        "div",
+        "maximum",
+        "minimum",
+        "concat",
+        "where",
+        "greater",
+        "less",
+        "equal",
+        "not_equal",
+        "cosine_similarity",
+        "pairwise_distance",
+    }:
         inputs["y"] = rng.normal(0, 0.5, size=case.input_shape_generic).astype(np.float32)
+    if case.operator in {"where", "masked_fill"}:
+        inputs["mask"] = rng.random(size=case.input_shape_generic) > 0.5
     if case.operator in {"bias_add", "prelu"}:
         if len(case.input_shape_generic) == 4:
             channels = case.input_shape_generic[1]
@@ -389,6 +406,14 @@ def _run_generic_case(case: BenchmarkCase, inputs: dict[str, np.ndarray]) -> np.
         return operators.exp(x)
     if case.operator == "log":
         return operators.log(x)
+    if case.operator == "log1p":
+        return operators.log1p(x)
+    if case.operator == "pow":
+        return operators.pow_tensor(x)
+    if case.operator == "sin":
+        return operators.sin(x)
+    if case.operator == "cos":
+        return operators.cos(x)
     if case.operator == "reciprocal":
         return operators.reciprocal(x)
     if case.operator == "floor":
@@ -401,8 +426,52 @@ def _run_generic_case(case: BenchmarkCase, inputs: dict[str, np.ndarray]) -> np.
         return operators.clip(x)
     if case.operator == "sign":
         return operators.sign(x)
+    if case.operator == "standardize":
+        return operators.standardize(x, case.axis)
+    if case.operator == "minmax_normalize":
+        return operators.minmax_normalize(x, case.axis)
+    if case.operator == "pixel_norm":
+        return operators.pixel_norm(x)
     if case.operator == "dropout_inference":
         return operators.dropout_inference(x)
+    if case.operator == "where":
+        return operators.where(inputs["mask"], inputs["x"], inputs["y"])
+    if case.operator == "masked_fill":
+        return operators.masked_fill(inputs["x"], inputs["mask"])
+    if case.operator == "greater":
+        return operators.greater(inputs["x"], inputs["y"])
+    if case.operator == "less":
+        return operators.less(inputs["x"], inputs["y"])
+    if case.operator == "equal":
+        return operators.equal(inputs["x"], inputs["y"])
+    if case.operator == "not_equal":
+        return operators.not_equal(inputs["x"], inputs["y"])
+    if case.operator == "argmax":
+        return operators.argmax(x, case.axis)
+    if case.operator == "argmin":
+        return operators.argmin(x, case.axis)
+    if case.operator == "topk":
+        return operators.topk(x, k=case.scale_factor + 1, axis=case.axis)
+    if case.operator == "sort":
+        return operators.sort(x, case.axis)
+    if case.operator == "cumsum":
+        return operators.cumsum(x, case.axis)
+    if case.operator == "cumprod":
+        return operators.cumprod(x, case.axis)
+    if case.operator == "adaptive_avgpool2d":
+        return operators.adaptive_avgpool2d(x, output_size=case.scale_factor)
+    if case.operator == "adaptive_maxpool2d":
+        return operators.adaptive_maxpool2d(x, output_size=case.scale_factor)
+    if case.operator == "cosine_similarity":
+        return operators.cosine_similarity(inputs["x"], inputs["y"], case.axis)
+    if case.operator == "pairwise_distance":
+        return operators.pairwise_distance(inputs["x"], inputs["y"], case.axis)
+    if case.operator == "glu":
+        return operators.glu(x)
+    if case.operator == "swiglu":
+        return operators.swiglu(x)
+    if case.operator == "geglu":
+        return operators.geglu(x)
     if case.operator == "embedding":
         return operators.embedding(inputs["indices"], inputs["table"])
     if case.operator == "scaled_dot_product_attention":

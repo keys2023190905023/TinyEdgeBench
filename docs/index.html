@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="TinyEdgeBench is a local benchmark tool for low-bit edge-AI operators, model blocks, and CPU-first edge AI experiments."
+    />
+    <title>TinyEdgeBench | Local Edge-AI Operator Benchmarks</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <canvas id="signal-canvas" aria-hidden="true"></canvas>
+
+    <header class="site-header">
+      <a class="brand" href="#top" aria-label="TinyEdgeBench home">
+        <span class="brand-mark"></span>
+        <span>TinyEdgeBench</span>
+      </a>
+      <nav class="nav-links" aria-label="Primary navigation">
+        <a href="#features">Features</a>
+        <a href="#operators">Operators</a>
+        <a href="#workflow">Workflow</a>
+        <a href="#install">Install</a>
+      </nav>
+      <a class="github-link" href="https://github.com/keys2023190905023/TinyEdgeBench">GitHub</a>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <img class="hero-image" src="assets/hero-edge-bench.png" alt="Edge AI benchmarking workstation" />
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <p class="eyebrow">CPU-first local benchmarking for low-bit edge AI</p>
+          <h1>TinyEdgeBench</h1>
+          <p class="hero-copy">
+            Configure operators or model blocks, run FP32, simulated INT8, and shift-only experiments locally,
+            then export CSV results, plots, and a Markdown report.
+          </p>
+          <div class="hero-actions">
+            <a class="primary-action" href="#install">Start locally</a>
+            <a class="secondary-action" href="#operators">Explore catalog</a>
+          </div>
+          <div class="metric-strip" aria-label="Project metrics">
+            <div>
+              <strong>105</strong>
+              <span>operators</span>
+            </div>
+            <div>
+              <strong>29</strong>
+              <span>presets</span>
+            </div>
+            <div>
+              <strong>CPU</strong>
+              <span>default backend</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section intro-band" id="features">
+        <div class="section-heading">
+          <p class="eyebrow">Why it exists</p>
+          <h2>Fast answers before heavy profiling stacks.</h2>
+        </div>
+        <div class="feature-grid">
+          <article class="feature-card">
+            <span class="feature-index">01</span>
+            <h3>Run locally</h3>
+            <p>No CUDA requirement, cloud dependency, or vendor SDK setup for the default path.</p>
+          </article>
+          <article class="feature-card">
+            <span class="feature-index">02</span>
+            <h3>Compare precision modes</h3>
+            <p>Benchmark FP32 baselines against simulated INT8 and shift-only approximations.</p>
+          </article>
+          <article class="feature-card">
+            <span class="feature-index">03</span>
+            <h3>Export artifacts</h3>
+            <p>Generate summary CSV, Markdown reports, latency plots, and numerical error plots.</p>
+          </article>
+          <article class="feature-card">
+            <span class="feature-index">04</span>
+            <h3>Use CLI or Web UI</h3>
+            <p>Drive benchmarks from YAML, an interactive wizard, or a local Streamlit browser app.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section catalog-band" id="operators">
+        <div class="section-heading">
+          <p class="eyebrow">Benchmark catalog</p>
+          <h2>Operator and model-block coverage for edge experiments.</h2>
+        </div>
+        <div class="catalog-layout">
+          <div class="operator-panel">
+            <h3>Operator families</h3>
+            <div class="operator-cloud" id="operator-cloud"></div>
+          </div>
+          <div class="preset-panel">
+            <h3>Network presets</h3>
+            <ul class="preset-list">
+              <li>MobileNet / EfficientNet blocks</li>
+              <li>ResNet, ConvNeXt, UNet, DeepLab, FPN</li>
+              <li>YOLO and PAN-style detection modules</li>
+              <li>ViT, Swin, BERT, and GPT-style blocks</li>
+              <li>Speech, recommendation, PointNet, GraphSAGE</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="section workflow-band" id="workflow">
+        <div class="section-heading">
+          <p class="eyebrow">Workflow</p>
+          <h2>Configure, run, inspect, export.</h2>
+        </div>
+        <div class="workflow-grid">
+          <article class="workflow-step">
+            <h3>YAML mode</h3>
+            <pre><code>python -m tinyedgebench.benchmark --config configs/default.yaml</code></pre>
+          </article>
+          <article class="workflow-step">
+            <h3>Interactive wizard</h3>
+            <pre><code>tinyedgebench wizard</code></pre>
+          </article>
+          <article class="workflow-step">
+            <h3>Local Web UI</h3>
+            <pre><code>tinyedgebench web</code></pre>
+          </article>
+        </div>
+      </section>
+
+      <section class="section install-band" id="install">
+        <div class="install-copy">
+          <p class="eyebrow">Install</p>
+          <h2>Clone it, install it, run it.</h2>
+          <p>
+            TinyEdgeBench is packaged as a Python project with a Streamlit Web UI and pytest coverage for the
+            benchmark core.
+          </p>
+        </div>
+        <div class="terminal-window" aria-label="Installation commands">
+          <div class="terminal-bar">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+          <pre><code>git clone https://github.com/keys2023190905023/TinyEdgeBench.git
+cd TinyEdgeBench
+python -m pip install -e ".[dev]"
+python -m pytest
+tinyedgebench web</code></pre>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <span>TinyEdgeBench</span>
+      <span>Local benchmarks for edge-AI operators.</span>
+    </footer>
+
+    <script src="app.js"></script>
+  </body>
+</html>

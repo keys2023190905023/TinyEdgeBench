@@ -28,7 +28,7 @@ TinyEdgeBench gives you a lightweight local baseline for those questions. It is 
 | Interactive CLI wizard | Supported |
 | Streamlit Web UI | Supported |
 | CSV, Markdown, and PNG outputs | Supported |
-| 70+ operator microbenchmarks | Supported |
+| 100+ operator microbenchmarks | Supported |
 | 25+ network/block presets | Supported |
 | FP32 baseline | Supported |
 | Simulated INT8 | Supported |
@@ -95,6 +95,20 @@ To choose a different Streamlit port:
 ```bash
 tinyedgebench web -- --server.port 8502
 ```
+
+## Project Website
+
+The repository includes a static, GitHub Pages-ready website in [docs/](docs/):
+
+```text
+docs/
+  index.html
+  styles.css
+  app.js
+  assets/hero-edge-bench.png
+```
+
+To publish it on GitHub, enable Pages in the repository settings and choose `main` plus the `/docs` folder as the source.
 
 ## CLI Wizard
 
@@ -194,13 +208,15 @@ network_presets:
 | --- | --- |
 | Convolution | `conv2d`, `depthwise_conv2d`, `pointwise_conv2d` |
 | Matrix and linear | `matmul`, `batch_matmul`, `linear` |
-| Activations | `relu`, `relu6`, `sigmoid`, `tanh`, `gelu`, `silu`, `leaky_relu`, `elu`, `selu`, `celu`, `softplus`, `softsign`, `hard_sigmoid`, `hard_swish`, `mish`, `prelu` |
+| Activations | `relu`, `relu6`, `sigmoid`, `tanh`, `gelu`, `silu`, `leaky_relu`, `elu`, `selu`, `celu`, `softplus`, `softsign`, `hard_sigmoid`, `hard_swish`, `mish`, `prelu`, `glu`, `swiglu`, `geglu` |
 | Pooling and image ops | `maxpool2d`, `avgpool2d`, `global_avgpool2d`, `upsample_nearest2d`, `pad` |
 | Normalization | `batchnorm2d`, `layernorm`, `rmsnorm`, `groupnorm`, `instance_norm`, `l2_normalize` |
-| Tensor ops | `add`, `sub`, `mul`, `div`, `maximum`, `minimum`, `bias_add`, `concat`, `transpose`, `reshape`, `flatten`, `squeeze`, `expand_dims`, `tile`, `slice`, `gather`, `one_hot` |
+| Tensor ops | `add`, `sub`, `mul`, `div`, `maximum`, `minimum`, `bias_add`, `where`, `masked_fill`, `greater`, `less`, `equal`, `not_equal`, `concat`, `transpose`, `reshape`, `flatten`, `squeeze`, `expand_dims`, `tile`, `slice`, `gather`, `one_hot` |
 | Layout/image transforms | `channel_shuffle`, `space_to_depth`, `depth_to_space` |
-| Reductions and probabilities | `softmax`, `log_softmax`, `reduce_mean`, `reduce_sum`, `reduce_max`, `reduce_min`, `reduce_prod` |
-| Unary math | `identity`, `abs`, `neg`, `square`, `sqrt`, `rsqrt`, `exp`, `log`, `reciprocal`, `floor`, `ceil`, `round`, `clip`, `sign`, `dropout_inference` |
+| Pooling extras | `adaptive_avgpool2d`, `adaptive_maxpool2d` |
+| Reductions and probabilities | `softmax`, `log_softmax`, `reduce_mean`, `reduce_sum`, `reduce_max`, `reduce_min`, `reduce_prod`, `argmax`, `argmin`, `topk`, `sort`, `cumsum`, `cumprod` |
+| Unary math | `identity`, `abs`, `neg`, `square`, `sqrt`, `rsqrt`, `exp`, `log`, `log1p`, `pow`, `sin`, `cos`, `reciprocal`, `floor`, `ceil`, `round`, `clip`, `sign`, `standardize`, `minmax_normalize`, `pixel_norm`, `dropout_inference` |
+| Similarity and distance | `cosine_similarity`, `pairwise_distance` |
 | Sequence/model ops | `embedding`, `scaled_dot_product_attention`, `causal_self_attention`, `rotary_embedding` |
 
 ## Precision Modes
