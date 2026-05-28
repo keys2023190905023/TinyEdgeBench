@@ -1,0 +1,26 @@
+output_dir: results_extended
+warmup: 1
+runs: 3
+backend: cpu
+seed: 42
+network_presets:
+  - name: tiny_cnn
+    precision_modes: [fp32, int8_sim, shift_only]
+  - name: transformer_encoder_tiny
+    precision_modes: [fp32, int8_sim]
+benchmarks:
+  - name: relu_example
+    operator: relu
+    input_shape: [1, 16, 16, 16]
+    precision_modes: [fp32, int8_sim, shift_only]
+  - name: softmax_example
+    operator: softmax
+    input_shape: [1, 4, 16, 16]
+    axis: -1
+    precision_modes: [fp32, int8_sim]
+  - name: avgpool_example
+    operator: avgpool2d
+    input_shape: [1, 16, 32, 32]
+    kernel_size: [2, 2]
+    stride: 2
+    precision_modes: [fp32, int8_sim]
