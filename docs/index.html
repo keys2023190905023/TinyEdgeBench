@@ -20,6 +20,7 @@
       </a>
       <nav class="nav-links" aria-label="Primary navigation">
         <a href="#features">Features</a>
+        <a href="#hardware">Hardware</a>
         <a href="#operators">Operators</a>
         <a href="#workflow">Workflow</a>
         <a href="#install">Install</a>
@@ -38,6 +39,11 @@
             Configure operators or model blocks, run FP32, simulated INT8, and shift-only experiments locally,
             then export CSV results, plots, and a Markdown report from your own CPU or GPU.
           </p>
+          <div class="hero-status" aria-label="Execution model">
+            <span>Local execution only</span>
+            <span>CPU by default</span>
+            <span>Optional CUDA backends</span>
+          </div>
           <div class="hero-actions">
             <a class="primary-action" href="#install">Start locally</a>
             <a class="secondary-action" href="#operators">Explore catalog</a>
@@ -56,6 +62,50 @@
               <span>execution</span>
             </div>
           </div>
+        </div>
+      </section>
+
+      <section class="section hardware-band" id="hardware">
+        <div class="section-heading">
+          <p class="eyebrow">Deployment realism</p>
+          <h2>Benchmark the hardware in front of you.</h2>
+        </div>
+        <div class="hardware-grid">
+          <article class="hardware-panel">
+            <span class="panel-kicker">Execution boundary</span>
+            <h3>GitHub hosts the project. Your machine runs the benchmark.</h3>
+            <p>
+              TinyEdgeBench keeps the website static and the measurement path local, so CPU/GPU results
+              reflect the user's installed runtimes, drivers, and actual device.
+            </p>
+          </article>
+          <article class="backend-matrix" aria-label="Supported backend matrix">
+            <div class="backend-row">
+              <span>NumPy</span>
+              <strong>cpu</strong>
+              <em>default</em>
+            </div>
+            <div class="backend-row">
+              <span>PyTorch</span>
+              <strong>torch_cpu</strong>
+              <em>optional</em>
+            </div>
+            <div class="backend-row">
+              <span>PyTorch CUDA</span>
+              <strong>torch_cuda</strong>
+              <em>local GPU</em>
+            </div>
+            <div class="backend-row">
+              <span>ONNX Runtime</span>
+              <strong>onnxruntime_cpu</strong>
+              <em>optional</em>
+            </div>
+            <div class="backend-row">
+              <span>ONNX Runtime CUDA</span>
+              <strong>onnxruntime_cuda</strong>
+              <em>local GPU</em>
+            </div>
+          </article>
         </div>
       </section>
 

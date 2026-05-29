@@ -163,15 +163,15 @@ def run_web_benchmark(config: BenchmarkConfig) -> tuple[list[BenchmarkResult], d
 
 def main() -> None:
     st.set_page_config(page_title="TinyEdgeBench", layout="wide")
-    st.title("TinyEdgeBench")
-    st.caption("Local benchmark experiments for low-bit edge-AI operators. All measurements run on this machine.")
+    _inject_theme()
+    availability = backend_availability()
+    _render_header(availability)
 
     with st.sidebar:
         st.header("Benchmark")
         benchmark_mode = st.radio("Benchmark mode", ["Single operator", "Network preset"], horizontal=True)
         precision_modes = st.multiselect("Precision modes", PRECISION_OPTIONS, default=PRECISION_OPTIONS)
         backends = st.multiselect("Backends", BACKEND_OPTIONS, default=["cpu"])
-        availability = backend_availability()
         st.caption("Backend availability on this local machine:")
         for backend in BACKEND_OPTIONS:
             st.caption(f"{backend}: {availability.get(backend, 'unknown')}")
@@ -362,6 +362,13 @@ def main() -> None:
 def _render_results(results: list[BenchmarkResult], artifacts: dict[str, Path], output_dir: Path) -> None:
     rows = results_to_rows(results)
     st.success(f"Benchmark complete. Artifacts written to `{output_dir}`.")
+    fastest = min(results, key=lambda item: item.latency_ms)
+    slowest = max(results, key=lambda item: item.latency_ms)
+    avg_error = sum(item.mean_abs_error for item in results) / len(results)
+    col_fast, col_slow, col_error = st.columns(3)
+    col_fast.metric("Fastest latency", f"{fastest.latency_ms:.4f} ms", fastest.backend)
+    col_slow.metric("Slowest latency", f"{slowest.latency_ms:.4f} ms", slowest.backend)
+    col_error.metric("Mean numerical error", f"{avg_error:.6f}")
     st.subheader("Summary")
     st.dataframe(rows, use_container_width=True)
 
@@ -410,6 +417,188 @@ def _download_file(label: str, path: Path, mime: str) -> None:
         st.download_button(label, data=path.read_bytes(), file_name=path.name, mime=mime)
     else:
         st.button(label, disabled=True)
+
+
+def _render_header(availability: dict[str, str]) -> None:
+    available_count = sum(1 for backend in BACKEND_OPTIONS if availability.get(backend, "").startswith("available"))
+    st.markdown(
+        f"""
+        <section class="teb-hero">
+          <div>
+            <p class="teb-eyebrow">LOCAL HARDWARE BENCHMARK CONSOLE</p>
+            <h1>TinyEdgeBench</h1>
+            <p class="teb-copy">Operator, backend, precision, latency, and numerical error in one local workflow.</p>
+          </div>
+          <div class="teb-status-grid">
+            <div><strong>105</strong><span>operators</span></div>
+            <div><strong>29</strong><span>presets</span></div>
+            <div><strong>{available_count}/{len(BACKEND_OPTIONS)}</strong><span>backends ready</span></div>
+          </div>
+        </section>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def _inject_theme() -> None:
+    st.markdown(
+        """
+        <style>
+        :root {
+          --teb-bg: #05070c;
+          --teb-panel: rgba(9, 17, 27, 0.82);
+          --teb-line: rgba(103, 242, 255, 0.22);
+          --teb-line-strong: rgba(103, 242, 255, 0.46);
+          --teb-text: #f2fbfb;
+          --teb-muted: #9bb4ba;
+          --teb-cyan: #67f2ff;
+          --teb-green: #9cf16d;
+          --teb-magenta: #f27ac8;
+        }
+
+        .stApp {
+          background:
+            linear-gradient(rgba(103, 242, 255, 0.035) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(103, 242, 255, 0.025) 1px, transparent 1px),
+            radial-gradient(circle at 50% -20%, rgba(103, 242, 255, 0.13), transparent 34%),
+            var(--teb-bg);
+          background-size: 42px 42px, 42px 42px, auto, auto;
+          color: var(--teb-text);
+        }
+
+        [data-testid="stSidebar"] {
+          background: rgba(4, 9, 15, 0.9);
+          border-right: 1px solid var(--teb-line);
+        }
+
+        [data-testid="stHeader"] {
+          background: rgba(5, 7, 12, 0.62);
+          border-bottom: 1px solid rgba(103, 242, 255, 0.12);
+          backdrop-filter: blur(18px);
+        }
+
+        .block-container {
+          max-width: 1240px;
+          padding-top: 2rem;
+        }
+
+        .teb-hero {
+          display: grid;
+          grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+          gap: 24px;
+          align-items: stretch;
+          margin-bottom: 28px;
+          padding: 28px;
+          border: 1px solid var(--teb-line);
+          border-radius: 10px;
+          background:
+            linear-gradient(135deg, rgba(103, 242, 255, 0.12), transparent 36%, rgba(242, 122, 200, 0.08)),
+            rgba(9, 17, 27, 0.78);
+          box-shadow: 0 28px 90px rgba(0, 0, 0, 0.42);
+          position: relative;
+          overflow: hidden;
+        }
+
+        .teb-hero::before {
+          position: absolute;
+          top: 0;
+          left: 24px;
+          right: 24px;
+          height: 1px;
+          content: "";
+          background: linear-gradient(90deg, transparent, var(--teb-cyan), transparent);
+        }
+
+        .teb-eyebrow {
+          margin: 0 0 10px;
+          color: var(--teb-green);
+          font-size: 12px;
+          font-weight: 800;
+          letter-spacing: 0.12em;
+        }
+
+        .teb-hero h1 {
+          margin: 0;
+          color: var(--teb-text);
+          font-size: clamp(44px, 6vw, 76px);
+          line-height: 0.95;
+          text-shadow: 0 0 42px rgba(103, 242, 255, 0.22);
+        }
+
+        .teb-copy {
+          max-width: 720px;
+          margin: 16px 0 0;
+          color: #c7d9dc;
+          font-size: 18px;
+          line-height: 1.55;
+        }
+
+        .teb-status-grid {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 10px;
+          align-content: end;
+        }
+
+        .teb-status-grid div,
+        [data-testid="stMetric"] {
+          border: 1px solid rgba(103, 242, 255, 0.2);
+          border-radius: 8px;
+          background: linear-gradient(180deg, rgba(17, 31, 45, 0.84), rgba(7, 14, 22, 0.64));
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+
+        .teb-status-grid div {
+          min-height: 102px;
+          padding: 18px;
+        }
+
+        .teb-status-grid strong,
+        .teb-status-grid span {
+          display: block;
+        }
+
+        .teb-status-grid strong {
+          font-size: 30px;
+          color: var(--teb-text);
+        }
+
+        .teb-status-grid span {
+          margin-top: 4px;
+          color: var(--teb-muted);
+          font-size: 13px;
+        }
+
+        div[data-testid="stButton"] > button,
+        div[data-testid="stDownloadButton"] > button {
+          border: 1px solid var(--teb-line-strong);
+          border-radius: 8px;
+          background: linear-gradient(135deg, var(--teb-cyan), var(--teb-green));
+          color: #031015;
+          font-weight: 800;
+          box-shadow: 0 14px 34px rgba(103, 242, 255, 0.18);
+        }
+
+        [data-testid="stDataFrame"],
+        [data-testid="stMetric"],
+        [data-testid="stAlert"] {
+          border-radius: 8px;
+        }
+
+        h2, h3 {
+          letter-spacing: 0;
+        }
+
+        @media (max-width: 900px) {
+          .teb-hero,
+          .teb-status-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
 
 
 if __name__ == "__main__":
