@@ -7,7 +7,12 @@ import numpy as np
 
 from tinyedgebench.config import CONV_OPERATORS, MATRIX_OPERATORS, BenchmarkCase, BenchmarkConfig
 from tinyedgebench import operators
-from tinyedgebench.real_backends import build_onnxruntime_cpu, run_torch_cpu, supports_real_backend
+from tinyedgebench.real_backends import (
+    build_onnxruntime_executor,
+    build_torch_executor,
+    supports_onnxruntime_backend,
+    supports_real_backend,
+)
 
 
 @dataclass(frozen=True)
@@ -38,8 +43,10 @@ def run_benchmarks(config: BenchmarkConfig) -> list[BenchmarkResult]:
                 timings = []
                 output = reference
                 for _ in range(config.runs):
+                    _synchronize_executor(executor)
                     start = time.perf_counter()
                     output = executor()
+                    _synchronize_executor(executor)
                     timings.append((time.perf_counter() - start) * 1000.0)
                 latency_ms = float(np.median(timings))
                 error = np.abs(output - reference)
@@ -176,12 +183,22 @@ def _build_executor(case: BenchmarkCase, precision: str, inputs: dict[str, np.nd
             f"Backend '{backend}' currently reports real backend timings for fp32 only. "
             "Use backend 'cpu' for int8_sim and shift_only simulations."
         )
-    if not supports_real_backend(case.operator):
-        raise ValueError(f"Backend '{backend}' does not support operator '{case.operator}' yet.")
     if backend == "torch_cpu":
-        return lambda: run_torch_cpu(case, inputs)
+        if not supports_real_backend(case.operator):
+            raise ValueError(f"Backend '{backend}' does not support operator '{case.operator}' yet.")
+        return build_torch_executor(case, inputs, device="cpu")
+    if backend == "torch_cuda":
+        if not supports_real_backend(case.operator):
+            raise ValueError(f"Backend '{backend}' does not support operator '{case.operator}' yet.")
+        return build_torch_executor(case, inputs, device="cuda")
     if backend == "onnxruntime_cpu":
-        return build_onnxruntime_cpu(case, inputs)
+        if not supports_onnxruntime_backend(case.operator):
+            raise ValueError(f"Backend '{backend}' does not support operator '{case.operator}' yet.")
+        return build_onnxruntime_executor(case, inputs, provider="CPUExecutionProvider")
+    if backend == "onnxruntime_cuda":
+        if not supports_onnxruntime_backend(case.operator):
+            raise ValueError(f"Backend '{backend}' does not support operator '{case.operator}' yet.")
+        return build_onnxruntime_executor(case, inputs, provider="CUDAExecutionProvider")
     raise ValueError(f"Unsupported backend: {backend}")
 
 
@@ -503,6 +520,12 @@ def _run_generic_case(case: BenchmarkCase, inputs: dict[str, np.ndarray]) -> np.
     if case.operator == "rotary_embedding":
         return operators.rotary_embedding(x)
     raise ValueError(f"Unsupported benchmark operator: {case.operator}")
+
+
+def _synchronize_executor(executor) -> None:
+    synchronize = getattr(executor, "synchronize", None)
+    if callable(synchronize):
+        synchronize()
 
 
 def _precision_inputs(inputs: dict[str, np.ndarray], precision: str) -> dict[str, np.ndarray]:

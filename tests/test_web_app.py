@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from tinyedgebench.cli import launch_web_app
-from tinyedgebench.web_app import build_web_case, build_web_config, results_to_rows
+from tinyedgebench.web_app import BACKEND_OPTIONS, build_web_case, build_web_config, results_to_rows
 from tinyedgebench.runner import BenchmarkResult
 
 
@@ -22,6 +22,11 @@ def test_build_web_config_for_matmul(tmp_path: Path) -> None:
     assert config.backend == "cpu"
     assert config.benchmarks[0].operator == "matmul"
     assert config.benchmarks[0].matrix_n == 6
+
+
+def test_web_backend_options_include_local_gpu_backends() -> None:
+    assert "torch_cuda" in BACKEND_OPTIONS
+    assert "onnxruntime_cuda" in BACKEND_OPTIONS
 
 
 def test_results_to_rows() -> None:

@@ -15,12 +15,13 @@ from tinyedgebench.config import (
     BenchmarkConfig,
 )
 from tinyedgebench.network_presets import NETWORK_PRESETS, build_network_preset
+from tinyedgebench.real_backends import backend_availability
 from tinyedgebench.runner import BenchmarkResult, run_benchmarks
 
 
 PRECISION_OPTIONS = ["fp32", "int8_sim", "shift_only"]
 OPERATOR_OPTIONS = sorted(SUPPORTED_OPERATORS)
-BACKEND_OPTIONS = ["cpu", "torch_cpu", "onnxruntime_cpu"]
+BACKEND_OPTIONS = ["cpu", "torch_cpu", "torch_cuda", "onnxruntime_cpu", "onnxruntime_cuda"]
 
 
 def build_web_case(
@@ -163,18 +164,23 @@ def run_web_benchmark(config: BenchmarkConfig) -> tuple[list[BenchmarkResult], d
 def main() -> None:
     st.set_page_config(page_title="TinyEdgeBench", layout="wide")
     st.title("TinyEdgeBench")
-    st.caption("Local CPU-first benchmark experiments for low-bit edge-AI operators.")
+    st.caption("Local benchmark experiments for low-bit edge-AI operators. All measurements run on this machine.")
 
     with st.sidebar:
         st.header("Benchmark")
         benchmark_mode = st.radio("Benchmark mode", ["Single operator", "Network preset"], horizontal=True)
         precision_modes = st.multiselect("Precision modes", PRECISION_OPTIONS, default=PRECISION_OPTIONS)
         backends = st.multiselect("Backends", BACKEND_OPTIONS, default=["cpu"])
+        availability = backend_availability()
+        st.caption("Backend availability on this local machine:")
+        for backend in BACKEND_OPTIONS:
+            st.caption(f"{backend}: {availability.get(backend, 'unknown')}")
         warmup = st.number_input("Warmup runs", min_value=0, max_value=100, value=2, step=1)
         runs = st.number_input("Benchmark runs", min_value=1, max_value=1000, value=5, step=1)
         output_dir = st.text_input("Output directory", value="results")
-        if any(backend != "cpu" for backend in backends) and any(mode != "fp32" for mode in precision_modes):
+        if any(backend not in {"cpu", "numpy_cpu"} for backend in backends) and any(mode != "fp32" for mode in precision_modes):
             st.warning("Real backend comparison currently supports fp32. Use cpu for int8_sim and shift_only simulations.")
+        st.info("The web page is only the control panel. Benchmarks execute in the local Python process that launched Streamlit.")
 
     if benchmark_mode == "Network preset":
         preset = st.selectbox(
@@ -362,6 +368,7 @@ def _render_results(results: list[BenchmarkResult], artifacts: dict[str, Path], 
     chart_rows = [
         {
             "case": f"{row['benchmark']} / {row['precision']}",
+            "backend": row["backend"],
             "latency_ms": row["latency_ms"],
             "mean_abs_error": row["mean_abs_error"],
         }
@@ -370,10 +377,10 @@ def _render_results(results: list[BenchmarkResult], artifacts: dict[str, Path], 
     col_latency, col_error = st.columns(2)
     with col_latency:
         st.subheader("Latency Comparison")
-        st.bar_chart(chart_rows, x="case", y="latency_ms")
+        st.bar_chart(chart_rows, x="case", y="latency_ms", color="backend")
     with col_error:
         st.subheader("Numerical Error")
-        st.bar_chart(chart_rows, x="case", y="mean_abs_error")
+        st.bar_chart(chart_rows, x="case", y="mean_abs_error", color="backend")
 
     report_text = artifacts["report"].read_text(encoding="utf-8")
     st.subheader("Markdown Report Preview")

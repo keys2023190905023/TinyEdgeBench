@@ -40,10 +40,19 @@ onnx = [
   "onnx>=1.16",
   "onnxruntime>=1.17"
 ]
+onnx-gpu = [
+  "onnx>=1.16",
+  "onnxruntime-gpu>=1.17"
+]
 real-backends = [
   "torch>=2.2",
   "onnx>=1.16",
   "onnxruntime>=1.17"
+]
+real-backends-gpu = [
+  "torch>=2.2",
+  "onnx>=1.16",
+  "onnxruntime-gpu>=1.17"
 ]
 
 [project.scripts]

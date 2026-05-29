@@ -59,3 +59,11 @@
 - Added optional dependency extras: `torch`, `onnx`, and `real-backends`.
 - Added `configs/real_backends.yaml` for local deployment-style FP32 backend comparison.
 - Updated reports to clearly distinguish real backend FP32 measurements from simulated INT8 and shift-only modes.
+
+## 2026-05-29 Local Hardware And GPU Backends
+
+- Clarified the project execution model: GitHub Pages is a static showcase, while CLI, wizard, and Streamlit benchmarks run on the user's local machine.
+- Added optional `torch_cuda` and `onnxruntime_cuda` backend names for local CUDA benchmarking.
+- Added CUDA-aware backend availability reporting for the Web UI and generated Markdown reports.
+- Added `configs/gpu_backends.example.yaml` for local GPU backend comparison.
+- Added optional dependency extras for ONNX Runtime GPU environments.

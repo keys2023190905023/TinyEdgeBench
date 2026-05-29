@@ -36,7 +36,7 @@
           <h1>TinyEdgeBench</h1>
           <p class="hero-copy">
             Configure operators or model blocks, run FP32, simulated INT8, and shift-only experiments locally,
-            then export CSV results, plots, and a Markdown report.
+            then export CSV results, plots, and a Markdown report from your own CPU or GPU.
           </p>
           <div class="hero-actions">
             <a class="primary-action" href="#install">Start locally</a>
@@ -52,8 +52,8 @@
               <span>presets</span>
             </div>
             <div>
-              <strong>CPU</strong>
-              <span>default backend</span>
+              <strong>Local</strong>
+              <span>execution</span>
             </div>
           </div>
         </div>
@@ -68,7 +68,7 @@
           <article class="feature-card">
             <span class="feature-index">01</span>
             <h3>Run locally</h3>
-            <p>No CUDA requirement, cloud dependency, or vendor SDK setup for the default path.</p>
+            <p>The website is a showcase; CLI and Web UI benchmarks execute on the user's own machine.</p>
           </article>
           <article class="feature-card">
             <span class="feature-index">02</span>
@@ -83,7 +83,7 @@
           <article class="feature-card">
             <span class="feature-index">04</span>
             <h3>Compare real backends</h3>
-            <p>Optionally measure PyTorch CPU and ONNX Runtime CPU kernels against the NumPy baseline.</p>
+            <p>Optionally measure PyTorch and ONNX Runtime CPU/CUDA kernels against the NumPy baseline.</p>
           </article>
         </div>
       </section>
@@ -133,6 +133,10 @@
             <h3>Real backend suite</h3>
             <pre><code>python -m tinyedgebench.benchmark --config configs/real_backends.yaml</code></pre>
           </article>
+          <article class="workflow-step">
+            <h3>Local GPU suite</h3>
+            <pre><code>python -m tinyedgebench.benchmark --config configs/gpu_backends.example.yaml</code></pre>
+          </article>
         </div>
       </section>
 
@@ -155,6 +159,7 @@
 cd TinyEdgeBench
 python -m pip install -e ".[dev]"
 python -m pip install -e ".[real-backends]"
+python -m pip install -e ".[real-backends-gpu]"
 python -m pytest
 tinyedgebench web</code></pre>
         </div>

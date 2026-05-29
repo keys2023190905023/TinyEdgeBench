@@ -112,7 +112,7 @@ TENSOR_OPERATORS = {
 }
 SUPPORTED_OPERATORS = CONV_OPERATORS | MATRIX_OPERATORS | TENSOR_OPERATORS
 SUPPORTED_PRECISIONS = {"fp32", "int8_sim", "shift_only"}
-SUPPORTED_BACKENDS = {"cpu", "numpy_cpu", "torch_cpu", "onnxruntime_cpu"}
+SUPPORTED_BACKENDS = {"cpu", "numpy_cpu", "torch_cpu", "torch_cuda", "onnxruntime_cpu", "onnxruntime_cuda"}
 
 
 @dataclass(frozen=True)
