@@ -49,6 +49,7 @@ const ctx = canvas.getContext("2d");
 let width = 0;
 let height = 0;
 let points = [];
+let tick = 0;
 
 function resize() {
   const ratio = window.devicePixelRatio || 1;
@@ -64,10 +65,12 @@ function resize() {
     y: Math.random() * height,
     vx: (Math.random() - 0.5) * 0.35,
     vy: (Math.random() - 0.5) * 0.35,
+    phase: Math.random() * Math.PI * 2,
   }));
 }
 
 function draw() {
+  tick += 0.012;
   ctx.clearRect(0, 0, width, height);
   ctx.fillStyle = "#05080d";
   ctx.fillRect(0, 0, width, height);
@@ -88,7 +91,7 @@ function draw() {
       const dy = a.y - b.y;
       const distance = Math.sqrt(dx * dx + dy * dy);
       if (distance < 118) {
-        const alpha = (1 - distance / 118) * 0.18;
+        const alpha = (1 - distance / 118) * 0.2;
         ctx.strokeStyle = `rgba(98, 240, 232, ${alpha})`;
         ctx.beginPath();
         ctx.moveTo(a.x, a.y);
@@ -99,8 +102,9 @@ function draw() {
   }
 
   for (const p of points) {
-    ctx.fillStyle = "rgba(156, 241, 109, 0.35)";
-    ctx.fillRect(p.x - 1, p.y - 1, 2, 2);
+    const pulse = 0.28 + Math.sin(tick + p.phase) * 0.14;
+    ctx.fillStyle = `rgba(156, 241, 109, ${pulse})`;
+    ctx.fillRect(p.x - 1.2, p.y - 1.2, 2.4, 2.4);
   }
 
   window.requestAnimationFrame(draw);

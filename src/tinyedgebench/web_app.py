@@ -183,6 +183,7 @@ def main() -> None:
     _inject_theme()
     availability = backend_availability()
     _render_header(availability)
+    _render_backend_deck(availability)
     _render_history_tools()
 
     with st.sidebar:
@@ -500,8 +501,38 @@ def _render_header(availability: dict[str, str]) -> None:
           </div>
           <div class="teb-status-grid">
             <div><strong>105</strong><span>operators</span></div>
-            <div><strong>29</strong><span>presets</span></div>
+            <div><strong>36</strong><span>presets</span></div>
             <div><strong>{available_count}/{len(BACKEND_OPTIONS)}</strong><span>backends ready</span></div>
+          </div>
+        </section>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def _render_backend_deck(availability: dict[str, str]) -> None:
+    cards = []
+    for backend in BACKEND_OPTIONS:
+        status = availability.get(backend, "unknown")
+        state = "ready" if status.startswith("available") else "pending"
+        cards.append(
+            f"""
+            <div class="teb-backend-card {state}">
+              <span>{state}</span>
+              <strong>{backend}</strong>
+              <em>{status}</em>
+            </div>
+            """
+        )
+    st.markdown(
+        f"""
+        <section class="teb-backend-deck">
+          <div class="teb-section-head">
+            <p>LOCAL RUNTIME MATRIX</p>
+            <strong>Backend availability</strong>
+          </div>
+          <div class="teb-backend-grid">
+            {''.join(cards)}
           </div>
         </section>
         """,
@@ -638,6 +669,96 @@ def _inject_theme() -> None:
           font-size: 13px;
         }
 
+        .teb-backend-deck {
+          margin-bottom: 24px;
+          padding: 18px;
+          border: 1px solid var(--teb-line);
+          border-radius: 10px;
+          background:
+            linear-gradient(90deg, rgba(103, 242, 255, 0.08), transparent 42%, rgba(242, 122, 200, 0.06)),
+            rgba(7, 14, 22, 0.78);
+          box-shadow: 0 22px 70px rgba(0, 0, 0, 0.3);
+        }
+
+        .teb-section-head {
+          display: flex;
+          align-items: end;
+          justify-content: space-between;
+          gap: 16px;
+          margin-bottom: 14px;
+        }
+
+        .teb-section-head p {
+          margin: 0;
+          color: var(--teb-green);
+          font-size: 11px;
+          font-weight: 800;
+          letter-spacing: 0.12em;
+        }
+
+        .teb-section-head strong {
+          color: var(--teb-text);
+          font-size: 18px;
+        }
+
+        .teb-backend-grid {
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 10px;
+        }
+
+        .teb-backend-card {
+          min-height: 112px;
+          padding: 14px;
+          border: 1px solid rgba(103, 242, 255, 0.18);
+          border-radius: 8px;
+          background: linear-gradient(180deg, rgba(17, 31, 45, 0.78), rgba(7, 14, 22, 0.58));
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+          overflow-wrap: anywhere;
+        }
+
+        .teb-backend-card.ready {
+          border-color: rgba(156, 241, 109, 0.34);
+        }
+
+        .teb-backend-card span,
+        .teb-backend-card strong,
+        .teb-backend-card em {
+          display: block;
+        }
+
+        .teb-backend-card span {
+          width: fit-content;
+          margin-bottom: 12px;
+          padding: 4px 8px;
+          border-radius: 999px;
+          background: rgba(242, 122, 200, 0.12);
+          color: var(--teb-magenta);
+          font-size: 11px;
+          font-style: normal;
+          font-weight: 800;
+          text-transform: uppercase;
+        }
+
+        .teb-backend-card.ready span {
+          background: rgba(156, 241, 109, 0.12);
+          color: var(--teb-green);
+        }
+
+        .teb-backend-card strong {
+          color: var(--teb-text);
+          font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+          font-size: 13px;
+        }
+
+        .teb-backend-card em {
+          margin-top: 8px;
+          color: var(--teb-muted);
+          font-size: 12px;
+          font-style: normal;
+          line-height: 1.35;
+        }
+
         div[data-testid="stButton"] > button,
         div[data-testid="stDownloadButton"] > button {
           border: 1px solid var(--teb-line-strong);
@@ -654,13 +775,21 @@ def _inject_theme() -> None:
           border-radius: 8px;
         }
 
+        [data-testid="stFileUploader"],
+        [data-testid="stExpander"] {
+          border: 1px solid rgba(103, 242, 255, 0.14);
+          border-radius: 8px;
+          background: rgba(8, 16, 25, 0.52);
+        }
+
         h2, h3 {
           letter-spacing: 0;
         }
 
         @media (max-width: 900px) {
           .teb-hero,
-          .teb-status-grid {
+          .teb-status-grid,
+          .teb-backend-grid {
             grid-template-columns: 1fr;
           }
         }

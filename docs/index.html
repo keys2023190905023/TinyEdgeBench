@@ -48,6 +48,11 @@
             <a class="primary-action" href="#install">Start locally</a>
             <a class="secondary-action" href="#operators">Explore catalog</a>
           </div>
+          <div class="hero-command" aria-label="Quick start command">
+            <span class="command-prompt">$</span>
+            <code>tinyedgebench web</code>
+            <span class="command-state">local Streamlit console</span>
+          </div>
           <div class="metric-strip" aria-label="Project metrics">
             <div>
               <strong>105</strong>
@@ -105,6 +110,16 @@
               <strong>onnxruntime_cuda</strong>
               <em>local GPU</em>
             </div>
+            <div class="backend-row">
+              <span>ONNX Runtime TensorRT</span>
+              <strong>onnxruntime_tensorrt</strong>
+              <em>provider</em>
+            </div>
+            <div class="backend-row">
+              <span>OpenVINO / TVM / TensorRT</span>
+              <strong>registered targets</strong>
+              <em>roadmap</em>
+            </div>
           </article>
         </div>
       </section>
@@ -135,6 +150,26 @@
             <h3>Compare real backends</h3>
             <p>Optionally measure PyTorch and ONNX Runtime CPU/CUDA kernels against the NumPy baseline.</p>
           </article>
+        </div>
+      </section>
+
+      <section class="section proof-band" aria-label="Benchmark outputs">
+        <div class="proof-grid">
+          <div>
+            <span>01</span>
+            <strong>Layer-wise latency</strong>
+            <p>Operator, model-block, and model-level timing rows for deployment triage.</p>
+          </div>
+          <div>
+            <span>02</span>
+            <strong>Error visibility</strong>
+            <p>FP32, simulated INT8, and shift-only comparisons with numerical error plots.</p>
+          </div>
+          <div>
+            <span>03</span>
+            <strong>Run history</strong>
+            <p>Timestamped artifacts and saved-run comparisons for optimization loops.</p>
+          </div>
         </div>
       </section>
 
