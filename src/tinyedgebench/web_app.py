@@ -457,7 +457,7 @@ def _bar_chart(rows: list[dict[str, Any]], x: str, y: str, color: str) -> None:
     try:
         import plotly.express as px
 
-        fig = px.bar(rows, x=x, y=y, color=color, template="plotly_dark")
+        fig = px.bar(rows, x=x, y=y, color=color, template="plotly_white")
         fig.update_layout(margin=dict(l=10, r=10, t=10, b=10), paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)")
         st.plotly_chart(fig, use_container_width=True)
     except ImportError:
@@ -516,13 +516,11 @@ def _render_backend_deck(availability: dict[str, str]) -> None:
         status = availability.get(backend, "unknown")
         state = "ready" if status.startswith("available") else "pending"
         cards.append(
-            f"""
-            <div class="teb-backend-card {state}">
-              <span>{state}</span>
-              <strong>{backend}</strong>
-              <em>{status}</em>
-            </div>
-            """
+            f'<div class="teb-backend-card {state}">'
+            f"<span>{state}</span>"
+            f"<strong>{backend}</strong>"
+            f"<em>{status}</em>"
+            "</div>"
         )
     st.markdown(
         f"""
@@ -545,36 +543,35 @@ def _inject_theme() -> None:
         """
         <style>
         :root {
-          --teb-bg: #05070c;
-          --teb-panel: rgba(9, 17, 27, 0.82);
-          --teb-line: rgba(103, 242, 255, 0.22);
-          --teb-line-strong: rgba(103, 242, 255, 0.46);
-          --teb-text: #f2fbfb;
-          --teb-muted: #9bb4ba;
-          --teb-cyan: #67f2ff;
-          --teb-green: #9cf16d;
-          --teb-magenta: #f27ac8;
+          --teb-bg: #f5f5f7;
+          --teb-panel: rgba(255, 255, 255, 0.76);
+          --teb-line: rgba(29, 29, 31, 0.1);
+          --teb-line-strong: rgba(0, 113, 227, 0.34);
+          --teb-text: #1d1d1f;
+          --teb-muted: #6e6e73;
+          --teb-cyan: #0071e3;
+          --teb-green: #34c759;
+          --teb-magenta: #af52de;
         }
 
         .stApp {
           background:
-            linear-gradient(rgba(103, 242, 255, 0.035) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(103, 242, 255, 0.025) 1px, transparent 1px),
-            radial-gradient(circle at 50% -20%, rgba(103, 242, 255, 0.13), transparent 34%),
+            radial-gradient(circle at 18% 0%, rgba(0, 113, 227, 0.14), transparent 28%),
+            radial-gradient(circle at 92% 6%, rgba(175, 82, 222, 0.1), transparent 24%),
             var(--teb-bg);
-          background-size: 42px 42px, 42px 42px, auto, auto;
           color: var(--teb-text);
         }
 
         [data-testid="stSidebar"] {
-          background: rgba(4, 9, 15, 0.9);
+          background: rgba(255, 255, 255, 0.72);
           border-right: 1px solid var(--teb-line);
+          backdrop-filter: blur(24px) saturate(180%);
         }
 
         [data-testid="stHeader"] {
-          background: rgba(5, 7, 12, 0.62);
-          border-bottom: 1px solid rgba(103, 242, 255, 0.12);
-          backdrop-filter: blur(18px);
+          background: rgba(255, 255, 255, 0.62);
+          border-bottom: 1px solid rgba(29, 29, 31, 0.08);
+          backdrop-filter: blur(22px) saturate(180%);
         }
 
         .block-container {
@@ -590,13 +587,14 @@ def _inject_theme() -> None:
           margin-bottom: 28px;
           padding: 28px;
           border: 1px solid var(--teb-line);
-          border-radius: 10px;
+          border-radius: 28px;
           background:
-            linear-gradient(135deg, rgba(103, 242, 255, 0.12), transparent 36%, rgba(242, 122, 200, 0.08)),
-            rgba(9, 17, 27, 0.78);
-          box-shadow: 0 28px 90px rgba(0, 0, 0, 0.42);
+            linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.7) 46%, rgba(0, 113, 227, 0.08)),
+            rgba(255, 255, 255, 0.78);
+          box-shadow: 0 28px 80px rgba(0, 0, 0, 0.12);
           position: relative;
           overflow: hidden;
+          backdrop-filter: blur(24px) saturate(180%);
         }
 
         .teb-hero::before {
@@ -606,12 +604,12 @@ def _inject_theme() -> None:
           right: 24px;
           height: 1px;
           content: "";
-          background: linear-gradient(90deg, transparent, var(--teb-cyan), transparent);
+          background: linear-gradient(90deg, transparent, rgba(0, 113, 227, 0.32), transparent);
         }
 
         .teb-eyebrow {
           margin: 0 0 10px;
-          color: var(--teb-green);
+          color: var(--teb-cyan);
           font-size: 12px;
           font-weight: 800;
           letter-spacing: 0.12em;
@@ -622,13 +620,13 @@ def _inject_theme() -> None:
           color: var(--teb-text);
           font-size: clamp(44px, 6vw, 76px);
           line-height: 0.95;
-          text-shadow: 0 0 42px rgba(103, 242, 255, 0.22);
+          letter-spacing: -0.04em;
         }
 
         .teb-copy {
           max-width: 720px;
           margin: 16px 0 0;
-          color: #c7d9dc;
+          color: var(--teb-muted);
           font-size: 18px;
           line-height: 1.55;
         }
@@ -642,10 +640,10 @@ def _inject_theme() -> None:
 
         .teb-status-grid div,
         [data-testid="stMetric"] {
-          border: 1px solid rgba(103, 242, 255, 0.2);
-          border-radius: 8px;
-          background: linear-gradient(180deg, rgba(17, 31, 45, 0.84), rgba(7, 14, 22, 0.64));
-          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+          border: 1px solid rgba(29, 29, 31, 0.08);
+          border-radius: 20px;
+          background: rgba(255, 255, 255, 0.76);
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 18px 42px rgba(0, 0, 0, 0.08);
         }
 
         .teb-status-grid div {
@@ -673,11 +671,12 @@ def _inject_theme() -> None:
           margin-bottom: 24px;
           padding: 18px;
           border: 1px solid var(--teb-line);
-          border-radius: 10px;
+          border-radius: 28px;
           background:
-            linear-gradient(90deg, rgba(103, 242, 255, 0.08), transparent 42%, rgba(242, 122, 200, 0.06)),
-            rgba(7, 14, 22, 0.78);
-          box-shadow: 0 22px 70px rgba(0, 0, 0, 0.3);
+            linear-gradient(115deg, rgba(255, 255, 255, 0.94), rgba(255, 255, 255, 0.72)),
+            rgba(255, 255, 255, 0.78);
+          box-shadow: 0 24px 70px rgba(0, 0, 0, 0.1);
+          backdrop-filter: blur(24px) saturate(180%);
         }
 
         .teb-section-head {
@@ -710,15 +709,15 @@ def _inject_theme() -> None:
         .teb-backend-card {
           min-height: 112px;
           padding: 14px;
-          border: 1px solid rgba(103, 242, 255, 0.18);
-          border-radius: 8px;
-          background: linear-gradient(180deg, rgba(17, 31, 45, 0.78), rgba(7, 14, 22, 0.58));
-          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+          border: 1px solid rgba(29, 29, 31, 0.08);
+          border-radius: 18px;
+          background: rgba(255, 255, 255, 0.78);
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
           overflow-wrap: anywhere;
         }
 
         .teb-backend-card.ready {
-          border-color: rgba(156, 241, 109, 0.34);
+          border-color: rgba(52, 199, 89, 0.28);
         }
 
         .teb-backend-card span,
@@ -732,7 +731,7 @@ def _inject_theme() -> None:
           margin-bottom: 12px;
           padding: 4px 8px;
           border-radius: 999px;
-          background: rgba(242, 122, 200, 0.12);
+          background: rgba(175, 82, 222, 0.1);
           color: var(--teb-magenta);
           font-size: 11px;
           font-style: normal;
@@ -741,7 +740,7 @@ def _inject_theme() -> None:
         }
 
         .teb-backend-card.ready span {
-          background: rgba(156, 241, 109, 0.12);
+          background: rgba(52, 199, 89, 0.1);
           color: var(--teb-green);
         }
 
@@ -762,11 +761,11 @@ def _inject_theme() -> None:
         div[data-testid="stButton"] > button,
         div[data-testid="stDownloadButton"] > button {
           border: 1px solid var(--teb-line-strong);
-          border-radius: 8px;
-          background: linear-gradient(135deg, var(--teb-cyan), var(--teb-green));
-          color: #031015;
+          border-radius: 999px;
+          background: #0071e3;
+          color: #ffffff;
           font-weight: 800;
-          box-shadow: 0 14px 34px rgba(103, 242, 255, 0.18);
+          box-shadow: 0 14px 34px rgba(0, 113, 227, 0.18);
         }
 
         [data-testid="stDataFrame"],
@@ -777,9 +776,10 @@ def _inject_theme() -> None:
 
         [data-testid="stFileUploader"],
         [data-testid="stExpander"] {
-          border: 1px solid rgba(103, 242, 255, 0.14);
-          border-radius: 8px;
-          background: rgba(8, 16, 25, 0.52);
+          border: 1px solid rgba(29, 29, 31, 0.08);
+          border-radius: 20px;
+          background: rgba(255, 255, 255, 0.68);
+          box-shadow: 0 12px 34px rgba(0, 0, 0, 0.06);
         }
 
         h2, h3 {
