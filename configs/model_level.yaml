@@ -1,0 +1,14 @@
+output_dir: results_model_level
+warmup: 1
+runs: 3
+backends: [cpu]
+seed: 42
+network_presets:
+  - name: mobilenetv2_tiny
+    precision_modes: [fp32, int8_sim, shift_only]
+  - name: resnet18_tiny
+    precision_modes: [fp32, int8_sim, shift_only]
+  - name: tinybert_block
+    precision_modes: [fp32, int8_sim, shift_only]
+  - name: llama_mlp_attention_micro
+    precision_modes: [fp32, int8_sim, shift_only]

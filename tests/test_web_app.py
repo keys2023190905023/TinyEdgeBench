@@ -27,6 +27,8 @@ def test_build_web_config_for_matmul(tmp_path: Path) -> None:
 def test_web_backend_options_include_local_gpu_backends() -> None:
     assert "torch_cuda" in BACKEND_OPTIONS
     assert "onnxruntime_cuda" in BACKEND_OPTIONS
+    assert "onnxruntime_tensorrt" in BACKEND_OPTIONS
+    assert "openvino_cpu" in BACKEND_OPTIONS
 
 
 def test_results_to_rows() -> None:

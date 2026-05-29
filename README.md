@@ -33,6 +33,10 @@ TinyEdgeBench gives you a lightweight local baseline for those questions. It is 
 | FP32 baseline | Supported |
 | Real `torch_cpu` / `onnxruntime_cpu` comparison | Optional |
 | Real `torch_cuda` / `onnxruntime_cuda` comparison | Optional, local GPU required |
+| ONNX Runtime TensorRT Provider comparison | Optional, local TensorRT provider required |
+| OpenVINO / TVM / native TensorRT backend registry | Planned executors with availability checks |
+| Model-level benchmark presets | Supported |
+| Historical run comparison | Supported |
 | Simulated INT8 | Supported |
 | Shift-only approximation | Supported |
 | CUDA/GPU execution | Supported through optional local backends |
@@ -109,6 +113,8 @@ To choose a different Streamlit port:
 tinyedgebench web -- --server.port 8502
 ```
 
+The Web UI also supports uploaded YAML configs, historical run comparison, Plotly charts when Plotly is installed, and one-click ZIP downloads for generated reports.
+
 ## Project Website
 
 The repository includes a static, GitHub Pages-ready website in [docs/](docs/):
@@ -180,6 +186,10 @@ By default, `cpu` uses the built-in NumPy benchmark path. TinyEdgeBench can also
 | `torch_cuda` | PyTorch CUDA kernels on the local NVIDIA GPU |
 | `onnxruntime_cpu` | ONNX Runtime CPUExecutionProvider kernels |
 | `onnxruntime_cuda` | ONNX Runtime CUDAExecutionProvider kernels on the local NVIDIA GPU |
+| `onnxruntime_tensorrt` | ONNX Runtime TensorrtExecutionProvider kernels when available locally |
+| `openvino_cpu`, `openvino_npu` | Registered deployment targets with availability checks; executor integration is planned |
+| `tvm_cpu`, `tvm_cuda` | Registered compiler-runtime targets with availability checks; executor integration is planned |
+| `tensorrt_cuda` | Registered native TensorRT target; use `onnxruntime_tensorrt` today for TensorRT-provider runs |
 
 Install optional backend dependencies:
 
@@ -235,6 +245,14 @@ benchmarks:
 
 See [configs/gpu_backends.example.yaml](configs/gpu_backends.example.yaml). Use CUDA backends only on a local machine where PyTorch CUDA or ONNX Runtime CUDAExecutionProvider is available.
 
+For TensorRT Provider experiments through ONNX Runtime:
+
+```bash
+python -m tinyedgebench.benchmark --config configs/deployment_backends.example.yaml
+```
+
+If the local ONNX Runtime install does not expose `TensorrtExecutionProvider`, remove `onnxruntime_tensorrt` from the `backends` list.
+
 ## Network Presets
 
 TinyEdgeBench can run lightweight suites that approximate common model blocks:
@@ -270,6 +288,47 @@ TinyEdgeBench can run lightweight suites that approximate common model blocks:
 | `pointnet_mlp_block` | PointNet-style per-point MLP and global reduction block |
 | `graphsage_mlp_block` | GraphSAGE-style aggregate and projection block |
 | `anomaly_mlp` | Small anomaly-detection MLP block |
+| `mobilenetv2_tiny` | Layer-wise MobileNetV2-style tiny model |
+| `resnet18_tiny` | Layer-wise ResNet18-style tiny image model |
+| `efficientnet_lite_tiny` | Layer-wise EfficientNet-Lite-style model |
+| `yolo_tiny_head` | Layer-wise YOLO tiny detection head |
+| `tinybert_block` | Layer-wise TinyBERT encoder block |
+| `whisper_tiny_encoder` | Layer-wise Whisper encoder approximation |
+| `llama_mlp_attention_micro` | Layer-wise LLaMA attention and MLP microbenchmark |
+
+Run model-level presets:
+
+```bash
+python -m tinyedgebench.benchmark --config configs/model_level.yaml
+```
+
+## Historical Comparison
+
+Save a timestamped copy of a run:
+
+```bash
+python -m tinyedgebench.benchmark --config configs/default.yaml --history
+```
+
+This writes the normal output directory and also copies artifacts into:
+
+```text
+results/runs/<timestamp>/
+```
+
+Compare two saved runs:
+
+```bash
+tinyedgebench compare results/runs/<baseline> results/runs/<candidate>
+```
+
+The comparison generates:
+
+```text
+results/compare/
+  comparison.csv
+  comparison.md
+```
 
 Example:
 
@@ -315,7 +374,7 @@ network_presets:
 | `latency_plot.png` | Latency comparison chart |
 | `error_plot.png` | Numerical error chart |
 
-The report records the local execution machine, operating system, Python version, CPU information, GPU information when available, CUDA visibility, PyTorch CUDA status, and ONNX Runtime providers.
+The report records the local execution machine, operating system, Python version, CPU information, GPU information when available, CUDA visibility, PyTorch CUDA status, ONNX Runtime providers, an executive summary, backend ranking, bottleneck rows, and reproducibility commands.
 
 ## Example CSV
 
@@ -360,6 +419,7 @@ Run end-to-end examples:
 python -m tinyedgebench.benchmark --config configs/default.yaml
 python -m tinyedgebench.benchmark --config configs/extended_operators.yaml
 python -m tinyedgebench.benchmark --config configs/model_presets.yaml
+python -m tinyedgebench.benchmark --config configs/model_level.yaml
 python -m tinyedgebench.benchmark --config configs/real_backends.yaml
 ```
 
@@ -373,6 +433,10 @@ python -m tinyedgebench.benchmark --config configs/gpu_backends.example.yaml
 
 Screenshots will be added as the Web UI stabilizes.
 
+## Continuous Integration
+
+The repository includes GitHub Actions CI in `.github/workflows/ci.yml`. It installs the package, runs `pytest`, and verifies the default YAML config on every push and pull request.
+
 ## Roadmap
 
 - More deployment backends such as CuPy, OpenVINO, TensorRT, and TVM
@@ -380,8 +444,7 @@ Screenshots will be added as the Web UI stabilizes.
 - NPU benchmarking adapters for vendor SDK command-line runners
 - Backend-specific quantized INT8 kernels beyond the current simulation path
 - More fused kernels and model-specific operator groups
-- JSON export and historical comparison reports
-- Richer Web UI presets and saved benchmark sessions
+- PyPI release packaging and versioned benchmark artifacts
 
 ## License
 

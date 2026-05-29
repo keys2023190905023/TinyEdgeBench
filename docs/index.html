@@ -54,7 +54,7 @@
               <span>operators</span>
             </div>
             <div>
-              <strong>29</strong>
+              <strong>36</strong>
               <span>presets</span>
             </div>
             <div>
@@ -155,7 +155,7 @@
               <li>ResNet, ConvNeXt, UNet, DeepLab, FPN</li>
               <li>YOLO and PAN-style detection modules</li>
               <li>ViT, Swin, BERT, and GPT-style blocks</li>
-              <li>Speech, recommendation, PointNet, GraphSAGE</li>
+              <li>MobileNetV2, ResNet18, EfficientNet-Lite, Whisper, LLaMA</li>
             </ul>
           </div>
         </div>
@@ -186,6 +186,10 @@
           <article class="workflow-step">
             <h3>Local GPU suite</h3>
             <pre><code>python -m tinyedgebench.benchmark --config configs/gpu_backends.example.yaml</code></pre>
+          </article>
+          <article class="workflow-step">
+            <h3>Compare saved runs</h3>
+            <pre><code>tinyedgebench compare results/runs/base results/runs/new</code></pre>
           </article>
         </div>
       </section>

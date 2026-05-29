@@ -54,7 +54,7 @@ def test_backend_list_config_and_numpy_alias() -> None:
 def test_gpu_backend_names_parse_without_running_hardware() -> None:
     config = parse_config(
         {
-            "backends": ["torch_cuda", "onnxruntime_cuda"],
+            "backends": ["torch_cuda", "onnxruntime_cuda", "onnxruntime_tensorrt"],
             "warmup": 0,
             "runs": 1,
             "benchmarks": [
@@ -70,7 +70,7 @@ def test_gpu_backend_names_parse_without_running_hardware() -> None:
         }
     )
 
-    assert config.backends == ("torch_cuda", "onnxruntime_cuda")
+    assert config.backends == ("torch_cuda", "onnxruntime_cuda", "onnxruntime_tensorrt")
 
 
 def test_backend_availability_reports_default_cpu() -> None:
@@ -80,3 +80,5 @@ def test_backend_availability_reports_default_cpu() -> None:
     assert availability["numpy_cpu"] == "available"
     assert "torch_cuda" in availability
     assert "onnxruntime_cuda" in availability
+    assert "onnxruntime_tensorrt" in availability
+    assert "openvino_cpu" in availability

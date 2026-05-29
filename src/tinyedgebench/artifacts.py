@@ -73,6 +73,10 @@ def write_report(
     error_plot_path: str | Path,
 ) -> None:
     system_info = get_system_info()
+    fastest = min(results, key=lambda item: item.latency_ms)
+    slowest = max(results, key=lambda item: item.latency_ms)
+    backend_rankings = _backend_rankings(results)
+    bottlenecks = sorted(results, key=lambda item: item.latency_ms, reverse=True)[:5]
     path = Path(path)
     latency_rel = Path(latency_plot_path).name
     error_rel = Path(error_plot_path).name
@@ -93,11 +97,54 @@ def write_report(
         f"- ONNX Runtime version: {system_info['onnxruntime_version']}",
         f"- ONNX Runtime providers: {system_info['onnxruntime_providers']}",
         "",
-        "## Results",
+        "## Executive Summary",
         "",
-        "| Benchmark | Operator | Precision | Backend | Latency (ms) | Mean Abs Error | Max Abs Error |",
-        "| --- | --- | --- | --- | ---: | ---: | ---: |",
+        f"- Benchmarks executed: {len(results)} result rows.",
+        f"- Fastest row: `{fastest.name}` on `{fastest.backend}` / `{fastest.precision}` at {fastest.latency_ms:.4f} ms.",
+        f"- Slowest row: `{slowest.name}` on `{slowest.backend}` / `{slowest.precision}` at {slowest.latency_ms:.4f} ms.",
+        f"- Highest mean absolute error: {max(result.mean_abs_error for result in results):.6f}.",
+        "",
+        "## Backend Ranking",
+        "",
+        "| Backend | Median Latency (ms) | Rows |",
+        "| --- | ---: | ---: |",
     ]
+    for backend, median_latency, count in backend_rankings:
+        lines.append(f"| {backend} | {median_latency:.4f} | {count} |")
+    lines.extend(
+        [
+            "",
+            "## Bottleneck Rows",
+            "",
+            "| Benchmark | Operator | Precision | Backend | Latency (ms) |",
+            "| --- | --- | --- | --- | ---: |",
+        ]
+    )
+    for result in bottlenecks:
+        lines.append(f"| {result.name} | {result.operator} | {result.precision} | {result.backend} | {result.latency_ms:.4f} |")
+    lines.extend(
+        [
+            "",
+            "## Reproduce",
+            "",
+            "Run the same YAML config on the target machine with:",
+            "",
+            "```bash",
+            "python -m tinyedgebench.benchmark --config path/to/config.yaml --history",
+            "```",
+            "",
+            "Compare two saved runs with:",
+            "",
+            "```bash",
+            "tinyedgebench compare results/runs/<baseline> results/runs/<candidate>",
+            "```",
+            "",
+            "## Results",
+            "",
+            "| Benchmark | Operator | Precision | Backend | Latency (ms) | Mean Abs Error | Max Abs Error |",
+            "| --- | --- | --- | --- | ---: | ---: | ---: |",
+        ]
+    )
     for result in results:
         lines.append(
             "| "
@@ -125,6 +172,22 @@ def write_report(
         ]
     )
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def _backend_rankings(results: list[BenchmarkResult]) -> list[tuple[str, float, int]]:
+    by_backend: dict[str, list[float]] = {}
+    for result in results:
+        by_backend.setdefault(result.backend, []).append(result.latency_ms)
+    rankings = []
+    for backend, latencies in by_backend.items():
+        sorted_latencies = sorted(latencies)
+        mid = len(sorted_latencies) // 2
+        if len(sorted_latencies) % 2:
+            median_latency = sorted_latencies[mid]
+        else:
+            median_latency = (sorted_latencies[mid - 1] + sorted_latencies[mid]) / 2
+        rankings.append((backend, median_latency, len(latencies)))
+    return sorted(rankings, key=lambda item: item[1])
 
 
 def write_latency_plot(results: list[BenchmarkResult], path: str | Path) -> None:

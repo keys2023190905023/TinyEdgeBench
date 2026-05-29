@@ -182,6 +182,12 @@ def build_onnxruntime_executor(
     if provider != "CPUExecutionProvider" and "CPUExecutionProvider" in available_providers:
         providers.append("CPUExecutionProvider")
     session = ort.InferenceSession(model.SerializeToString(), providers=providers)
+    active_providers = session.get_providers()
+    if provider != "CPUExecutionProvider" and (not active_providers or active_providers[0] != provider):
+        raise RuntimeError(
+            f"ONNX Runtime did not activate provider '{provider}'. Active providers: {', '.join(active_providers)}. "
+            "Install the matching runtime libraries locally or remove this backend from the config."
+        )
     feed = {name: inputs[name].astype(np.float32, copy=False) for name in input_names}
 
     def execute() -> np.ndarray:
@@ -279,6 +285,12 @@ def backend_availability() -> dict[str, str]:
         "torch_cuda": "missing CUDA-capable PyTorch",
         "onnxruntime_cpu": "missing ONNX Runtime",
         "onnxruntime_cuda": "missing ONNX Runtime CUDAExecutionProvider",
+        "onnxruntime_tensorrt": "missing ONNX Runtime TensorrtExecutionProvider",
+        "openvino_cpu": "missing OpenVINO runtime",
+        "openvino_npu": "missing OpenVINO runtime or NPU plugin",
+        "tvm_cpu": "missing Apache TVM runtime",
+        "tvm_cuda": "missing Apache TVM CUDA runtime",
+        "tensorrt_cuda": "missing TensorRT Python runtime",
     }
     try:
         torch = _torch()
@@ -295,7 +307,29 @@ def backend_availability() -> dict[str, str]:
             availability["onnxruntime_cpu"] = "available"
         if "CUDAExecutionProvider" in providers:
             availability["onnxruntime_cuda"] = "available (CUDAExecutionProvider)"
+        if "TensorrtExecutionProvider" in providers:
+            availability["onnxruntime_tensorrt"] = "provider listed (TensorRT libraries must load locally)"
     except RuntimeError:
+        pass
+    try:
+        import openvino as _openvino  # noqa: F401
+
+        availability["openvino_cpu"] = "installed (executor pending)"
+        availability["openvino_npu"] = "installed (requires local NPU plugin)"
+    except ImportError:
+        pass
+    try:
+        import tvm as _tvm  # noqa: F401
+
+        availability["tvm_cpu"] = "installed (executor pending)"
+        availability["tvm_cuda"] = "installed (executor pending)"
+    except ImportError:
+        pass
+    try:
+        import tensorrt as _tensorrt  # noqa: F401
+
+        availability["tensorrt_cuda"] = "installed (executor pending)"
+    except ImportError:
         pass
     return availability
 

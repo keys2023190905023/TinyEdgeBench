@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Any
 
 import streamlit as st
+import yaml
 
 from tinyedgebench.artifacts import write_artifacts
 from tinyedgebench.config import (
@@ -13,7 +14,9 @@ from tinyedgebench.config import (
     SUPPORTED_OPERATORS,
     BenchmarkCase,
     BenchmarkConfig,
+    parse_config,
 )
+from tinyedgebench.history import compare_runs, list_runs, record_run, write_comparison, zip_directory
 from tinyedgebench.network_presets import NETWORK_PRESETS, build_network_preset
 from tinyedgebench.real_backends import backend_availability
 from tinyedgebench.runner import BenchmarkResult, run_benchmarks
@@ -21,7 +24,19 @@ from tinyedgebench.runner import BenchmarkResult, run_benchmarks
 
 PRECISION_OPTIONS = ["fp32", "int8_sim", "shift_only"]
 OPERATOR_OPTIONS = sorted(SUPPORTED_OPERATORS)
-BACKEND_OPTIONS = ["cpu", "torch_cpu", "torch_cuda", "onnxruntime_cpu", "onnxruntime_cuda"]
+BACKEND_OPTIONS = [
+    "cpu",
+    "torch_cpu",
+    "torch_cuda",
+    "onnxruntime_cpu",
+    "onnxruntime_cuda",
+    "onnxruntime_tensorrt",
+    "openvino_cpu",
+    "openvino_npu",
+    "tvm_cpu",
+    "tvm_cuda",
+    "tensorrt_cuda",
+]
 
 
 def build_web_case(
@@ -155,9 +170,11 @@ def results_to_rows(results: list[BenchmarkResult]) -> list[dict[str, Any]]:
     ]
 
 
-def run_web_benchmark(config: BenchmarkConfig) -> tuple[list[BenchmarkResult], dict[str, Path]]:
+def run_web_benchmark(config: BenchmarkConfig, save_history: bool = True) -> tuple[list[BenchmarkResult], dict[str, Path]]:
     results = run_benchmarks(config)
     artifacts = write_artifacts(results, config.output_dir)
+    if save_history:
+        artifacts["history_run"] = record_run(config, results, artifacts)
     return results, artifacts
 
 
@@ -166,9 +183,22 @@ def main() -> None:
     _inject_theme()
     availability = backend_availability()
     _render_header(availability)
+    _render_history_tools()
 
     with st.sidebar:
         st.header("Benchmark")
+        uploaded_yaml = st.file_uploader("Run YAML config", type=["yaml", "yml"])
+        if uploaded_yaml is not None and st.button("Run Uploaded YAML", type="secondary"):
+            try:
+                raw = yaml.safe_load(uploaded_yaml.getvalue().decode("utf-8")) or {}
+                config = parse_config(raw)
+                with st.spinner("Running uploaded YAML locally..."):
+                    results, artifacts = run_web_benchmark(config)
+            except Exception as exc:
+                st.error(str(exc))
+                return
+            _render_results(results, artifacts, config.output_dir)
+            return
         benchmark_mode = st.radio("Benchmark mode", ["Single operator", "Network preset"], horizontal=True)
         precision_modes = st.multiselect("Precision modes", PRECISION_OPTIONS, default=PRECISION_OPTIONS)
         backends = st.multiselect("Backends", BACKEND_OPTIONS, default=["cpu"])
@@ -384,10 +414,10 @@ def _render_results(results: list[BenchmarkResult], artifacts: dict[str, Path], 
     col_latency, col_error = st.columns(2)
     with col_latency:
         st.subheader("Latency Comparison")
-        st.bar_chart(chart_rows, x="case", y="latency_ms", color="backend")
+        _bar_chart(chart_rows, x="case", y="latency_ms", color="backend")
     with col_error:
         st.subheader("Numerical Error")
-        st.bar_chart(chart_rows, x="case", y="mean_abs_error", color="backend")
+        _bar_chart(chart_rows, x="case", y="mean_abs_error", color="backend")
 
     report_text = artifacts["report"].read_text(encoding="utf-8")
     st.subheader("Markdown Report Preview")
@@ -403,6 +433,9 @@ def _render_results(results: list[BenchmarkResult], artifacts: dict[str, Path], 
         _download_file("latency_plot.png", artifacts["latency_plot"], "image/png")
     with col_error_png:
         _download_file("error_plot.png", artifacts["error_plot"], "image/png")
+    zip_source = artifacts.get("history_run", output_dir)
+    zip_path = zip_directory(zip_source)
+    _download_file("artifacts.zip", zip_path, "application/zip")
 
 
 def _parse_shape_text(text: str) -> tuple[int, ...]:
@@ -417,6 +450,42 @@ def _download_file(label: str, path: Path, mime: str) -> None:
         st.download_button(label, data=path.read_bytes(), file_name=path.name, mime=mime)
     else:
         st.button(label, disabled=True)
+
+
+def _bar_chart(rows: list[dict[str, Any]], x: str, y: str, color: str) -> None:
+    try:
+        import plotly.express as px
+
+        fig = px.bar(rows, x=x, y=y, color=color, template="plotly_dark")
+        fig.update_layout(margin=dict(l=10, r=10, t=10, b=10), paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)")
+        st.plotly_chart(fig, use_container_width=True)
+    except ImportError:
+        st.bar_chart(rows, x=x, y=y, color=color)
+
+
+def _render_history_tools() -> None:
+    runs = list_runs()
+    with st.expander("History and run comparison", expanded=False):
+        if len(runs) < 2:
+            st.caption("Run at least two benchmarks with history enabled to compare them here.")
+            return
+        labels = [path.name for path in runs]
+        col_base, col_candidate = st.columns(2)
+        with col_base:
+            baseline_label = st.selectbox("Baseline run", labels, index=1)
+        with col_candidate:
+            candidate_label = st.selectbox("Candidate run", labels, index=0)
+        if st.button("Compare Selected Runs"):
+            baseline = next(path for path in runs if path.name == baseline_label)
+            candidate = next(path for path in runs if path.name == candidate_label)
+            comparisons = compare_runs(baseline, candidate)
+            artifacts = write_comparison(comparisons, "results/compare")
+            st.dataframe(comparisons, use_container_width=True)
+            col_csv, col_md = st.columns(2)
+            with col_csv:
+                _download_file("comparison.csv", artifacts["comparison_csv"], "text/csv")
+            with col_md:
+                _download_file("comparison.md", artifacts["comparison_report"], "text/markdown")
 
 
 def _render_header(availability: dict[str, str]) -> None:

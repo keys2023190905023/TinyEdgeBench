@@ -25,6 +25,7 @@ classifiers = [
 dependencies = [
   "matplotlib>=3.7",
   "numpy>=1.24",
+  "plotly>=5.20",
   "PyYAML>=6.0",
   "streamlit>=1.35"
 ]
@@ -53,6 +54,12 @@ real-backends-gpu = [
   "torch>=2.2",
   "onnx>=1.16",
   "onnxruntime-gpu>=1.17"
+]
+openvino = [
+  "openvino>=2024.0"
+]
+tvm = [
+  "apache-tvm>=0.14"
 ]
 
 [project.scripts]

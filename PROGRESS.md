@@ -67,3 +67,14 @@
 - Added CUDA-aware backend availability reporting for the Web UI and generated Markdown reports.
 - Added `configs/gpu_backends.example.yaml` for local GPU backend comparison.
 - Added optional dependency extras for ONNX Runtime GPU environments.
+
+## 2026-05-29 Deployment Benchmark Upgrade
+
+- Added backend registry entries for `onnxruntime_tensorrt`, OpenVINO, TVM, and native TensorRT planning.
+- Added real `onnxruntime_tensorrt` execution through ONNX Runtime when `TensorrtExecutionProvider` is available locally.
+- Added model-level presets for MobileNetV2, ResNet18, EfficientNet-Lite, YOLO tiny head, TinyBERT, Whisper, and LLaMA-style blocks.
+- Added timestamped run history under `results/runs/<timestamp>/`.
+- Added `tinyedgebench compare` for latency, speedup, and error comparison between two saved runs.
+- Upgraded generated reports with executive summaries, backend rankings, bottleneck rows, and reproducibility commands.
+- Upgraded the Web UI with YAML upload, history comparison, Plotly charts when installed, and ZIP artifact downloads.
+- Added GitHub Actions CI for pytest and default YAML validation.

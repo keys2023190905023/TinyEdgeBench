@@ -17,6 +17,7 @@ from tinyedgebench.config import (
     MATRIX_OPERATORS,
     wizard_case_to_config,
 )
+from tinyedgebench.history import compare_runs, write_comparison
 
 
 InputFunc = Callable[[str], str]
@@ -127,12 +128,23 @@ def main(argv: list[str] | None = None) -> int:
     subparsers.add_parser("wizard", help="Run the interactive CLI wizard.")
     web_parser = subparsers.add_parser("web", help="Launch the local Streamlit web UI.")
     web_parser.add_argument("streamlit_args", nargs=argparse.REMAINDER, help="Optional arguments passed to Streamlit.")
+    compare_parser = subparsers.add_parser("compare", help="Compare two TinyEdgeBench run directories.")
+    compare_parser.add_argument("baseline", help="Baseline run directory containing summary.csv.")
+    compare_parser.add_argument("candidate", help="Candidate run directory containing summary.csv.")
+    compare_parser.add_argument("--output-dir", default="results/compare", help="Directory for comparison.csv and comparison.md.")
     args = parser.parse_args(argv)
     if args.command == "wizard":
         wizard()
         return 0
     if args.command == "web":
         return launch_web_app(args.streamlit_args)
+    if args.command == "compare":
+        comparisons = compare_runs(args.baseline, args.candidate)
+        artifacts = write_comparison(comparisons, args.output_dir)
+        print(f"Compared {len(comparisons)} matching rows.")
+        for label, path in artifacts.items():
+            print(f"{label}: {path}")
+        return 0
     parser.print_help()
     return 1
 

@@ -33,6 +33,13 @@ NETWORK_PRESETS = {
     "pointnet_mlp_block": "PointNet-style per-point MLP and global reduction block",
     "graphsage_mlp_block": "GraphSAGE-style aggregate and projection block",
     "anomaly_mlp": "Small anomaly-detection MLP block",
+    "mobilenetv2_tiny": "Layer-wise MobileNetV2-style tiny model",
+    "resnet18_tiny": "Layer-wise ResNet18-style tiny image model",
+    "efficientnet_lite_tiny": "Layer-wise EfficientNet-Lite-style model",
+    "yolo_tiny_head": "Layer-wise YOLO tiny detection head",
+    "tinybert_block": "Layer-wise TinyBERT encoder block",
+    "whisper_tiny_encoder": "Layer-wise Whisper encoder approximation",
+    "llama_mlp_attention_micro": "Layer-wise LLaMA attention and MLP microbenchmark",
 }
 
 
@@ -265,5 +272,82 @@ def build_network_preset(name: str, precision_modes: list[str] | None = None) ->
             BenchmarkCase("anom_dense2", "linear", modes, matrix_m=16, matrix_k=64, matrix_n=16),
             BenchmarkCase("anom_l2norm", "l2_normalize", modes, input_shape_generic=(16, 16), axis=-1),
             BenchmarkCase("anom_score", "reduce_sum", modes, input_shape_generic=(16, 16), axis=-1),
+        ]
+    if name == "mobilenetv2_tiny":
+        return [
+            BenchmarkCase("mobilenetv2_stem_conv", "conv2d", modes, input_shape=(1, 3, 32, 32), output_channels=16, kernel_size=(3, 3), stride=2, padding=1),
+            BenchmarkCase("mobilenetv2_expand_1", "pointwise_conv2d", modes, input_shape=(1, 16, 16, 16), output_channels=32, kernel_size=(1, 1)),
+            BenchmarkCase("mobilenetv2_dw_1", "depthwise_conv2d", modes, input_shape=(1, 32, 16, 16), kernel_size=(3, 3), padding=1),
+            BenchmarkCase("mobilenetv2_project_1", "pointwise_conv2d", modes, input_shape=(1, 32, 16, 16), output_channels=16, kernel_size=(1, 1)),
+            BenchmarkCase("mobilenetv2_expand_2", "pointwise_conv2d", modes, input_shape=(1, 16, 16, 16), output_channels=48, kernel_size=(1, 1)),
+            BenchmarkCase("mobilenetv2_dw_2", "depthwise_conv2d", modes, input_shape=(1, 48, 16, 16), kernel_size=(3, 3), stride=2, padding=1),
+            BenchmarkCase("mobilenetv2_project_2", "pointwise_conv2d", modes, input_shape=(1, 48, 8, 8), output_channels=32, kernel_size=(1, 1)),
+            BenchmarkCase("mobilenetv2_pool", "global_avgpool2d", modes, input_shape_generic=(1, 32, 8, 8)),
+            BenchmarkCase("mobilenetv2_classifier", "linear", modes, matrix_m=1, matrix_k=32, matrix_n=1000),
+        ]
+    if name == "resnet18_tiny":
+        return [
+            BenchmarkCase("resnet18_stem", "conv2d", modes, input_shape=(1, 3, 32, 32), output_channels=16, kernel_size=(7, 7), stride=2, padding=3),
+            BenchmarkCase("resnet18_stem_pool", "maxpool2d", modes, input_shape_generic=(1, 16, 16, 16), kernel_size=(3, 3), stride=2),
+            BenchmarkCase("resnet18_block1_conv1", "conv2d", modes, input_shape=(1, 16, 8, 8), output_channels=16, kernel_size=(3, 3), padding=1),
+            BenchmarkCase("resnet18_block1_conv2", "conv2d", modes, input_shape=(1, 16, 8, 8), output_channels=16, kernel_size=(3, 3), padding=1),
+            BenchmarkCase("resnet18_block1_add", "add", modes, input_shape_generic=(1, 16, 8, 8)),
+            BenchmarkCase("resnet18_block2_conv1", "conv2d", modes, input_shape=(1, 16, 8, 8), output_channels=32, kernel_size=(3, 3), stride=2, padding=1),
+            BenchmarkCase("resnet18_block2_conv2", "conv2d", modes, input_shape=(1, 32, 4, 4), output_channels=32, kernel_size=(3, 3), padding=1),
+            BenchmarkCase("resnet18_pool", "global_avgpool2d", modes, input_shape_generic=(1, 32, 4, 4)),
+            BenchmarkCase("resnet18_fc", "linear", modes, matrix_m=1, matrix_k=32, matrix_n=1000),
+        ]
+    if name == "efficientnet_lite_tiny":
+        return [
+            BenchmarkCase("efflite_stem", "conv2d", modes, input_shape=(1, 3, 32, 32), output_channels=16, kernel_size=(3, 3), stride=2, padding=1),
+            BenchmarkCase("efflite_mbconv1_expand", "pointwise_conv2d", modes, input_shape=(1, 16, 16, 16), output_channels=48, kernel_size=(1, 1)),
+            BenchmarkCase("efflite_mbconv1_dw", "depthwise_conv2d", modes, input_shape=(1, 48, 16, 16), kernel_size=(3, 3), padding=1),
+            BenchmarkCase("efflite_mbconv1_se_pool", "global_avgpool2d", modes, input_shape_generic=(1, 48, 16, 16)),
+            BenchmarkCase("efflite_mbconv1_project", "pointwise_conv2d", modes, input_shape=(1, 48, 16, 16), output_channels=24, kernel_size=(1, 1)),
+            BenchmarkCase("efflite_head", "pointwise_conv2d", modes, input_shape=(1, 24, 16, 16), output_channels=64, kernel_size=(1, 1)),
+            BenchmarkCase("efflite_pool", "global_avgpool2d", modes, input_shape_generic=(1, 64, 16, 16)),
+            BenchmarkCase("efflite_classifier", "linear", modes, matrix_m=1, matrix_k=64, matrix_n=1000),
+        ]
+    if name == "yolo_tiny_head":
+        return [
+            BenchmarkCase("yolo_tiny_neck_conv", "conv2d", modes, input_shape=(1, 128, 20, 20), output_channels=128, kernel_size=(3, 3), padding=1),
+            BenchmarkCase("yolo_tiny_neck_silu", "silu", modes, input_shape_generic=(1, 128, 20, 20)),
+            BenchmarkCase("yolo_tiny_cls_conv", "pointwise_conv2d", modes, input_shape=(1, 128, 20, 20), output_channels=80, kernel_size=(1, 1)),
+            BenchmarkCase("yolo_tiny_box_conv", "pointwise_conv2d", modes, input_shape=(1, 128, 20, 20), output_channels=64, kernel_size=(1, 1)),
+            BenchmarkCase("yolo_tiny_obj_conv", "pointwise_conv2d", modes, input_shape=(1, 128, 20, 20), output_channels=1, kernel_size=(1, 1)),
+            BenchmarkCase("yolo_tiny_sigmoid", "sigmoid", modes, input_shape_generic=(1, 145, 20, 20)),
+        ]
+    if name == "tinybert_block":
+        return [
+            BenchmarkCase("tinybert_ln1", "layernorm", modes, input_shape_generic=(1, 32, 128)),
+            BenchmarkCase("tinybert_qkv", "linear", modes, matrix_m=32, matrix_k=128, matrix_n=384),
+            BenchmarkCase("tinybert_attention", "scaled_dot_product_attention", modes, batch_size=1, sequence_length=32, embedding_dim=128, num_heads=4),
+            BenchmarkCase("tinybert_out_proj", "linear", modes, matrix_m=32, matrix_k=128, matrix_n=128),
+            BenchmarkCase("tinybert_ln2", "layernorm", modes, input_shape_generic=(1, 32, 128)),
+            BenchmarkCase("tinybert_ffn1", "linear", modes, matrix_m=32, matrix_k=128, matrix_n=512),
+            BenchmarkCase("tinybert_gelu", "gelu", modes, input_shape_generic=(1, 32, 512)),
+            BenchmarkCase("tinybert_ffn2", "linear", modes, matrix_m=32, matrix_k=512, matrix_n=128),
+        ]
+    if name == "whisper_tiny_encoder":
+        return [
+            BenchmarkCase("whisper_conv1", "conv2d", modes, input_shape=(1, 1, 24, 64), output_channels=16, kernel_size=(3, 3), padding=1),
+            BenchmarkCase("whisper_gelu1", "gelu", modes, input_shape_generic=(1, 16, 24, 64)),
+            BenchmarkCase("whisper_conv2", "conv2d", modes, input_shape=(1, 16, 24, 64), output_channels=16, kernel_size=(3, 3), stride=2, padding=1),
+            BenchmarkCase("whisper_ln", "layernorm", modes, input_shape_generic=(1, 384, 16)),
+            BenchmarkCase("whisper_attention", "scaled_dot_product_attention", modes, batch_size=1, sequence_length=128, embedding_dim=128, num_heads=4),
+            BenchmarkCase("whisper_ffn1", "linear", modes, matrix_m=128, matrix_k=128, matrix_n=512),
+            BenchmarkCase("whisper_silu", "silu", modes, input_shape_generic=(1, 128, 512)),
+            BenchmarkCase("whisper_ffn2", "linear", modes, matrix_m=128, matrix_k=512, matrix_n=128),
+        ]
+    if name == "llama_mlp_attention_micro":
+        return [
+            BenchmarkCase("llama_rmsnorm", "rmsnorm", modes, input_shape_generic=(1, 32, 256)),
+            BenchmarkCase("llama_qkv", "linear", modes, matrix_m=32, matrix_k=256, matrix_n=768),
+            BenchmarkCase("llama_rotary", "rotary_embedding", modes, input_shape_generic=(1, 4, 32, 64)),
+            BenchmarkCase("llama_attention", "causal_self_attention", modes, batch_size=1, sequence_length=32, embedding_dim=256, num_heads=4),
+            BenchmarkCase("llama_out_proj", "linear", modes, matrix_m=32, matrix_k=256, matrix_n=256),
+            BenchmarkCase("llama_gate_up", "linear", modes, matrix_m=32, matrix_k=256, matrix_n=1024),
+            BenchmarkCase("llama_swiglu", "swiglu", modes, input_shape_generic=(1, 32, 1024)),
+            BenchmarkCase("llama_down", "linear", modes, matrix_m=32, matrix_k=512, matrix_n=256),
         ]
     raise ValueError(f"Unknown network preset: {name}")

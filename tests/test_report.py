@@ -26,4 +26,7 @@ def test_report_generation_contains_system_info(tmp_path: Path) -> None:
     assert "CUDA available" in report
     assert "Execution location: local machine" in report
     assert "ONNX Runtime providers" in report
+    assert "Executive Summary" in report
+    assert "Backend Ranking" in report
+    assert "Bottleneck Rows" in report
     assert "| case | matmul | fp32 | cpu |" in report
