@@ -78,3 +78,10 @@
 - Upgraded generated reports with executive summaries, backend rankings, bottleneck rows, and reproducibility commands.
 - Upgraded the Web UI with YAML upload, history comparison, Plotly charts when installed, and ZIP artifact downloads.
 - Added GitHub Actions CI for pytest and default YAML validation.
+
+## 2026-05-30 Frontend Skill Workflow
+
+- Searched for concrete Codex frontend/design skills and installed `figma-generate-design`, `figma-implement-design`, `figma-create-design-system-rules`, `playwright`, and `screenshot`.
+- Added `AGENTS.md` with TinyEdgeBench-specific frontend design rules for a premium, Apple-inspired engineering product interface.
+- Tokenized static site and Streamlit UI styling for reusable radii, shadows, and material surfaces.
+- Kept the benchmark core unchanged while improving the maintainability of the frontend presentation layer.

@@ -552,6 +552,11 @@ def _inject_theme() -> None:
           --teb-cyan: #0071e3;
           --teb-green: #34c759;
           --teb-magenta: #af52de;
+          --teb-radius-card: 20px;
+          --teb-radius-panel: 28px;
+          --teb-radius-pill: 999px;
+          --teb-shadow-soft: 0 18px 42px rgba(0, 0, 0, 0.08);
+          --teb-shadow-panel: 0 28px 80px rgba(0, 0, 0, 0.12);
         }
 
         .stApp {
@@ -586,11 +591,11 @@ def _inject_theme() -> None:
           margin-bottom: 28px;
           padding: 28px;
           border: 1px solid var(--teb-line);
-          border-radius: 28px;
+          border-radius: var(--teb-radius-panel);
           background:
             linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.7) 46%, rgba(0, 113, 227, 0.08)),
             rgba(255, 255, 255, 0.78);
-          box-shadow: 0 28px 80px rgba(0, 0, 0, 0.12);
+          box-shadow: var(--teb-shadow-panel);
           position: relative;
           overflow: hidden;
           backdrop-filter: blur(24px) saturate(180%);
@@ -640,9 +645,9 @@ def _inject_theme() -> None:
         .teb-status-grid div,
         [data-testid="stMetric"] {
           border: 1px solid rgba(29, 29, 31, 0.08);
-          border-radius: 20px;
+          border-radius: var(--teb-radius-card);
           background: rgba(255, 255, 255, 0.76);
-          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 18px 42px rgba(0, 0, 0, 0.08);
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), var(--teb-shadow-soft);
         }
 
         .teb-status-grid div {
@@ -670,7 +675,7 @@ def _inject_theme() -> None:
           margin-bottom: 24px;
           padding: 18px;
           border: 1px solid var(--teb-line);
-          border-radius: 28px;
+          border-radius: var(--teb-radius-panel);
           background:
             linear-gradient(115deg, rgba(255, 255, 255, 0.94), rgba(255, 255, 255, 0.72)),
             rgba(255, 255, 255, 0.78);
@@ -709,7 +714,7 @@ def _inject_theme() -> None:
           min-height: 112px;
           padding: 14px;
           border: 1px solid rgba(29, 29, 31, 0.08);
-          border-radius: 18px;
+          border-radius: var(--teb-radius-card);
           background: rgba(255, 255, 255, 0.78);
           box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
           overflow-wrap: anywhere;
@@ -729,7 +734,7 @@ def _inject_theme() -> None:
           width: fit-content;
           margin-bottom: 12px;
           padding: 4px 8px;
-          border-radius: 999px;
+          border-radius: var(--teb-radius-pill);
           background: rgba(175, 82, 222, 0.1);
           color: var(--teb-magenta);
           font-size: 11px;
@@ -760,7 +765,7 @@ def _inject_theme() -> None:
         div[data-testid="stButton"] > button,
         div[data-testid="stDownloadButton"] > button {
           border: 1px solid var(--teb-line-strong);
-          border-radius: 999px;
+          border-radius: var(--teb-radius-pill);
           background: #0071e3;
           color: #ffffff;
           font-weight: 800;
@@ -776,7 +781,7 @@ def _inject_theme() -> None:
         [data-testid="stFileUploader"],
         [data-testid="stExpander"] {
           border: 1px solid rgba(29, 29, 31, 0.08);
-          border-radius: 20px;
+          border-radius: var(--teb-radius-card);
           background: rgba(255, 255, 255, 0.68);
           box-shadow: 0 12px 34px rgba(0, 0, 0, 0.06);
         }
