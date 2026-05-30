@@ -556,8 +556,7 @@ def _inject_theme() -> None:
 
         .stApp {
           background:
-            radial-gradient(circle at 18% 0%, rgba(0, 113, 227, 0.14), transparent 28%),
-            radial-gradient(circle at 92% 6%, rgba(175, 82, 222, 0.1), transparent 24%),
+            linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(245, 245, 247, 0.98) 44%, #ffffff),
             var(--teb-bg);
           color: var(--teb-text);
         }
@@ -612,15 +611,15 @@ def _inject_theme() -> None:
           color: var(--teb-cyan);
           font-size: 12px;
           font-weight: 800;
-          letter-spacing: 0.12em;
+          letter-spacing: 0;
         }
 
         .teb-hero h1 {
           margin: 0;
           color: var(--teb-text);
-          font-size: clamp(44px, 6vw, 76px);
+          font-size: 64px;
           line-height: 0.95;
-          letter-spacing: -0.04em;
+          letter-spacing: 0;
         }
 
         .teb-copy {
@@ -692,7 +691,7 @@ def _inject_theme() -> None:
           color: var(--teb-green);
           font-size: 11px;
           font-weight: 800;
-          letter-spacing: 0.12em;
+          letter-spacing: 0;
         }
 
         .teb-section-head strong {
@@ -791,6 +790,10 @@ def _inject_theme() -> None:
           .teb-status-grid,
           .teb-backend-grid {
             grid-template-columns: 1fr;
+          }
+
+          .teb-hero h1 {
+            font-size: 44px;
           }
         }
         </style>

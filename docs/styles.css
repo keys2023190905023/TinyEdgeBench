@@ -29,8 +29,7 @@ html {
 body {
   margin: 0;
   background:
-    radial-gradient(circle at 18% 0%, rgba(0, 113, 227, 0.14), transparent 28%),
-    radial-gradient(circle at 92% 10%, rgba(175, 82, 222, 0.1), transparent 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(245, 245, 247, 0.98) 44%, #ffffff),
     var(--bg);
   color: var(--text);
   font-family:
@@ -45,8 +44,7 @@ body::before {
   pointer-events: none;
   content: "";
   background:
-    linear-gradient(rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.14) 38%),
-    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.5), transparent 42%);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.14) 38%);
   opacity: 0.7;
 }
 
@@ -214,7 +212,7 @@ a {
   font-size: 13px;
   font-weight: 740;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0;
 }
 
 h1,
@@ -227,7 +225,7 @@ p {
 h1 {
   max-width: 760px;
   margin-bottom: 18px;
-  font-size: clamp(56px, 8vw, 118px);
+  font-size: 104px;
   line-height: 0.9;
   font-weight: 820;
   color: #f5f5f7;
@@ -236,10 +234,10 @@ h1 {
 
 h2 {
   max-width: 760px;
-  font-size: clamp(32px, 4vw, 58px);
+  font-size: 56px;
   line-height: 1;
   font-weight: 760;
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
 }
 
 h3 {
@@ -249,7 +247,7 @@ h3 {
 .hero-copy {
   max-width: 680px;
   color: rgba(245, 245, 247, 0.82);
-  font-size: clamp(18px, 2vw, 24px);
+  font-size: 22px;
   line-height: 1.5;
 }
 
@@ -542,7 +540,7 @@ h3 {
   font-size: 12px;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
+  letter-spacing: 0;
 }
 
 .backend-matrix {
@@ -691,6 +689,18 @@ code {
 
   .hero {
     min-height: 880px;
+  }
+
+  h1 {
+    font-size: 64px;
+  }
+
+  h2 {
+    font-size: 38px;
+  }
+
+  .hero-copy {
+    font-size: 18px;
   }
 
   .metric-strip,
