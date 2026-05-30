@@ -431,7 +431,9 @@ python -m tinyedgebench.benchmark --config configs/gpu_backends.example.yaml
 
 ## Screenshots
 
-Screenshots will be added as the Web UI stabilizes.
+Static project website with the new dynamic benchmark-intelligence panel:
+
+![TinyEdgeBench dynamic benchmark intelligence preview](docs/assets/tinyedgebench-dynamic-preview.png)
 
 ## Continuous Integration
 

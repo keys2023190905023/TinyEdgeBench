@@ -20,6 +20,7 @@
       </a>
       <nav class="nav-links" aria-label="Primary navigation">
         <a href="#features">Features</a>
+        <a href="#intelligence">Live View</a>
         <a href="#hardware">Hardware</a>
         <a href="#operators">Operators</a>
         <a href="#workflow">Workflow</a>
@@ -67,6 +68,103 @@
               <span>execution</span>
             </div>
           </div>
+        </div>
+      </section>
+
+      <section class="section intelligence-band" id="intelligence">
+        <div class="section-heading split-heading">
+          <div>
+            <p class="eyebrow">Benchmark intelligence</p>
+            <h2>Live deployment signals, organized for fast decisions.</h2>
+          </div>
+          <div class="live-pill" aria-label="Local simulation status">
+            <span></span>
+            Local preview data
+          </div>
+        </div>
+        <div class="intelligence-grid">
+          <article class="run-monitor">
+            <div class="panel-header">
+              <span class="panel-kicker">Active experiment</span>
+              <strong id="live-run-label">conv2d / torch_cpu / int8_sim</strong>
+            </div>
+            <div class="run-dial" aria-label="Live benchmark progress">
+              <div class="dial-copy">
+                <span>Run progress</span>
+                <strong id="run-progress-label">68%</strong>
+              </div>
+              <div class="progress-track">
+                <span id="run-progress-bar"></span>
+              </div>
+            </div>
+            <div class="telemetry-grid" aria-label="Live benchmark metrics">
+              <div>
+                <span>Latency</span>
+                <strong id="live-latency">2.84 ms</strong>
+              </div>
+              <div>
+                <span>Throughput</span>
+                <strong id="live-throughput">352 ops/s</strong>
+              </div>
+              <div>
+                <span>Abs error</span>
+                <strong id="live-error">0.0031</strong>
+              </div>
+              <div>
+                <span>Backend</span>
+                <strong id="live-backend">torch_cpu</strong>
+              </div>
+            </div>
+            <ol class="pipeline-list" aria-label="Benchmark pipeline">
+              <li class="complete"><span></span>Load YAML or Web UI parameters</li>
+              <li class="complete"><span></span>Warm up selected backend</li>
+              <li class="active"><span></span>Measure operator latency</li>
+              <li><span></span>Export CSV, plots, and Markdown report</li>
+            </ol>
+          </article>
+
+          <article class="latency-panel">
+            <div class="panel-header">
+              <span class="panel-kicker">Latency profile</span>
+              <strong>Backend comparison snapshot</strong>
+            </div>
+            <div class="latency-bars" aria-label="Latency comparison chart">
+              <div class="latency-row">
+                <span>NumPy CPU</span>
+                <div><i id="bar-cpu"></i></div>
+                <strong id="value-cpu">4.92 ms</strong>
+              </div>
+              <div class="latency-row">
+                <span>Torch CPU</span>
+                <div><i id="bar-torch"></i></div>
+                <strong id="value-torch">2.84 ms</strong>
+              </div>
+              <div class="latency-row">
+                <span>ONNX CPU</span>
+                <div><i id="bar-onnx"></i></div>
+                <strong id="value-onnx">2.31 ms</strong>
+              </div>
+              <div class="latency-row">
+                <span>Torch CUDA</span>
+                <div><i id="bar-cuda"></i></div>
+                <strong id="value-cuda">0.71 ms</strong>
+              </div>
+            </div>
+            <div class="insight-strip">
+              <div>
+                <span>Fastest</span>
+                <strong id="fastest-backend">torch_cuda</strong>
+              </div>
+              <div>
+                <span>Bottleneck</span>
+                <strong id="bottleneck-op">matmul</strong>
+              </div>
+              <div>
+                <span>Artifacts</span>
+                <strong>CSV + report + plots</strong>
+              </div>
+            </div>
+          </article>
         </div>
       </section>
 

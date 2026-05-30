@@ -85,3 +85,4 @@
 - Added `AGENTS.md` with TinyEdgeBench-specific frontend design rules for a premium, Apple-inspired engineering product interface.
 - Tokenized static site and Streamlit UI styling for reusable radii, shadows, and material surfaces.
 - Kept the benchmark core unchanged while improving the maintainability of the frontend presentation layer.
+- Added a structured dynamic benchmark-intelligence section to the GitHub Pages site with rotating local-run preview metrics, progress state, latency bars, and deployment insight cards.

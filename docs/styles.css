@@ -368,7 +368,9 @@ h3 {
 .operator-panel:hover,
 .preset-panel:hover,
 .hardware-panel:hover,
-.backend-matrix:hover {
+.backend-matrix:hover,
+.run-monitor:hover,
+.latency-panel:hover {
   transform: translateY(-3px);
   border-color: rgba(128, 229, 224, 0.38);
 }
@@ -423,6 +425,275 @@ h3 {
   background:
     linear-gradient(120deg, rgba(0, 113, 227, 0.08), transparent 48%, rgba(175, 82, 222, 0.08)),
     #f5f5f7;
+}
+
+.intelligence-band {
+  padding-top: 84px;
+  padding-bottom: 88px;
+  scroll-margin-top: 72px;
+  background:
+    linear-gradient(180deg, rgba(8, 12, 18, 0.98), rgba(12, 16, 24, 0.96)),
+    #080c12;
+  color: #f5f5f7;
+}
+
+.intelligence-band .section-heading {
+  margin-bottom: 30px;
+}
+
+.intelligence-band h2 {
+  max-width: 820px;
+  font-size: 52px;
+  line-height: 1.02;
+}
+
+.split-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.split-heading h2 {
+  color: #f5f5f7;
+}
+
+.live-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid rgba(48, 209, 88, 0.24);
+  border-radius: var(--radius-pill);
+  background: rgba(48, 209, 88, 0.1);
+  color: rgba(245, 245, 247, 0.86);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.live-pill span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #30d158;
+  box-shadow: 0 0 18px rgba(48, 209, 88, 0.72);
+}
+
+.intelligence-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  gap: 18px;
+  width: min(1180px, 100%);
+  margin: 0 auto;
+}
+
+.run-monitor,
+.latency-panel {
+  position: relative;
+  overflow: hidden;
+  min-height: 500px;
+  padding: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-xl);
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.05)),
+    rgba(255, 255, 255, 0.06);
+  box-shadow: 0 32px 90px rgba(0, 0, 0, 0.34);
+  transition: transform 160ms ease, border-color 160ms ease;
+  backdrop-filter: blur(24px) saturate(170%);
+}
+
+.run-monitor::before,
+.latency-panel::before {
+  position: absolute;
+  top: 0;
+  left: 24px;
+  right: 24px;
+  height: 1px;
+  content: "";
+  background: linear-gradient(90deg, transparent, rgba(103, 242, 255, 0.52), transparent);
+}
+
+.panel-header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 28px;
+}
+
+.panel-header strong {
+  color: #f5f5f7;
+  font-size: 16px;
+  text-align: right;
+}
+
+.run-dial {
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-panel);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.dial-copy {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.dial-copy span,
+.telemetry-grid span,
+.insight-strip span {
+  color: rgba(245, 245, 247, 0.58);
+  font-size: 12px;
+}
+
+.dial-copy strong {
+  color: #f5f5f7;
+  font-size: 32px;
+}
+
+.progress-track {
+  overflow: hidden;
+  height: 10px;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.11);
+}
+
+.progress-track span {
+  display: block;
+  width: 68%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #30d158, #67f2ff, #0a84ff);
+  transition: width 420ms ease;
+}
+
+.telemetry-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 16px 0;
+}
+
+.telemetry-grid div,
+.insight-strip div {
+  min-height: 92px;
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.telemetry-grid strong,
+.insight-strip strong {
+  display: block;
+  margin-top: 8px;
+  color: #f5f5f7;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 18px;
+}
+
+.pipeline-list {
+  display: grid;
+  gap: 10px;
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pipeline-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 42px;
+  padding: 0 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  color: rgba(245, 245, 247, 0.62);
+  background: rgba(255, 255, 255, 0.04);
+  font-size: 13px;
+}
+
+.pipeline-list li span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(245, 245, 247, 0.28);
+}
+
+.pipeline-list li.complete {
+  color: rgba(245, 245, 247, 0.82);
+}
+
+.pipeline-list li.complete span {
+  background: #30d158;
+}
+
+.pipeline-list li.active {
+  color: #f5f5f7;
+  border-color: rgba(103, 242, 255, 0.28);
+}
+
+.pipeline-list li.active span {
+  background: #67f2ff;
+  box-shadow: 0 0 16px rgba(103, 242, 255, 0.72);
+}
+
+.latency-bars {
+  display: grid;
+  gap: 18px;
+  margin: 36px 0 24px;
+}
+
+.latency-row {
+  display: grid;
+  grid-template-columns: 110px minmax(120px, 1fr) 82px;
+  gap: 14px;
+  align-items: center;
+}
+
+.latency-row span,
+.latency-row strong {
+  font-size: 13px;
+}
+
+.latency-row span {
+  color: rgba(245, 245, 247, 0.7);
+}
+
+.latency-row strong {
+  color: #f5f5f7;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  text-align: right;
+}
+
+.latency-row div {
+  overflow: hidden;
+  height: 34px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.latency-row i {
+  display: block;
+  width: 50%;
+  height: 100%;
+  border-radius: inherit;
+  background:
+    linear-gradient(90deg, rgba(0, 113, 227, 0.7), rgba(103, 242, 255, 0.92));
+  transition: width 420ms ease;
+}
+
+.insight-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 32px;
 }
 
 .proof-grid {
@@ -711,10 +982,38 @@ code {
   .feature-grid,
   .workflow-grid,
   .hardware-grid,
+  .intelligence-grid,
+  .insight-strip,
   .proof-grid,
   .catalog-layout,
   .install-band {
     grid-template-columns: 1fr;
+  }
+
+  .split-heading {
+    display: block;
+  }
+
+  .live-pill {
+    margin-top: 18px;
+  }
+
+  .run-monitor,
+  .latency-panel {
+    min-height: auto;
+    padding: 20px;
+  }
+
+  .telemetry-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .latency-row {
+    grid-template-columns: 1fr;
+  }
+
+  .latency-row strong {
+    text-align: left;
   }
 
   .hero::after {
