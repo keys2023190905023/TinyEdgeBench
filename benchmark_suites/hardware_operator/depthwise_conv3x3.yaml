@@ -1,0 +1,12 @@
+output_dir: results/hardware_operator_depthwise_conv3x3
+warmup: 5
+runs: 20
+backends: [cpu, torch_cpu, onnxruntime_cpu]
+benchmarks:
+  - name: depthwise_conv3x3_edge
+    operator: depthwise_conv2d
+    input_shape: [1, 32, 56, 56]
+    kernel_size: [3, 3]
+    stride: 1
+    padding: 1
+    precision_modes: [fp32]

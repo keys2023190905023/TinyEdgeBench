@@ -1,0 +1,18 @@
+output_dir: results/vision_tiny_vww_mobilenet
+warmup: 5
+runs: 20
+backends: [cpu, torch_cpu, onnxruntime_cpu]
+benchmarks:
+  - name: mobilenet_depthwise_3x3
+    operator: depthwise_conv2d
+    input_shape: [1, 32, 96, 96]
+    kernel_size: [3, 3]
+    stride: 1
+    padding: 1
+    precision_modes: [fp32]
+  - name: mobilenet_pointwise_1x1
+    operator: pointwise_conv2d
+    input_shape: [1, 32, 96, 96]
+    output_channels: 64
+    kernel_size: [1, 1]
+    precision_modes: [fp32]

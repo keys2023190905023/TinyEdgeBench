@@ -1,0 +1,13 @@
+output_dir: results/hardware_operator_conv3x3_int8
+warmup: 5
+runs: 20
+backends: [cpu]
+benchmarks:
+  - name: conv3x3_int8_sim_trace_candidate
+    operator: conv2d
+    input_shape: [1, 16, 32, 32]
+    output_channels: 32
+    kernel_size: [3, 3]
+    stride: 1
+    padding: 1
+    precision_modes: [fp32, int8_sim]

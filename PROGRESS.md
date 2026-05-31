@@ -86,3 +86,12 @@
 - Tokenized static site and Streamlit UI styling for reusable radii, shadows, and material surfaces.
 - Kept the benchmark core unchanged while improving the maintainability of the frontend presentation layer.
 - Added a structured dynamic benchmark-intelligence section to the GitHub Pages site with rotating local-run preview metrics, progress state, latency bars, and deployment insight cards.
+
+## 2026-05-31 Hardware Results And Protocol Upgrade
+
+- Repositioned TinyEdgeBench as an operator-to-deployment benchmark suite for low-bit edge AI across CPU, GPU, FPGA-trace, and NPU-ready targets.
+- Added latency stability, memory, CUDA memory, power, energy, EDP, and stage-timing fields to generated `summary.csv` artifacts.
+- Added verified CPU baseline and RTX 4060 Laptop GPU result directories under `docs/results/`.
+- Added a PYNQ-Z2 FPGA trace scaffold with board-side latency and operator-trace CSV contracts.
+- Added `docs/benchmark_protocol.md`, `docs/hardware_results.md`, and story-driven benchmark suites for vision, transformer, and hardware-operator experiments.
+- Updated the website and README to lead with verified hardware results instead of only feature claims.

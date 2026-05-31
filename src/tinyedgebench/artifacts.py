@@ -22,6 +22,21 @@ SUMMARY_COLUMNS = [
     "throughput_ops_per_s",
     "mean_abs_error",
     "max_abs_error",
+    "latency_median_ms",
+    "latency_p90_ms",
+    "latency_std_ms",
+    "valid_runs",
+    "failed_runs",
+    "oom_runs",
+    "peak_memory_mb",
+    "gpu_memory_allocated_mb",
+    "gpu_memory_reserved_mb",
+    "power_w",
+    "energy_mj",
+    "edp_mj_ms",
+    "preprocess_ms",
+    "inference_ms",
+    "postprocess_ms",
 ]
 
 
@@ -62,6 +77,21 @@ def write_summary_csv(results: list[BenchmarkResult], path: str | Path) -> None:
                     "throughput_ops_per_s": f"{result.throughput_ops_per_s:.2f}",
                     "mean_abs_error": f"{result.mean_abs_error:.8f}",
                     "max_abs_error": f"{result.max_abs_error:.8f}",
+                    "latency_median_ms": f"{result.latency_median_ms:.6f}",
+                    "latency_p90_ms": f"{result.latency_p90_ms:.6f}",
+                    "latency_std_ms": f"{result.latency_std_ms:.6f}",
+                    "valid_runs": result.valid_runs,
+                    "failed_runs": result.failed_runs,
+                    "oom_runs": result.oom_runs,
+                    "peak_memory_mb": _format_optional(result.peak_memory_mb, 3),
+                    "gpu_memory_allocated_mb": _format_optional(result.gpu_memory_allocated_mb, 3),
+                    "gpu_memory_reserved_mb": _format_optional(result.gpu_memory_reserved_mb, 3),
+                    "power_w": _format_optional(result.power_w, 3),
+                    "energy_mj": _format_optional(result.energy_mj, 3),
+                    "edp_mj_ms": _format_optional(result.edp_mj_ms, 3),
+                    "preprocess_ms": f"{result.preprocess_ms:.6f}",
+                    "inference_ms": f"{result.inference_ms:.6f}",
+                    "postprocess_ms": f"{result.postprocess_ms:.6f}",
                 }
             )
 
@@ -103,6 +133,7 @@ def write_report(
         f"- Fastest row: `{fastest.name}` on `{fastest.backend}` / `{fastest.precision}` at {fastest.latency_ms:.4f} ms.",
         f"- Slowest row: `{slowest.name}` on `{slowest.backend}` / `{slowest.precision}` at {slowest.latency_ms:.4f} ms.",
         f"- Highest mean absolute error: {max(result.mean_abs_error for result in results):.6f}.",
+        f"- Highest observed process RSS: {_format_optional(max((result.peak_memory_mb or 0.0) for result in results), 3)} MB.",
         "",
         "## Backend Ranking",
         "",
@@ -141,15 +172,17 @@ def write_report(
             "",
             "## Results",
             "",
-            "| Benchmark | Operator | Precision | Backend | Latency (ms) | Mean Abs Error | Max Abs Error |",
-            "| --- | --- | --- | --- | ---: | ---: | ---: |",
+            "| Benchmark | Operator | Precision | Backend | Median (ms) | P90 (ms) | Std (ms) | Peak RSS (MB) | Power (W) | Energy (mJ) | Mean Abs Error |",
+            "| --- | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
         ]
     )
     for result in results:
         lines.append(
             "| "
             f"{result.name} | {result.operator} | {result.precision} | {result.backend} | "
-            f"{result.latency_ms:.4f} | {result.mean_abs_error:.6f} | {result.max_abs_error:.6f} |"
+            f"{result.latency_median_ms:.4f} | {result.latency_p90_ms:.4f} | {result.latency_std_ms:.4f} | "
+            f"{_format_optional(result.peak_memory_mb, 3)} | {_format_optional(result.power_w, 3)} | "
+            f"{_format_optional(result.energy_mj, 3)} | {result.mean_abs_error:.6f} |"
         )
     lines.extend(
         [
@@ -167,11 +200,19 @@ def write_report(
             "- `cpu` is the default NumPy backend and remains available without optional dependencies.",
             "- `torch_cpu`, `torch_cuda`, `onnxruntime_cpu`, and `onnxruntime_cuda` measure real local backend kernels when the matching optional dependencies and hardware are available.",
             "- Real backend comparison currently reports FP32 timings; `int8_sim` and `shift_only` are simulation modes unless a backend-specific quantized kernel is added.",
+            "- CPU memory uses process RSS when `psutil` is installed; CUDA memory uses PyTorch peak allocation/reservation for `torch_cuda` runs.",
+            "- Power and energy are opportunistic estimates from `nvidia-smi power.draw` for CUDA-style backends; use an external meter or board-side logger for publishable energy numbers.",
             "- GitHub Pages can showcase the project, but benchmark data is generated only on the machine where TinyEdgeBench is run.",
             "- FPGA and NPU backends are roadmap items.",
         ]
     )
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def _format_optional(value: float | None, digits: int) -> str:
+    if value is None:
+        return ""
+    return f"{value:.{digits}f}"
 
 
 def _backend_rankings(results: list[BenchmarkResult]) -> list[tuple[str, float, int]]:

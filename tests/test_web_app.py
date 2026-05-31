@@ -56,9 +56,16 @@ def test_results_to_rows() -> None:
             "backend": "cpu",
             "input": "2x2 @ 2x2",
             "latency_ms": 1.0,
+            "latency_p90_ms": 1.0,
+            "latency_std_ms": 0.0,
             "throughput_ops_per_s": 100.0,
             "mean_abs_error": 0.0,
             "max_abs_error": 0.0,
+            "peak_memory_mb": None,
+            "gpu_memory_allocated_mb": None,
+            "power_w": None,
+            "energy_mj": None,
+            "edp_mj_ms": None,
         }
     ]
 

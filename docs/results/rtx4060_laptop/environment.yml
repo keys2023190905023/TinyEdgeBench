@@ -1,0 +1,16 @@
+name: tinyedgebench-rtx4060
+channels:
+  - defaults
+dependencies:
+  - python=3.9.13
+  - pip
+  - pip:
+      - tinyedgebench
+      - numpy
+      - matplotlib
+      - psutil
+      - plotly
+      - pyyaml
+      - streamlit
+      - torch==2.5.1+cu121
+      - onnxruntime==1.19.2

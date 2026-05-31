@@ -397,6 +397,7 @@ h3 {
 .section-heading,
 .feature-grid,
 .hardware-grid,
+.results-grid,
 .catalog-layout,
 .workflow-grid,
 .install-band {
@@ -419,6 +420,120 @@ h3 {
 .catalog-band,
 .install-band {
   background: #ffffff;
+}
+
+.results-band {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(245, 245, 247, 0.96)),
+    #ffffff;
+}
+
+.section-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.74);
+  color: var(--cyan);
+  font-size: 14px;
+  font-weight: 740;
+  box-shadow: var(--shadow-soft);
+  white-space: nowrap;
+}
+
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.result-card {
+  position: relative;
+  overflow: hidden;
+  min-height: 360px;
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-panel);
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.96), rgba(245, 245, 247, 0.78)),
+    var(--surface);
+  box-shadow: var(--shadow);
+  transition: transform 160ms ease, border-color 160ms ease;
+}
+
+.result-card::before {
+  position: absolute;
+  top: 0;
+  left: 20px;
+  right: 20px;
+  height: 1px;
+  content: "";
+  background: linear-gradient(90deg, transparent, rgba(0, 113, 227, 0.38), transparent);
+}
+
+.result-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--line-strong);
+}
+
+.result-status {
+  display: inline-flex;
+  margin-bottom: 26px;
+  padding: 6px 9px;
+  border: 1px solid rgba(52, 199, 89, 0.22);
+  border-radius: var(--radius-pill);
+  background: rgba(52, 199, 89, 0.08);
+  color: #248a3d;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.result-card.experimental .result-status {
+  border-color: rgba(255, 159, 10, 0.28);
+  background: rgba(255, 159, 10, 0.1);
+  color: #a05a00;
+}
+
+.result-card p {
+  color: var(--muted);
+  line-height: 1.62;
+}
+
+.result-metrics {
+  display: grid;
+  gap: 10px;
+  margin: 22px 0;
+}
+
+.result-metrics div {
+  min-height: 82px;
+  padding: 14px;
+  border: 1px solid rgba(29, 29, 31, 0.08);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.result-metrics span,
+.result-metrics em {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  font-style: normal;
+}
+
+.result-metrics strong {
+  display: block;
+  margin: 5px 0;
+  color: var(--text);
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 21px;
+}
+
+.result-card a {
+  color: var(--cyan);
+  font-weight: 760;
 }
 
 .proof-band {
@@ -454,7 +569,7 @@ h3 {
   gap: 24px;
 }
 
-.split-heading h2 {
+.intelligence-band .split-heading h2 {
   color: #f5f5f7;
 }
 
@@ -982,6 +1097,7 @@ code {
   .feature-grid,
   .workflow-grid,
   .hardware-grid,
+  .results-grid,
   .intelligence-grid,
   .insight-strip,
   .proof-grid,

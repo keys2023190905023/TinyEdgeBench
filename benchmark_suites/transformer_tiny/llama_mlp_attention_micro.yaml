@@ -1,0 +1,18 @@
+output_dir: results/transformer_tiny_llama_micro
+warmup: 5
+runs: 20
+backends: [cpu, torch_cpu, torch_cuda]
+benchmarks:
+  - name: llama_mlp_gate_projection
+    operator: matmul
+    matrix_m: 128
+    matrix_k: 256
+    matrix_n: 768
+    precision_modes: [fp32]
+  - name: attention_projection
+    operator: batch_matmul
+    batch_size: 4
+    matrix_m: 128
+    matrix_k: 64
+    matrix_n: 128
+    precision_modes: [fp32]

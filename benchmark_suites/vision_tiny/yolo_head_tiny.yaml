@@ -1,0 +1,19 @@
+output_dir: results/vision_tiny_yolo_head
+warmup: 5
+runs: 20
+backends: [cpu, torch_cpu, torch_cuda]
+benchmarks:
+  - name: yolo_tiny_head_conv
+    operator: conv2d
+    input_shape: [1, 64, 20, 20]
+    output_channels: 128
+    kernel_size: [3, 3]
+    stride: 1
+    padding: 1
+    precision_modes: [fp32]
+  - name: yolo_tiny_logits_projection
+    operator: pointwise_conv2d
+    input_shape: [1, 128, 20, 20]
+    output_channels: 45
+    kernel_size: [1, 1]
+    precision_modes: [fp32]

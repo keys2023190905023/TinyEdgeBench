@@ -5,14 +5,14 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "tinyedgebench"
 version = "0.1.0"
-description = "A local benchmark tool for low-bit edge-AI operators."
+description = "A reproducible operator-to-deployment benchmark suite for low-bit edge AI."
 readme = "README.md"
 requires-python = ">=3.9"
 license = {text = "MIT"}
 authors = [
   {name = "TinyEdgeBench contributors"}
 ]
-keywords = ["edge-ai", "benchmark", "int8", "operators", "numpy"]
+keywords = ["edge-ai", "tinyml", "benchmark", "int8", "quantization", "onnxruntime", "pytorch", "cuda", "fpga", "npu"]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Intended Audience :: Developers",
@@ -26,6 +26,7 @@ dependencies = [
   "matplotlib>=3.7",
   "numpy>=1.24",
   "plotly>=5.20",
+  "psutil>=5.9",
   "PyYAML>=6.0",
   "streamlit>=1.35"
 ]

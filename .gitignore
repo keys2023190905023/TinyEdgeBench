@@ -9,6 +9,8 @@ venv/
 build/
 dist/
 results/
+!docs/results/
+!docs/results/**
 results_*/
 *.log
 *.pid

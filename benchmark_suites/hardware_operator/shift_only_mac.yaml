@@ -1,0 +1,11 @@
+output_dir: results/hardware_operator_shift_only_mac
+warmup: 5
+runs: 20
+backends: [cpu]
+benchmarks:
+  - name: shift_only_mac_trace_candidate
+    operator: matmul
+    matrix_m: 128
+    matrix_k: 128
+    matrix_n: 128
+    precision_modes: [fp32, shift_only]

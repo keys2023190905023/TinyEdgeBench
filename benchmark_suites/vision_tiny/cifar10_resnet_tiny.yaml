@@ -1,0 +1,19 @@
+output_dir: results/vision_tiny_cifar10_resnet
+warmup: 5
+runs: 20
+backends: [cpu, torch_cpu, onnxruntime_cpu]
+benchmarks:
+  - name: resnet_tiny_stem_conv3x3
+    operator: conv2d
+    input_shape: [1, 3, 32, 32]
+    output_channels: 32
+    kernel_size: [3, 3]
+    stride: 1
+    padding: 1
+    precision_modes: [fp32]
+  - name: resnet_tiny_pointwise_projection
+    operator: pointwise_conv2d
+    input_shape: [1, 32, 32, 32]
+    output_channels: 64
+    kernel_size: [1, 1]
+    precision_modes: [fp32]

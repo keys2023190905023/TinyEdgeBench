@@ -162,9 +162,16 @@ def results_to_rows(results: list[BenchmarkResult]) -> list[dict[str, Any]]:
             "backend": result.backend,
             "input": result.input_description,
             "latency_ms": result.latency_ms,
+            "latency_p90_ms": result.latency_p90_ms,
+            "latency_std_ms": result.latency_std_ms,
             "throughput_ops_per_s": result.throughput_ops_per_s,
             "mean_abs_error": result.mean_abs_error,
             "max_abs_error": result.max_abs_error,
+            "peak_memory_mb": result.peak_memory_mb,
+            "gpu_memory_allocated_mb": result.gpu_memory_allocated_mb,
+            "power_w": result.power_w,
+            "energy_mj": result.energy_mj,
+            "edp_mj_ms": result.edp_mj_ms,
         }
         for result in results
     ]

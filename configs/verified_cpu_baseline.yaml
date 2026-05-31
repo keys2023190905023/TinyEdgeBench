@@ -1,0 +1,19 @@
+output_dir: docs/results/cpu_baseline
+warmup: 3
+runs: 10
+backends: [cpu, torch_cpu, onnxruntime_cpu]
+benchmarks:
+  - name: cpu_conv3x3_32ch
+    operator: conv2d
+    input_shape: [1, 16, 32, 32]
+    output_channels: 32
+    kernel_size: [3, 3]
+    stride: 1
+    padding: 1
+    precision_modes: [fp32]
+  - name: cpu_matmul_128
+    operator: matmul
+    matrix_m: 128
+    matrix_k: 128
+    matrix_n: 128
+    precision_modes: [fp32]

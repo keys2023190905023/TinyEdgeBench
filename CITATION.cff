@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+title: "TinyEdgeBench"
+message: "If you use TinyEdgeBench for low-bit edge-AI benchmarking, please cite this repository."
+type: software
+authors:
+  - name: "TinyEdgeBench contributors"
+repository-code: "https://github.com/keys2023190905023/TinyEdgeBench"
+license: "MIT"
+version: "0.1.0"
+keywords:
+  - edge-ai
+  - tinyml
+  - benchmark
+  - int8
+  - quantization
+  - cuda
+  - fpga
+  - npu

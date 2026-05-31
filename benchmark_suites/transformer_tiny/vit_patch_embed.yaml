@@ -1,0 +1,13 @@
+output_dir: results/transformer_tiny_vit_patch_embed
+warmup: 5
+runs: 20
+backends: [cpu, torch_cpu, torch_cuda, onnxruntime_cpu, onnxruntime_cuda]
+benchmarks:
+  - name: vit_patch_embed_conv16
+    operator: conv2d
+    input_shape: [1, 3, 224, 224]
+    output_channels: 192
+    kernel_size: [16, 16]
+    stride: 16
+    padding: 0
+    precision_modes: [fp32]

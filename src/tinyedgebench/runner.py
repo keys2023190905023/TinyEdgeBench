@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass
+import subprocess
 
 import numpy as np
 
@@ -26,6 +27,31 @@ class BenchmarkResult:
     throughput_ops_per_s: float
     mean_abs_error: float
     max_abs_error: float
+    latency_median_ms: float = 0.0
+    latency_p90_ms: float = 0.0
+    latency_std_ms: float = 0.0
+    valid_runs: int = 0
+    failed_runs: int = 0
+    oom_runs: int = 0
+    peak_memory_mb: float | None = None
+    gpu_memory_allocated_mb: float | None = None
+    gpu_memory_reserved_mb: float | None = None
+    power_w: float | None = None
+    energy_mj: float | None = None
+    edp_mj_ms: float | None = None
+    preprocess_ms: float = 0.0
+    inference_ms: float = 0.0
+    postprocess_ms: float = 0.0
+
+    def __post_init__(self) -> None:
+        if self.latency_median_ms == 0.0:
+            object.__setattr__(self, "latency_median_ms", self.latency_ms)
+        if self.latency_p90_ms == 0.0:
+            object.__setattr__(self, "latency_p90_ms", self.latency_ms)
+        if self.valid_runs == 0:
+            object.__setattr__(self, "valid_runs", 1)
+        if self.inference_ms == 0.0:
+            object.__setattr__(self, "inference_ms", self.latency_ms)
 
 
 def run_benchmarks(config: BenchmarkConfig) -> list[BenchmarkResult]:
@@ -40,17 +66,32 @@ def run_benchmarks(config: BenchmarkConfig) -> list[BenchmarkResult]:
                 executor = _build_executor(case, precision, inputs, backend)
                 for _ in range(config.warmup):
                     executor()
+                _reset_torch_cuda_stats(backend)
+                process = _process()
+                peak_memory_mb = _rss_mb(process)
                 timings = []
                 output = reference
+                power_samples = []
                 for _ in range(config.runs):
+                    power_before = _nvidia_smi_power_w(backend)
                     _synchronize_executor(executor)
                     start = time.perf_counter()
                     output = executor()
                     _synchronize_executor(executor)
                     timings.append((time.perf_counter() - start) * 1000.0)
+                    power_after = _nvidia_smi_power_w(backend)
+                    peak_memory_mb = _max_optional(peak_memory_mb, _rss_mb(process))
+                    if power_before is not None:
+                        power_samples.append(power_before)
+                    if power_after is not None:
+                        power_samples.append(power_after)
                 latency_ms = float(np.median(timings))
+                latency_p90_ms = float(np.percentile(timings, 90))
+                latency_std_ms = float(np.std(timings))
                 error = np.abs(output - reference)
                 throughput = estimated_ops / (latency_ms / 1000.0) if latency_ms > 0 else 0.0
+                power_w = float(np.mean(power_samples)) if power_samples else None
+                energy_mj = (power_w * latency_ms) if power_w is not None else None
                 results.append(
                     BenchmarkResult(
                         name=case.name,
@@ -62,6 +103,17 @@ def run_benchmarks(config: BenchmarkConfig) -> list[BenchmarkResult]:
                         throughput_ops_per_s=float(throughput),
                         mean_abs_error=float(error.mean()),
                         max_abs_error=float(error.max()),
+                        latency_median_ms=latency_ms,
+                        latency_p90_ms=latency_p90_ms,
+                        latency_std_ms=latency_std_ms,
+                        valid_runs=len(timings),
+                        peak_memory_mb=peak_memory_mb,
+                        gpu_memory_allocated_mb=_torch_cuda_memory_mb(backend, "allocated"),
+                        gpu_memory_reserved_mb=_torch_cuda_memory_mb(backend, "reserved"),
+                        power_w=power_w,
+                        energy_mj=energy_mj,
+                        edp_mj_ms=(energy_mj * latency_ms) if energy_mj is not None else None,
+                        inference_ms=latency_ms,
                     )
                 )
     return results
@@ -535,6 +587,83 @@ def _synchronize_executor(executor) -> None:
     synchronize = getattr(executor, "synchronize", None)
     if callable(synchronize):
         synchronize()
+
+
+def _process():
+    try:
+        import psutil
+
+        return psutil.Process()
+    except ImportError:
+        return None
+
+
+def _rss_mb(process) -> float | None:
+    if process is None:
+        return None
+    try:
+        return float(process.memory_info().rss / (1024 * 1024))
+    except Exception:
+        return None
+
+
+def _max_optional(left: float | None, right: float | None) -> float | None:
+    if left is None:
+        return right
+    if right is None:
+        return left
+    return max(left, right)
+
+
+def _reset_torch_cuda_stats(backend: str) -> None:
+    if backend != "torch_cuda":
+        return
+    try:
+        import torch
+
+        if torch.cuda.is_available():
+            torch.cuda.reset_peak_memory_stats()
+    except Exception:
+        pass
+
+
+def _torch_cuda_memory_mb(backend: str, kind: str) -> float | None:
+    if backend != "torch_cuda":
+        return None
+    try:
+        import torch
+
+        if not torch.cuda.is_available():
+            return None
+        if kind == "allocated":
+            value = torch.cuda.max_memory_allocated()
+        else:
+            value = torch.cuda.max_memory_reserved()
+        return float(value / (1024 * 1024))
+    except Exception:
+        return None
+
+
+def _nvidia_smi_power_w(backend: str) -> float | None:
+    if "cuda" not in backend and "tensorrt" not in backend:
+        return None
+    try:
+        result = subprocess.run(
+            ["nvidia-smi", "--query-gpu=power.draw", "--format=csv,noheader,nounits"],
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=1,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return None
+    if result.returncode != 0:
+        return None
+    first = result.stdout.splitlines()[0].strip() if result.stdout.splitlines() else ""
+    try:
+        return float(first)
+    except ValueError:
+        return None
 
 
 def _precision_inputs(inputs: dict[str, np.ndarray], precision: str) -> dict[str, np.ndarray]:

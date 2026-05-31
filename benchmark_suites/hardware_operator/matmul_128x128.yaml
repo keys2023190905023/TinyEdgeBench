@@ -1,0 +1,11 @@
+output_dir: results/hardware_operator_matmul_128
+warmup: 5
+runs: 20
+backends: [cpu, torch_cpu, torch_cuda, onnxruntime_cpu, onnxruntime_cuda]
+benchmarks:
+  - name: matmul_128x128_deployment_probe
+    operator: matmul
+    matrix_m: 128
+    matrix_k: 128
+    matrix_n: 128
+    precision_modes: [fp32]

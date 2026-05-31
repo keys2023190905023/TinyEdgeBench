@@ -2,11 +2,15 @@
 
 [![Python](https://img.shields.io/badge/python-3.9%2B-blue)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
-[![Backend](https://img.shields.io/badge/backend-CPU%20local-lightgrey)](#why-tinyedgebench)
+[![Version](https://img.shields.io/badge/version-v0.1.0-black)](pyproject.toml)
+[![Backend](https://img.shields.io/badge/backend-CPU%20%7C%20GPU%20%7C%20FPGA--trace%20ready-lightgrey)](#verified-hardware-results)
+[![Verified](https://img.shields.io/badge/benchmarked-RTX%204060-76b900)](docs/results/rtx4060_laptop/)
 
-TinyEdgeBench is a local benchmark tool for low-bit edge-AI operators. It lets you configure operators or common model blocks, run benchmarks on your own machine, and generate CSV results, plots, and a Markdown report.
+TinyEdgeBench is a reproducible operator-to-deployment benchmark suite for low-bit edge AI across CPU, GPU, FPGA-trace, and NPU-ready targets.
 
-The project is CPU-first, NumPy-based, and designed for fast operator-level exploration before moving to heavier runtime, GPU, FPGA, or NPU profiling stacks.
+It connects operator simulation, model-block benchmarking, real local backend comparison, and hardware-trace evaluation into one inspectable Python workflow. The long-term goal is simple: answer whether a low-bit edge-AI workload should stay on CPU, move to GPU, map to FPGA, or target an NPU runtime.
+
+[Website](docs/) | [Quick Start](#quick-start) | [Benchmark Protocol](docs/benchmark_protocol.md) | [Verified Results](docs/hardware_results.md) | [Roadmap](#roadmap)
 
 ## Why TinyEdgeBench
 
@@ -15,9 +19,21 @@ Edge-AI work often starts with practical questions:
 - How fast is this operator on my laptop or edge box?
 - How much error does an INT8-style approximation introduce?
 - Which layer family is the likely latency bottleneck?
-- Can I get a quick local report without setting up CUDA or vendor SDKs?
+- Does the same workload behave differently on NumPy CPU, PyTorch, ONNX Runtime, CUDA, FPGA traces, or future NPU adapters?
+- What is the memory, power, and energy tradeoff, not only latency?
 
-TinyEdgeBench gives you a lightweight local baseline for those questions. It is not a production inference runtime; it is a small, inspectable benchmarking harness for early design and optimization work.
+TinyEdgeBench is not a production inference runtime. It is a small, inspectable benchmarking harness for deployment decisions: operator diagnosis, precision-error tradeoff, backend comparison, and hardware-trace validation.
+
+## Verified Hardware Results
+
+The repository now includes verified local result artifacts under [docs/results/](docs/results/). A result is treated as verified only when the directory includes the generated CSV/report/plots plus system information.
+
+| Platform | Backend | Workload | Precision | Key Result |
+| --- | --- | --- | --- | --- |
+| Laptop CPU | NumPy / Torch CPU / ONNX CPU | Conv3x3 / MatMul128 | FP32 | [summary.csv](docs/results/cpu_baseline/summary.csv) with median, P90, std, RSS, error |
+| RTX 4060 Laptop | Torch CUDA / ONNX CUDA plus CPU baselines | MatMul256 / Conv3x3 | FP32 | [summary.csv](docs/results/rtx4060_laptop/summary.csv) with CUDA memory and estimated energy |
+| PYNQ-Z2 | FPGA trace adapter | Shift-only MAC / INT8 MAC trace | INT8 / shift-only | [trace scaffold](docs/results/pynq_z2_fpga/) ready for board-side logs |
+| NPU target | Vendor adapter | YOLO / MobileNet blocks | INT8 | Planned once hardware/runtime is available |
 
 ## Highlights
 
@@ -30,6 +46,10 @@ TinyEdgeBench gives you a lightweight local baseline for those questions. It is 
 | CSV, Markdown, and PNG outputs | Supported |
 | 100+ operator microbenchmarks | Supported |
 | 25+ network/block presets | Supported |
+| Verified CPU and RTX 4060 result artifacts | Supported |
+| Memory, P90/std latency, and estimated CUDA energy columns | Supported |
+| Benchmark protocol documentation | Supported |
+| FPGA trace result scaffold | Experimental |
 | FP32 baseline | Supported |
 | Real `torch_cpu` / `onnxruntime_cpu` comparison | Optional |
 | Real `torch_cuda` / `onnxruntime_cuda` comparison | Optional, local GPU required |
@@ -374,20 +394,25 @@ network_presets:
 | `latency_plot.png` | Latency comparison chart |
 | `error_plot.png` | Numerical error chart |
 
-The report records the local execution machine, operating system, Python version, CPU information, GPU information when available, CUDA visibility, PyTorch CUDA status, ONNX Runtime providers, an executive summary, backend ranking, bottleneck rows, and reproducibility commands.
+The report records the local execution machine, operating system, Python version, CPU/GPU information, CUDA visibility, PyTorch CUDA status, ONNX Runtime providers, backend ranking, bottleneck rows, memory fields, optional CUDA power/energy estimates, and reproducibility commands.
 
 ## Example CSV
 
 ```csv
-name,operator,precision,backend,input_description,latency_ms,throughput_ops_per_s,mean_abs_error,max_abs_error
-conv2d_small,conv2d,fp32,cpu,"NCHW=(1, 3, 16, 16), out_channels=8, kernel=(3, 3), stride=1, padding=1",0.250000,44236800.00,0.00000000,0.00000000
+name,operator,precision,backend,input_description,latency_ms,throughput_ops_per_s,mean_abs_error,max_abs_error,latency_median_ms,latency_p90_ms,latency_std_ms,valid_runs,failed_runs,oom_runs,peak_memory_mb,gpu_memory_allocated_mb,gpu_memory_reserved_mb,power_w,energy_mj,edp_mj_ms,preprocess_ms,inference_ms,postprocess_ms
+rtx4060_matmul_256,matmul,fp32,onnxruntime_cuda,256x256 @ 256x256,0.539750,62166617878.78,0.00093977,0.00499487,0.539750,0.653900,0.082526,20,0,0,584.684,,,14.213,7.672,4.141,0.000000,0.539750,0.000000
 ```
 
 ## Project Layout
 
 ```text
 TinyEdgeBench/
+  benchmark_suites/          story-driven benchmark suites
   configs/                  YAML benchmark examples
+  docs/
+    benchmark_protocol.md    reproducibility and measurement protocol
+    hardware_results.md      verified hardware result index
+    results/                 CPU/GPU/FPGA trace artifacts
   src/tinyedgebench/         package source
     benchmark.py             YAML entry point
     cli.py                   CLI commands
