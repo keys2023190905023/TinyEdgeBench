@@ -1,2 +1,0 @@
-platform,backend,workload,precision,latency_ms,throughput_ops_per_s,power_w,energy_mj,measurement_source,status
-PYNQ-Z2,fpga_shift_only_trace,shift_only_mac,shift_only,,,,board_timer,pending_board_run

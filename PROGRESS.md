@@ -89,9 +89,14 @@
 
 ## 2026-05-31 Hardware Results And Protocol Upgrade
 
-- Repositioned TinyEdgeBench as an operator-to-deployment benchmark suite for low-bit edge AI across CPU, GPU, FPGA-trace, and NPU-ready targets.
+- Repositioned TinyEdgeBench as an operator-to-deployment benchmark suite for low-bit edge AI on local CPU/GPU targets.
 - Added latency stability, memory, CUDA memory, power, energy, EDP, and stage-timing fields to generated `summary.csv` artifacts.
 - Added verified CPU baseline and RTX 4060 Laptop GPU result directories under `docs/results/`.
-- Added a PYNQ-Z2 FPGA trace scaffold with board-side latency and operator-trace CSV contracts.
-- Added `docs/benchmark_protocol.md`, `docs/hardware_results.md`, and story-driven benchmark suites for vision, transformer, and hardware-operator experiments.
+- Focused verified hardware evidence on CPU baseline and RTX 4060 Laptop GPU result directories.
+- Added `docs/benchmark_protocol.md`, `docs/hardware_results.md`, and story-driven benchmark suites for vision, transformer, and CPU/GPU operator experiments.
 - Updated the website and README to lead with verified hardware results instead of only feature claims.
+
+## 2026-06-01 CPU/GPU Focus
+
+- Removed non-CPU/GPU positioning and placeholder scaffold content to focus TinyEdgeBench on benchmarking the user's own CPU/GPU machine after local deployment.
+- Updated README, website, benchmark protocol, package keywords, and Web UI backend options around CPU/GPU-only local measurement.

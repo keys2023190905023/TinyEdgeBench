@@ -287,7 +287,6 @@ def backend_availability() -> dict[str, str]:
         "onnxruntime_cuda": "missing ONNX Runtime CUDAExecutionProvider",
         "onnxruntime_tensorrt": "missing ONNX Runtime TensorrtExecutionProvider",
         "openvino_cpu": "missing OpenVINO runtime",
-        "openvino_npu": "missing OpenVINO runtime or NPU plugin",
         "tvm_cpu": "missing Apache TVM runtime",
         "tvm_cuda": "missing Apache TVM CUDA runtime",
         "tensorrt_cuda": "missing TensorRT Python runtime",
@@ -315,7 +314,6 @@ def backend_availability() -> dict[str, str]:
         import openvino as _openvino  # noqa: F401
 
         availability["openvino_cpu"] = "installed (executor pending)"
-        availability["openvino_npu"] = "installed (requires local NPU plugin)"
     except ImportError:
         pass
     try:

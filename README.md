@@ -3,12 +3,12 @@
 [![Python](https://img.shields.io/badge/python-3.9%2B-blue)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Version](https://img.shields.io/badge/version-v0.1.0-black)](pyproject.toml)
-[![Backend](https://img.shields.io/badge/backend-CPU%20%7C%20GPU%20%7C%20FPGA--trace%20ready-lightgrey)](#verified-hardware-results)
+[![Backend](https://img.shields.io/badge/backend-CPU%20%7C%20GPU-lightgrey)](#verified-local-cpu-and-gpu-results)
 [![Verified](https://img.shields.io/badge/benchmarked-RTX%204060-76b900)](docs/results/rtx4060_laptop/)
 
-TinyEdgeBench is a reproducible operator-to-deployment benchmark suite for low-bit edge AI across CPU, GPU, FPGA-trace, and NPU-ready targets.
+TinyEdgeBench is a reproducible local benchmark suite for low-bit edge AI on the user's own CPU and GPU.
 
-It connects operator simulation, model-block benchmarking, real local backend comparison, and hardware-trace evaluation into one inspectable Python workflow. The long-term goal is simple: answer whether a low-bit edge-AI workload should stay on CPU, move to GPU, map to FPGA, or target an NPU runtime.
+It connects operator simulation, model-block benchmarking, and real local backend comparison into one inspectable Python workflow. The goal is simple: when someone installs TinyEdgeBench on their own computer, the generated report reflects that machine's actual CPU, GPU, driver, CUDA, PyTorch, and ONNX Runtime stack.
 
 [Website](docs/) | [Quick Start](#quick-start) | [Benchmark Protocol](docs/benchmark_protocol.md) | [Verified Results](docs/hardware_results.md) | [Roadmap](#roadmap)
 
@@ -19,12 +19,12 @@ Edge-AI work often starts with practical questions:
 - How fast is this operator on my laptop or edge box?
 - How much error does an INT8-style approximation introduce?
 - Which layer family is the likely latency bottleneck?
-- Does the same workload behave differently on NumPy CPU, PyTorch, ONNX Runtime, CUDA, FPGA traces, or future NPU adapters?
+- Does the same workload behave differently on NumPy CPU, PyTorch CPU, ONNX Runtime CPU, PyTorch CUDA, or ONNX Runtime CUDA?
 - What is the memory, power, and energy tradeoff, not only latency?
 
-TinyEdgeBench is not a production inference runtime. It is a small, inspectable benchmarking harness for deployment decisions: operator diagnosis, precision-error tradeoff, backend comparison, and hardware-trace validation.
+TinyEdgeBench is not a production inference runtime. It is a small, inspectable benchmarking harness for deployment decisions on local CPU/GPU machines: operator diagnosis, precision-error tradeoff, backend comparison, and reproducible report generation.
 
-## Verified Hardware Results
+## Verified Local CPU And GPU Results
 
 The repository now includes verified local result artifacts under [docs/results/](docs/results/). A result is treated as verified only when the directory includes the generated CSV/report/plots plus system information.
 
@@ -32,8 +32,6 @@ The repository now includes verified local result artifacts under [docs/results/
 | --- | --- | --- | --- | --- |
 | Laptop CPU | NumPy / Torch CPU / ONNX CPU | Conv3x3 / MatMul128 | FP32 | [summary.csv](docs/results/cpu_baseline/summary.csv) with median, P90, std, RSS, error |
 | RTX 4060 Laptop | Torch CUDA / ONNX CUDA plus CPU baselines | MatMul256 / Conv3x3 | FP32 | [summary.csv](docs/results/rtx4060_laptop/summary.csv) with CUDA memory and estimated energy |
-| PYNQ-Z2 | FPGA trace adapter | Shift-only MAC / INT8 MAC trace | INT8 / shift-only | [trace scaffold](docs/results/pynq_z2_fpga/) ready for board-side logs |
-| NPU target | Vendor adapter | YOLO / MobileNet blocks | INT8 | Planned once hardware/runtime is available |
 
 ## Highlights
 
@@ -49,7 +47,6 @@ The repository now includes verified local result artifacts under [docs/results/
 | Verified CPU and RTX 4060 result artifacts | Supported |
 | Memory, P90/std latency, and estimated CUDA energy columns | Supported |
 | Benchmark protocol documentation | Supported |
-| FPGA trace result scaffold | Experimental |
 | FP32 baseline | Supported |
 | Real `torch_cpu` / `onnxruntime_cpu` comparison | Optional |
 | Real `torch_cuda` / `onnxruntime_cuda` comparison | Optional, local GPU required |
@@ -78,7 +75,7 @@ TinyEdgeBench requires Python 3.9 or newer. CUDA is not required.
 TinyEdgeBench is designed for local deployment-style measurements:
 
 - GitHub hosts the source code, documentation, and static project website.
-- GitHub Pages is only a showcase page; it cannot run CPU, GPU, FPGA, or NPU benchmarks for visitors.
+- GitHub Pages is only a showcase page; it cannot run CPU or GPU benchmarks for visitors.
 - `python -m tinyedgebench.benchmark ...`, `tinyedgebench wizard`, and `tinyedgebench web` execute on the machine where the command is launched.
 - Reported latency and error data reflect that local machine's Python environment, CPU, GPU, drivers, and installed runtimes.
 
@@ -207,7 +204,7 @@ By default, `cpu` uses the built-in NumPy benchmark path. TinyEdgeBench can also
 | `onnxruntime_cpu` | ONNX Runtime CPUExecutionProvider kernels |
 | `onnxruntime_cuda` | ONNX Runtime CUDAExecutionProvider kernels on the local NVIDIA GPU |
 | `onnxruntime_tensorrt` | ONNX Runtime TensorrtExecutionProvider kernels when available locally |
-| `openvino_cpu`, `openvino_npu` | Registered deployment targets with availability checks; executor integration is planned |
+| `openvino_cpu` | Registered CPU deployment target with availability checks; executor integration is planned |
 | `tvm_cpu`, `tvm_cuda` | Registered compiler-runtime targets with availability checks; executor integration is planned |
 | `tensorrt_cuda` | Registered native TensorRT target; use `onnxruntime_tensorrt` today for TensorRT-provider runs |
 
@@ -412,7 +409,7 @@ TinyEdgeBench/
   docs/
     benchmark_protocol.md    reproducibility and measurement protocol
     hardware_results.md      verified hardware result index
-    results/                 CPU/GPU/FPGA trace artifacts
+    results/                 CPU/GPU benchmark artifacts
   src/tinyedgebench/         package source
     benchmark.py             YAML entry point
     cli.py                   CLI commands
@@ -456,9 +453,9 @@ python -m tinyedgebench.benchmark --config configs/gpu_backends.example.yaml
 
 ## Screenshots
 
-Static project website with the new dynamic benchmark-intelligence panel:
+Static project website with the CPU/GPU verified-results section:
 
-![TinyEdgeBench dynamic benchmark intelligence preview](docs/assets/tinyedgebench-dynamic-preview.png)
+![TinyEdgeBench CPU/GPU verified results preview](docs/assets/tinyedgebench-dynamic-preview.png)
 
 ## Continuous Integration
 
@@ -466,9 +463,7 @@ The repository includes GitHub Actions CI in `.github/workflows/ci.yml`. It inst
 
 ## Roadmap
 
-- More deployment backends such as CuPy, OpenVINO, TensorRT, and TVM
-- FPGA benchmarking adapters for exported operator traces and board-side timing logs
-- NPU benchmarking adapters for vendor SDK command-line runners
+- More CPU/GPU deployment backends such as CuPy, OpenVINO CPU, TensorRT, and TVM
 - Backend-specific quantized INT8 kernels beyond the current simulation path
 - More fused kernels and model-specific operator groups
 - PyPI release packaging and versioned benchmark artifacts

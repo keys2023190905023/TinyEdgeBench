@@ -12,7 +12,7 @@ license = {text = "MIT"}
 authors = [
   {name = "TinyEdgeBench contributors"}
 ]
-keywords = ["edge-ai", "tinyml", "benchmark", "int8", "quantization", "onnxruntime", "pytorch", "cuda", "fpga", "npu"]
+keywords = ["edge-ai", "tinyml", "benchmark", "int8", "quantization", "onnxruntime", "pytorch", "cuda", "gpu", "cpu"]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Intended Audience :: Developers",

@@ -1,15 +1,14 @@
 # TinyEdgeBench Benchmark Protocol
 
-TinyEdgeBench uses a lightweight, reproducible protocol for operator-to-deployment benchmarking on local hardware.
+TinyEdgeBench uses a lightweight, reproducible protocol for operator-to-deployment benchmarking on the user's local CPU/GPU machine.
 
 ## 1. Hardware Information
 
 Every published run should include:
 
 - CPU model and core count when available
-- GPU/NPU/FPGA device name when used
+- GPU device name when used
 - Memory capacity when available
-- Board name, clock, bitstream, and measurement timer for FPGA trace runs
 - Power meter or telemetry source for energy numbers
 
 ## 2. Software Environment
@@ -19,7 +18,7 @@ Record:
 - Operating system
 - Python version
 - TinyEdgeBench version or commit
-- NumPy, PyTorch, ONNX Runtime, OpenVINO, TVM, or TensorRT versions
+- NumPy, PyTorch, ONNX Runtime, OpenVINO CPU, TVM, or TensorRT versions
 - CUDA driver/runtime version when GPU backends are used
 - Exact YAML config and command used to reproduce the run
 
@@ -53,7 +52,7 @@ CUDA-style backends must synchronize before and after each timed region. CPU and
 - `fp32`: float32 execution on the selected backend.
 - `int8_sim`: symmetric int8 quantization with int32-style accumulation and float dequantization in the local simulation path.
 - `shift_only`: operands are approximated by signed powers of two to study shift-friendly arithmetic.
-- Real INT8 backend names such as `onnxruntime_int8_cpu`, `tensorrt_int8_calibrated`, or `fpga_int8_mac_trace` should only be used when the backend executes quantized kernels or board-side traces.
+- Real INT8 backend names such as `onnxruntime_int8_cpu` or `tensorrt_int8_calibrated` should only be used when the backend executes quantized CPU/GPU kernels.
 
 ## 8. Error Metrics
 
@@ -80,7 +79,7 @@ Report:
 - `energy_mj`
 - `edp_mj_ms`
 
-For FPGA/NPU boards, prefer board-side timers plus an external power meter or vendor telemetry.
+For publishable GPU energy numbers, prefer a stable sampling interval or external power meter over single-point telemetry.
 
 ## 11. Stage Timing
 

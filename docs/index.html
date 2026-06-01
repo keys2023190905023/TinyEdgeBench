@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-        content="TinyEdgeBench is a reproducible operator-to-deployment benchmark suite for low-bit edge AI across CPU, GPU, FPGA-trace, and NPU-ready targets."
+      content="TinyEdgeBench is a reproducible local benchmark suite for low-bit edge AI on the user's own CPU and GPU."
     />
-    <title>TinyEdgeBench | Operator-to-Deployment Low-Bit Edge-AI Benchmarks</title>
+    <title>TinyEdgeBench | Local CPU/GPU Low-Bit Edge-AI Benchmarks</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
@@ -38,13 +38,13 @@
           <p class="eyebrow">Operator-to-deployment benchmarking for low-bit edge AI</p>
           <h1>TinyEdgeBench</h1>
           <p class="hero-copy">
-            A reproducible benchmark suite for low-bit edge-AI operators, model blocks, and hardware-trace
-            evaluation across CPU, GPU, FPGA, and NPU-ready deployment targets.
+            A reproducible local benchmark suite for low-bit edge-AI operators and model blocks on the user's
+            own CPU/GPU machine.
           </p>
           <div class="hero-status" aria-label="Execution model">
             <span>Local execution only</span>
             <span>RTX 4060 verified</span>
-            <span>FPGA trace scaffold</span>
+            <span>Bring-your-own GPU</span>
           </div>
           <div class="hero-actions">
             <a class="primary-action" href="#install">Start locally</a>
@@ -75,8 +75,8 @@
       <section class="section results-band" id="results">
         <div class="section-heading split-heading">
           <div>
-            <p class="eyebrow">Verified hardware results</p>
-            <h2>Real local artifacts, not just feature claims.</h2>
+            <p class="eyebrow">Verified CPU/GPU results</p>
+            <h2>Real local artifacts from the machine that runs TinyEdgeBench.</h2>
           </div>
           <a class="section-link" href="results/rtx4060_laptop/summary.csv">Open RTX 4060 CSV</a>
         </div>
@@ -102,14 +102,14 @@
             <a href="results/cpu_baseline/report.md">View report</a>
           </article>
           <article class="result-card experimental">
-            <span class="result-status">Trace scaffold</span>
-            <h3>PYNQ-Z2 FPGA</h3>
-            <p>Board-side latency and output-import contract for INT8 MAC and shift-only operator traces.</p>
+            <span class="result-status">Template</span>
+            <h3>Any User GPU</h3>
+            <p>Install TinyEdgeBench on another laptop or server and the report becomes that machine's CPU/GPU data.</p>
             <div class="result-metrics">
-              <div><span>Status</span><strong>Pending</strong><em>board run</em></div>
-              <div><span>Adapter</span><strong>Trace-first</strong><em>FPGA-aware</em></div>
+              <div><span>Run</span><strong>Local</strong><em>no cloud benchmark</em></div>
+              <div><span>Config</span><strong>GPU suite</strong><em>CUDA optional</em></div>
             </div>
-            <a href="results/pynq_z2_fpga/report.md">View scaffold</a>
+            <a href="../configs/gpu_backends.example.yaml">View GPU config</a>
           </article>
         </div>
       </section>

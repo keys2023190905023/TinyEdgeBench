@@ -3,7 +3,7 @@ warmup: 5
 runs: 20
 backends: [cpu]
 benchmarks:
-  - name: conv3x3_int8_sim_trace_candidate
+  - name: conv3x3_int8_sim_cpu_probe
     operator: conv2d
     input_shape: [1, 16, 32, 32]
     output_channels: 32

@@ -3,7 +3,7 @@ warmup: 5
 runs: 20
 backends: [cpu]
 benchmarks:
-  - name: shift_only_mac_trace_candidate
+  - name: shift_only_mac_cpu_probe
     operator: matmul
     matrix_m: 128
     matrix_k: 128

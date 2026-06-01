@@ -1,2 +1,0 @@
-trace_id,operator,input_shape,weight_shape,precision,expected_output,status
-pynq_shift_only_mac_001,matmul,"[128,128]","[128,128]",shift_only,expected_output.bin,pending_export

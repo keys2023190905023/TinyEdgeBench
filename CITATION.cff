@@ -14,5 +14,5 @@ keywords:
   - int8
   - quantization
   - cuda
-  - fpga
-  - npu
+  - gpu
+  - cpu

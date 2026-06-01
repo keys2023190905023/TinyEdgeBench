@@ -201,9 +201,8 @@ def write_report(
             "- `torch_cpu`, `torch_cuda`, `onnxruntime_cpu`, and `onnxruntime_cuda` measure real local backend kernels when the matching optional dependencies and hardware are available.",
             "- Real backend comparison currently reports FP32 timings; `int8_sim` and `shift_only` are simulation modes unless a backend-specific quantized kernel is added.",
             "- CPU memory uses process RSS when `psutil` is installed; CUDA memory uses PyTorch peak allocation/reservation for `torch_cuda` runs.",
-            "- Power and energy are opportunistic estimates from `nvidia-smi power.draw` for CUDA-style backends; use an external meter or board-side logger for publishable energy numbers.",
+            "- Power and energy are opportunistic estimates from `nvidia-smi power.draw` for CUDA-style backends; use an external meter or stable sampler for publishable energy numbers.",
             "- GitHub Pages can showcase the project, but benchmark data is generated only on the machine where TinyEdgeBench is run.",
-            "- FPGA and NPU backends are roadmap items.",
         ]
     )
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")

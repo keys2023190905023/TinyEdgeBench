@@ -121,7 +121,6 @@ SUPPORTED_BACKENDS = {
     "onnxruntime_cuda",
     "onnxruntime_tensorrt",
     "openvino_cpu",
-    "openvino_npu",
     "tvm_cpu",
     "tvm_cuda",
     "tensorrt_cuda",

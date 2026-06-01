@@ -255,7 +255,7 @@ def _build_executor(case: BenchmarkCase, precision: str, inputs: dict[str, np.nd
         if not supports_onnxruntime_backend(case.operator):
             raise ValueError(f"Backend '{backend}' does not support operator '{case.operator}' yet.")
         return build_onnxruntime_executor(case, inputs, provider="TensorrtExecutionProvider")
-    if backend in {"openvino_cpu", "openvino_npu", "tvm_cpu", "tvm_cuda", "tensorrt_cuda"}:
+    if backend in {"openvino_cpu", "tvm_cpu", "tvm_cuda", "tensorrt_cuda"}:
         raise RuntimeError(
             f"Backend '{backend}' is registered for deployment planning but does not have an executor yet. "
             "Use onnxruntime_tensorrt for TensorRT-provider experiments today, or add the runtime-specific executor."

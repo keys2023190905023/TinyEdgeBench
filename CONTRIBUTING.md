@@ -15,12 +15,12 @@ TinyEdgeBench welcomes focused contributions that make low-bit edge-AI benchmark
 Only mark a result as verified when it includes:
 
 - `system.md`
-- `summary.csv` or board-side trace CSV
+- `summary.csv`
 - `report.md`
 - environment metadata
-- the exact command or board procedure used
+- the exact command used
 
-Leave unavailable energy, memory, or board fields blank rather than guessing.
+Leave unavailable energy or memory fields blank rather than guessing.
 
 ## Development
 

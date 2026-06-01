@@ -32,7 +32,6 @@ BACKEND_OPTIONS = [
     "onnxruntime_cuda",
     "onnxruntime_tensorrt",
     "openvino_cpu",
-    "openvino_npu",
     "tvm_cpu",
     "tvm_cuda",
     "tensorrt_cuda",
@@ -504,7 +503,7 @@ def _render_header(availability: dict[str, str]) -> None:
           <div>
             <p class="teb-eyebrow">LOCAL HARDWARE BENCHMARK CONSOLE</p>
             <h1>TinyEdgeBench</h1>
-            <p class="teb-copy">Operator, backend, precision, latency, and numerical error in one local workflow.</p>
+            <p class="teb-copy">Measure low-bit edge-AI operators on this machine's CPU/GPU runtime stack.</p>
           </div>
           <div class="teb-status-grid">
             <div><strong>105</strong><span>operators</span></div>

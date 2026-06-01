@@ -9,4 +9,4 @@
 - Added benchmark protocol documentation and verified hardware result directories.
 - Added CPU baseline and RTX 4060 Laptop GPU result artifacts.
 - Added memory, latency stability, CUDA memory, power, energy, EDP, and stage-timing fields to `summary.csv`.
-- Added FPGA trace scaffold for PYNQ-Z2-style low-bit operator validation.
+- Focused verified result artifacts on local CPU/GPU benchmarking.
