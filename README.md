@@ -453,9 +453,9 @@ python -m tinyedgebench.benchmark --config configs/gpu_backends.example.yaml
 
 ## Screenshots
 
-Static project website with the CPU/GPU verified-results section:
+Static project website with the refined local benchmark dashboard:
 
-![TinyEdgeBench CPU/GPU verified results preview](docs/assets/tinyedgebench-dynamic-preview.png)
+![TinyEdgeBench local benchmark dashboard preview](docs/assets/tinyedgebench-dynamic-preview.png)
 
 ## Continuous Integration
 

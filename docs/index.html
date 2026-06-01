@@ -35,40 +35,81 @@
         <img class="hero-image" src="assets/hero-edge-bench.png" alt="Edge AI benchmarking workstation" />
         <div class="hero-overlay"></div>
         <div class="hero-content">
-          <p class="eyebrow">Operator-to-deployment benchmarking for low-bit edge AI</p>
-          <h1>TinyEdgeBench</h1>
-          <p class="hero-copy">
-            A reproducible local benchmark suite for low-bit edge-AI operators and model blocks on the user's
-            own CPU/GPU machine.
-          </p>
-          <div class="hero-status" aria-label="Execution model">
-            <span>Local execution only</span>
-            <span>RTX 4060 verified</span>
-            <span>Bring-your-own GPU</span>
-          </div>
-          <div class="hero-actions">
-            <a class="primary-action" href="#install">Start locally</a>
-            <a class="secondary-action" href="#operators">Explore catalog</a>
-          </div>
-          <div class="hero-command" aria-label="Quick start command">
-            <span class="command-prompt">$</span>
-            <code>tinyedgebench web</code>
-            <span class="command-state">local Streamlit console</span>
-          </div>
-          <div class="metric-strip" aria-label="Project metrics">
-            <div>
-              <strong>105</strong>
-              <span>operators</span>
+          <div class="hero-copy-block">
+            <p class="eyebrow">Local CPU/GPU benchmark console</p>
+            <h1>TinyEdgeBench</h1>
+            <p class="hero-copy">
+              Local benchmarks for low-bit edge-AI deployment. Measure operator latency, numerical error, backend
+              behavior, memory, and export reproducible artifacts on the user's own machine.
+            </p>
+            <div class="hero-status" aria-label="Execution model">
+              <span>CPU/GPU verified</span>
+              <span>Local-only execution</span>
+              <span>CSV + plots + report</span>
             </div>
-            <div>
-              <strong>36</strong>
-              <span>presets</span>
+            <div class="hero-actions">
+              <a class="primary-action" href="#install">Start locally</a>
+              <a class="secondary-action" href="#results">View verified results</a>
             </div>
-            <div>
-              <strong>Local</strong>
-              <span>execution</span>
+            <div class="hero-command" aria-label="Quick start command">
+              <span class="command-prompt">$</span>
+              <code>tinyedgebench web</code>
+              <span class="command-state">local Streamlit console</span>
+            </div>
+            <div class="metric-strip" aria-label="Project metrics">
+              <div>
+                <strong>105</strong>
+                <span>operators</span>
+              </div>
+              <div>
+                <strong>36</strong>
+                <span>presets</span>
+              </div>
+              <div>
+                <strong>Local</strong>
+                <span>execution</span>
+              </div>
             </div>
           </div>
+
+          <aside class="hero-dashboard" aria-label="Live benchmark dashboard preview">
+            <div class="dashboard-title">
+              <span>Benchmark Run</span>
+              <span class="dashboard-pill">verified run</span>
+            </div>
+            <div class="dashboard-case">
+              <div><span>Operator</span><strong>conv3x3_64ch</strong></div>
+              <div><span>Backend</span><strong>torch_cuda</strong></div>
+              <div><span>Precision</span><strong>fp32</strong></div>
+            </div>
+            <div class="dashboard-metrics" aria-label="Backend latency comparison">
+              <div class="metric-row">
+                <span>NumPy CPU</span>
+                <div class="metric-bar"><span style="width: 100%"></span></div>
+                <strong class="metric-value">3.18 ms</strong>
+              </div>
+              <div class="metric-row">
+                <span>Torch CPU</span>
+                <div class="metric-bar"><span style="width: 21%"></span></div>
+                <strong class="metric-value">0.67 ms</strong>
+              </div>
+              <div class="metric-row">
+                <span>ONNX CPU</span>
+                <div class="metric-bar"><span style="width: 9%"></span></div>
+                <strong class="metric-value">0.28 ms</strong>
+              </div>
+              <div class="metric-row">
+                <span>CUDA</span>
+                <div class="metric-bar"><span style="width: 22%"></span></div>
+                <strong class="metric-value">0.70 ms</strong>
+              </div>
+            </div>
+            <div class="dashboard-artifacts" aria-label="Generated artifacts">
+              <span>summary.csv</span>
+              <span>report.md</span>
+              <span>latency_plot.png</span>
+            </div>
+          </aside>
         </div>
       </section>
 
@@ -85,30 +126,48 @@
             <span class="result-status">Verified</span>
             <h3>RTX 4060 Laptop GPU</h3>
             <p>Torch CUDA and ONNX Runtime CUDA compared against CPU baselines for MatMul256 and Conv3x3.</p>
-            <div class="result-metrics">
-              <div><span>Best MatMul</span><strong>0.5397 ms</strong><em>ONNX CUDA</em></div>
-              <div><span>CUDA memory</span><strong>8.875 MB</strong><em>PyTorch peak alloc</em></div>
-            </div>
+            <table class="result-table">
+              <thead>
+                <tr><th>Backend</th><th>Workload</th><th>Best Latency</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>ONNX CUDA</td><td>MatMul256</td><td>0.5397 ms</td></tr>
+                <tr><td>Torch CUDA</td><td>Conv3x3</td><td>0.7028 ms</td></tr>
+              </tbody>
+            </table>
+            <div class="artifact-list"><span>summary.csv</span><span>report.md</span><span>system info</span></div>
             <a href="results/rtx4060_laptop/report.md">View report</a>
           </article>
           <article class="result-card verified">
             <span class="result-status">Verified</span>
             <h3>CPU Baseline</h3>
             <p>NumPy, Torch CPU, and ONNX Runtime CPU measured on the current Windows laptop environment.</p>
-            <div class="result-metrics">
-              <div><span>Best MatMul</span><strong>0.2393 ms</strong><em>ONNX CPU</em></div>
-              <div><span>Best Conv</span><strong>0.6586 ms</strong><em>Torch CPU</em></div>
-            </div>
+            <table class="result-table">
+              <thead>
+                <tr><th>Backend</th><th>Workload</th><th>Best Latency</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>ONNX CPU</td><td>MatMul128</td><td>0.2393 ms</td></tr>
+                <tr><td>Torch CPU</td><td>Conv3x3</td><td>0.6586 ms</td></tr>
+              </tbody>
+            </table>
+            <div class="artifact-list"><span>summary.csv</span><span>report.md</span><span>plots</span></div>
             <a href="results/cpu_baseline/report.md">View report</a>
           </article>
           <article class="result-card experimental">
             <span class="result-status">Template</span>
             <h3>Any User GPU</h3>
             <p>Install TinyEdgeBench on another laptop or server and the report becomes that machine's CPU/GPU data.</p>
-            <div class="result-metrics">
-              <div><span>Run</span><strong>Local</strong><em>no cloud benchmark</em></div>
-              <div><span>Config</span><strong>GPU suite</strong><em>CUDA optional</em></div>
-            </div>
+            <table class="result-table">
+              <thead>
+                <tr><th>Target</th><th>Backend</th><th>Output</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>User laptop</td><td>torch_cuda</td><td>local report</td></tr>
+                <tr><td>Server GPU</td><td>onnxruntime_cuda</td><td>local CSV</td></tr>
+              </tbody>
+            </table>
+            <div class="artifact-list"><span>no cloud run</span><span>same YAML</span><span>own hardware</span></div>
             <a href="../configs/gpu_backends.example.yaml">View GPU config</a>
           </article>
         </div>
@@ -319,28 +378,41 @@
           <p class="eyebrow">Benchmark catalog</p>
           <h2>Operator and model-block coverage for edge experiments.</h2>
         </div>
-        <div class="catalog-layout">
-          <div class="operator-panel">
-            <h3>Operator families</h3>
-            <div class="operator-cloud" id="operator-cloud"></div>
-          </div>
-          <div class="preset-panel">
-            <h3>Network presets</h3>
-            <ul class="preset-list">
-              <li>MobileNet / EfficientNet blocks</li>
-              <li>ResNet, ConvNeXt, UNet, DeepLab, FPN</li>
-              <li>YOLO and PAN-style detection modules</li>
-              <li>ViT, Swin, BERT, and GPT-style blocks</li>
-              <li>MobileNetV2, ResNet18, EfficientNet-Lite, Whisper, LLaMA</li>
-            </ul>
-          </div>
+        <div class="catalog-groups">
+          <article class="catalog-card">
+            <span>CNN Operators</span>
+            <h3>Convolution-first edge vision</h3>
+            <p>conv2d / depthwise / pointwise / batchnorm / pooling / activation</p>
+          </article>
+          <article class="catalog-card">
+            <span>Detection Blocks</span>
+            <h3>Object detection microblocks</h3>
+            <p>YOLO head / PAN neck / FPN lateral block / segmentation logits</p>
+          </article>
+          <article class="catalog-card">
+            <span>Transformer Blocks</span>
+            <h3>Attention and MLP paths</h3>
+            <p>attention / layernorm / softmax / GELU / SwiGLU / rotary embedding</p>
+          </article>
+          <article class="catalog-card">
+            <span>Deployment Backends</span>
+            <h3>Local runtime comparison</h3>
+            <p>NumPy / Torch CPU / Torch CUDA / ONNX Runtime CPU / ONNX Runtime CUDA</p>
+          </article>
         </div>
       </section>
 
       <section class="section workflow-band" id="workflow">
         <div class="section-heading">
-          <p class="eyebrow">Workflow</p>
-          <h2>Configure, run, inspect, export.</h2>
+          <p class="eyebrow">Reproducible workflow</p>
+          <h2>Config to artifacts, with validation in the loop.</h2>
+        </div>
+        <div class="protocol-flow" aria-label="Benchmark protocol flow">
+          <div><span>01</span><strong>Config</strong><p>YAML or Web UI parameters.</p></div>
+          <div><span>02</span><strong>Warmup</strong><p>Backend-specific warmup runs.</p></div>
+          <div><span>03</span><strong>Measure</strong><p>Median, P90, std, memory.</p></div>
+          <div><span>04</span><strong>Validate</strong><p>FP32 reference error check.</p></div>
+          <div><span>05</span><strong>Export</strong><p>CSV, plots, Markdown report.</p></div>
         </div>
         <div class="workflow-grid">
           <article class="workflow-step">

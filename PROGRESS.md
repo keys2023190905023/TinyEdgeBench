@@ -100,3 +100,4 @@
 
 - Removed non-CPU/GPU positioning and placeholder scaffold content to focus TinyEdgeBench on benchmarking the user's own CPU/GPU machine after local deployment.
 - Updated README, website, benchmark protocol, package keywords, and Web UI backend options around CPU/GPU-only local measurement.
+- Refined the GitHub Pages site toward an Apple/Linear-style benchmark dashboard: hero dashboard preview, table-based verified result cards, grouped operator catalog, and reproducibility flow.
