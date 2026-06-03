@@ -394,52 +394,56 @@ function initializeTurnSections() {
       const clampedOffset = Math.max(-1, Math.min(1, centerOffset));
       const focus = clamp01(1 - Math.abs(centerOffset));
       const chapterDirection = (Number.parseInt(section.dataset.turnSection || "1", 10) || 1) % 2 === 0 ? -1 : 1;
-      const revealStart = viewportHeight * 0.94;
-      const revealEnd = viewportHeight * 0.18;
+      const revealStart = viewportHeight * 1.14;
+      const revealEnd = viewportHeight * 0.26;
       const rawEntry = prefersReducedMotion.matches
         ? 1
         : clamp01(1 - (rect.top - revealEnd) / Math.max(revealStart - revealEnd, 1));
       const chapterEntry = prefersReducedMotion.matches ? 1 : easeInOutCubic(rawEntry);
-      const handoffStart = viewportHeight * 0.9;
-      const handoffEnd = viewportHeight * 0.16;
+      const handoffStart = viewportHeight * 1.08;
+      const handoffEnd = viewportHeight * 0.28;
       const rawDissolve = prefersReducedMotion.matches || !nextRect
         ? 0
         : clamp01(1 - (nextRect.top - handoffEnd) / Math.max(handoffStart - handoffEnd, 1));
       const chapterDissolve = prefersReducedMotion.matches ? 0 : easeInOutCubic(rawDissolve);
+      const overlapWindow = prefersReducedMotion.matches
+        ? 0.18
+        : clamp01(1 - Math.abs(rawEntry - rawDissolve) / 0.5);
       const chapterVisibility = prefersReducedMotion.matches
         ? 1
-        : clamp01(chapterEntry * 1.08 - chapterDissolve * 0.46);
+        : clamp01(0.06 + chapterEntry * 1.16 - chapterDissolve * 0.34);
       const chapterCloud = prefersReducedMotion.matches
-        ? 0.22
+        ? 0.28
         : clamp01(
-            chapterEntry * 0.34 +
-              rawDissolve * 0.62 +
-              (1 - Math.min(1, Math.abs(chapterEntry - 0.56) / 0.56)) * 0.22,
+            0.08 +
+              chapterEntry * 0.26 +
+              rawDissolve * 0.82 +
+              overlapWindow * 0.34,
           );
       const chapterProgress = prefersReducedMotion.matches
         ? 1
-        : clamp01(chapterEntry * 0.72 + (1 - chapterDissolve) * 0.28);
+        : clamp01(chapterEntry * 0.78 + (1 - chapterDissolve) * 0.22);
       const assemblyMode = section.dataset.assemblyMode || "";
       const assemblyProgress = prefersReducedMotion.matches
         ? 1
         : easeOutCubic(
-            clamp01(assemblyMode === "reassemble" ? (chapterEntry - 0.12) / 0.72 : chapterEntry),
+            clamp01(assemblyMode === "reassemble" ? (chapterEntry - 0.08) / 0.78 : chapterEntry),
           ) * (1 - chapterDissolve * 0.08);
       const rotate = prefersReducedMotion.matches
         ? 0
-        : clampedOffset * -6.4 - (1 - chapterEntry) * 2.4 + chapterDissolve * 4.6;
+        : clampedOffset * -5.8 - (1 - chapterEntry) * 2.2 + chapterDissolve * 3.4;
       const yaw = prefersReducedMotion.matches
         ? 0
-        : clampedOffset * chapterDirection * (3.1 + (1 - chapterEntry) * 2.5) + chapterDirection * chapterDissolve * 3.8;
-      const shift = prefersReducedMotion.matches ? 0 : clampedOffset * 14 - chapterDissolve * 22;
+        : clampedOffset * chapterDirection * (2.9 + (1 - chapterEntry) * 2.2) + chapterDirection * chapterDissolve * 2.8;
+      const shift = prefersReducedMotion.matches ? 0 : clampedOffset * 12 - chapterDissolve * 12;
       const scale = prefersReducedMotion.matches
         ? 1
-        : 0.97 + focus * 0.016 + chapterEntry * 0.014 - chapterDissolve * 0.024;
+        : 0.978 + focus * 0.014 + chapterEntry * 0.01 - chapterDissolve * 0.014;
       const curl = prefersReducedMotion.matches
         ? 0.16
-        : 0.16 + Math.abs(clampedOffset) * 0.52 + chapterDissolve * 0.24;
-      const chapterShift = prefersReducedMotion.matches ? 0 : (1 - chapterEntry) * 68 - chapterDissolve * 22;
-      const blur = prefersReducedMotion.matches ? 0 : (1 - chapterEntry) * 18 + chapterDissolve * 6;
+        : 0.16 + Math.abs(clampedOffset) * 0.48 + chapterDissolve * 0.2;
+      const chapterShift = prefersReducedMotion.matches ? 0 : (1 - chapterEntry) * 56 - chapterDissolve * 10;
+      const blur = prefersReducedMotion.matches ? 0 : (1 - chapterEntry) * 14 + chapterDissolve * 8;
       const chapterZ = Math.max(1, sections.length - index - Math.round(chapterDissolve * 2.2));
       const isChapterLive = chapterEntry > 0.08 && chapterDissolve < 0.98;
       const isChapterSettled = chapterEntry >= 0.98 && chapterDissolve < 0.18;

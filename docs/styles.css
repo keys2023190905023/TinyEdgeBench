@@ -911,8 +911,8 @@ h3 {
 .chapter-band {
   position: relative;
   overflow: hidden;
-  min-height: clamp(940px, 136svh, 1320px);
-  padding: 24px 32px 0;
+  min-height: clamp(820px, 118svh, 1120px);
+  padding: 10px 32px 0;
   perspective: 2200px;
   z-index: var(--chapter-z, 1);
   --chapter-progress: 0;
@@ -932,17 +932,17 @@ h3 {
 }
 
 .chapter-band + .chapter-band {
-  margin-top: clamp(-320px, -18vw, -190px);
+  margin-top: clamp(-580px, -34vw, -400px);
 }
 
 .chapter-band:last-of-type {
-  min-height: clamp(820px, 118svh, 1100px);
+  min-height: clamp(720px, 100svh, 920px);
 }
 
 .section-turn-shell {
   position: relative;
   position: sticky;
-  top: 84px;
+  top: 78px;
   width: min(1220px, 100%);
   margin: 0 auto;
   padding: 34px 30px 30px;
@@ -1012,16 +1012,17 @@ h3 {
 .chapter-band::before,
 .chapter-band::after {
   position: absolute;
-  inset: 0;
   content: "";
   pointer-events: none;
 }
 
 .chapter-band::before {
+  inset: -18vh 0 -12vh;
   background:
-    radial-gradient(circle at 50% 48%, rgba(255, 255, 255, 0.14), transparent 18%),
-    radial-gradient(circle at 22% 58%, rgba(95, 157, 255, 0.12), transparent 24%),
-    radial-gradient(circle at 78% 38%, rgba(95, 157, 255, 0.14), transparent 28%),
+    radial-gradient(circle at 50% 46%, rgba(255, 255, 255, 0.18), transparent 22%),
+    radial-gradient(circle at 18% 54%, rgba(95, 157, 255, 0.15), transparent 28%),
+    radial-gradient(circle at 82% 38%, rgba(95, 157, 255, 0.17), transparent 30%),
+    radial-gradient(circle at 50% 76%, rgba(255, 255, 255, 0.1), transparent 28%),
     repeating-linear-gradient(
       90deg,
       rgba(255, 255, 255, 0.03) 0 2px,
@@ -1032,25 +1033,35 @@ h3 {
       rgba(255, 255, 255, 0.02) 0 2px,
       transparent 2px 14px
     );
+  background-size: 132% 138%, 118% 124%, 118% 124%, 124% 124%, 100% 100%, 100% 100%;
+  background-position: 50% 46%, 12% 54%, 88% 34%, 50% 82%, 0 0, 0 0;
   mix-blend-mode: screen;
-  opacity: calc(var(--chapter-cloud) * 0.24);
-  filter: blur(calc(18px + var(--chapter-dissolve) * 18px));
+  opacity: calc(0.06 + var(--chapter-cloud) * 0.38 + var(--chapter-dissolve) * 0.1);
+  filter: blur(calc(24px + var(--chapter-dissolve) * 22px));
+  animation: chapterCloudBreath 20s ease-in-out infinite;
   transition:
     opacity 180ms linear,
     filter 180ms linear;
 }
 
 .chapter-band::after {
+  inset: -10vh 0 -8vh;
   background:
+    radial-gradient(circle at 50% 16%, rgba(255, 255, 255, calc(var(--chapter-cloud) * 0.16)), transparent 30%),
+    radial-gradient(circle at 50% 68%, rgba(95, 157, 255, calc(var(--chapter-cloud) * 0.14)), transparent 32%),
     linear-gradient(
       180deg,
-      rgba(0, 0, 0, calc(var(--chapter-dissolve) * 0.22)) 0,
-      transparent 24%,
-      transparent 72%,
-      rgba(0, 0, 0, calc(var(--chapter-dissolve) * 0.3)) 100%
+      rgba(5, 8, 14, calc(0.04 + var(--chapter-dissolve) * 0.12)) 0,
+      rgba(5, 8, 14, calc(var(--chapter-cloud) * 0.06)) 22%,
+      transparent 40%,
+      transparent 68%,
+      rgba(4, 6, 11, calc(0.05 + var(--chapter-dissolve) * 0.16)) 100%
     );
-  opacity: calc(0.1 + var(--chapter-dissolve) * 0.36);
-  transition: opacity 180ms linear;
+  opacity: calc(0.06 + var(--chapter-cloud) * 0.12 + var(--chapter-dissolve) * 0.22);
+  filter: blur(18px);
+  transition:
+    opacity 180ms linear,
+    filter 180ms linear;
 }
 
 .section-turn-shell > :not(.section-pixel-canvas):not(.pixel-relay):not(.pixel-fracture):not(.turn-page-index) {
@@ -1064,7 +1075,7 @@ h3 {
   z-index: 1;
   width: 100%;
   height: 100%;
-  opacity: calc(0.12 + var(--chapter-entry) * 0.12 + var(--chapter-cloud) * 0.42);
+  opacity: calc(0.12 + var(--chapter-entry) * 0.08 + var(--chapter-cloud) * 0.52);
   pointer-events: none;
   mix-blend-mode: screen;
   filter: blur(calc((1 - var(--chapter-entry)) * 4px + var(--chapter-dissolve) * 10px));
@@ -1084,7 +1095,7 @@ h3 {
   transform:
     translate3d(
       0,
-      calc((1 - var(--chapter-entry)) * 54px - var(--chapter-dissolve) * 34px),
+      calc((1 - var(--chapter-entry)) * 44px - var(--chapter-dissolve) * 22px),
       0
     )
     scale(calc(0.92 + var(--chapter-visibility) * 0.08));
@@ -2754,6 +2765,19 @@ code {
   }
 }
 
+@keyframes chapterCloudBreath {
+  0%,
+  100% {
+    background-position: 50% 46%, 12% 54%, 88% 34%, 50% 82%, 0 0, 0 0;
+    transform: translate3d(0, -1.5%, 0) scale(1);
+  }
+
+  50% {
+    background-position: 48% 44%, 16% 58%, 84% 30%, 50% 78%, 18px 0, 0 14px;
+    transform: translate3d(0, 1.5%, 0) scale(1.04);
+  }
+}
+
 @keyframes cloudDrift {
   0%,
   100% {
@@ -3056,20 +3080,20 @@ code {
   }
 
   .chapter-band {
-    min-height: 112svh;
-    padding: 34px 18px 40px;
+    min-height: 98svh;
+    padding: 22px 18px 34px;
   }
 
   .chapter-band + .chapter-band {
-    margin-top: -92px;
+    margin-top: -168px;
   }
 
   .chapter-band:last-of-type {
-    min-height: 104svh;
+    min-height: 92svh;
   }
 
   .section-turn-shell {
-    top: 72px;
+    top: 68px;
     padding: 26px 20px 22px;
     border-radius: 24px;
   }
