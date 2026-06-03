@@ -49,11 +49,10 @@ if (cloud) {
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 const body = document.body;
 const cursorRing = document.querySelector(".cursor-ring");
+const runtimeSearchParams = new URLSearchParams(window.location.search);
+const requestedMotionMode = runtimeSearchParams.get("motion");
 const motionProfile = {
-  performanceLite:
-    !prefersReducedMotion.matches &&
-    (((navigator.deviceMemory || 0) > 0 && navigator.deviceMemory <= 8) ||
-      ((navigator.hardwareConcurrency || 0) > 0 && navigator.hardwareConcurrency <= 8)),
+  performanceLite: !prefersReducedMotion.matches && requestedMotionMode !== "full",
 };
 
 body.classList.toggle("is-performance-lite", motionProfile.performanceLite);
@@ -169,6 +168,7 @@ function initializeLivePreview() {
   if (!liveEls.label) return;
   let liveIndex = 0;
   updateLiveRun(liveRuns[liveIndex]);
+  if (motionProfile.performanceLite) return;
   window.setInterval(() => {
     liveIndex = (liveIndex + 1) % liveRuns.length;
     updateLiveRun(liveRuns[liveIndex]);
@@ -203,7 +203,7 @@ function initializeRevealAnimations() {
 
   const revealItems = document.querySelectorAll(".reveal-item");
   document.querySelectorAll(".hero .reveal-item").forEach((item) => item.classList.add("is-visible"));
-  if (prefersReducedMotion.matches) {
+  if (prefersReducedMotion.matches || motionProfile.performanceLite) {
     revealItems.forEach((item) => item.classList.add("is-visible"));
     return;
   }
@@ -404,6 +404,29 @@ function initializeTurnSections() {
   const sections = [...document.querySelectorAll("[data-turn-section]")];
   if (!sections.length) return;
 
+  if (motionProfile.performanceLite) {
+    sections.forEach((section, index) => {
+      section.style.setProperty("--turn-rotate", "0deg");
+      section.style.setProperty("--turn-yaw", "0deg");
+      section.style.setProperty("--turn-shift", "0px");
+      section.style.setProperty("--turn-scale", "1");
+      section.style.setProperty("--turn-glow", "0.16");
+      section.style.setProperty("--turn-curl", "0.16");
+      section.style.setProperty("--chapter-progress", "1");
+      section.style.setProperty("--chapter-entry", "1");
+      section.style.setProperty("--chapter-dissolve", "0");
+      section.style.setProperty("--chapter-visibility", "1");
+      section.style.setProperty("--chapter-cloud", `${index === 0 ? 0.18 : 0.26}`);
+      section.style.setProperty("--chapter-shift", "0px");
+      section.style.setProperty("--chapter-blur", "0px");
+      section.style.setProperty("--assembly-progress", "1");
+      section.style.setProperty("--chapter-z", `${sections.length - index}`);
+      section.classList.add("is-chapter-settled");
+      section.classList.remove("is-chapter-live", "is-chapter-dissolving");
+    });
+    return;
+  }
+
   const clamp01 = (value) => Math.max(0, Math.min(1, value));
   const easeOutCubic = (value) => 1 - (1 - value) ** 3;
   const easeInOutCubic = (value) =>
@@ -510,6 +533,7 @@ function initializeTurnSections() {
 }
 
 function initializeManifestoCanvas() {
+  if (motionProfile.performanceLite) return;
   const section = document.querySelector(".proof-band");
   const canvas = document.querySelector("#manifesto-canvas");
   const canvasCtx = canvas?.getContext("2d", { alpha: true });
@@ -619,6 +643,7 @@ function initializeManifestoCanvas() {
 }
 
 function initializeStoryCanvas() {
+  if (motionProfile.performanceLite) return;
   const stage = document.querySelector(".story-stage");
   const stack = stage?.querySelector(".story-stack");
   const canvas = document.querySelector("#story-canvas");
@@ -781,6 +806,7 @@ function initializeStoryCanvas() {
 }
 
 function initializeChapterPixelStreams() {
+  if (motionProfile.performanceLite) return;
   const entries = [...document.querySelectorAll("[data-turn-section]")]
     .map((section, index) => {
       const shell = section.querySelector(".section-turn-shell");
@@ -1058,7 +1084,7 @@ function resizeCanvas() {
 }
 
 function initializeCanvasMotion() {
-  if (!canvas || !ctx) return;
+  if (!canvas || !ctx || motionProfile.performanceLite) return;
 
   window.addEventListener("pointermove", (event) => {
     focus.targetX = event.clientX;
