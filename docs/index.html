@@ -8,7 +8,8 @@
       content="TinyEdgeBench is a reproducible local benchmark suite for low-bit edge AI on the user's own CPU and GPU."
     />
     <title>TinyEdgeBench | Local CPU/GPU Low-Bit Edge-AI Benchmarks</title>
-    <link rel="stylesheet" href="styles.css?v=20260603b" />
+    <link rel="icon" type="image/png" href="assets/tinyedgebench-dynamic-preview.png?v=20260603i" />
+    <link rel="stylesheet" href="styles.css?v=20260603i" />
   </head>
   <body>
     <canvas id="signal-canvas" aria-hidden="true"></canvas>
@@ -60,7 +61,7 @@
         </div>
         <img
           class="hero-image"
-          src="assets/hero-edge-bench.png?v=20260603b"
+          src="assets/hero-edge-bench.png?v=20260603i"
           alt="Edge AI benchmarking workstation"
         />
         <div class="hero-overlay"></div>
@@ -150,243 +151,299 @@
         </div>
       </section>
 
-      <section class="section results-band" id="results">
-        <div class="section-heading split-heading">
-          <div>
-            <p class="eyebrow">Verified CPU/GPU results</p>
-            <h2>Verified local evidence, straight from the machine that runs it.</h2>
+      <section class="section results-band chapter-band chapter-band-results" id="results" data-turn-section="01">
+        <div class="section-turn-shell">
+          <canvas class="section-pixel-canvas" aria-hidden="true"></canvas>
+          <span class="turn-page-index" aria-hidden="true">01</span>
+          <div class="pixel-relay pixel-relay-a" aria-hidden="true">
+            <img src="assets/tinyedgebench-dynamic-preview.png?v=20260603i" alt="" />
           </div>
-          <a class="section-link" href="results/rtx4060_laptop/summary.csv">Open RTX 4060 CSV</a>
-        </div>
-        <div class="results-grid">
-          <article class="result-card verified">
-            <span class="result-status">Verified</span>
-            <h3>RTX 4060 Laptop GPU</h3>
-            <p>Torch CUDA and ONNX Runtime CUDA compared against CPU baselines for MatMul256 and Conv3x3.</p>
-            <table class="result-table">
-              <thead>
-                <tr><th>Backend</th><th>Workload</th><th>Best Latency</th></tr>
-              </thead>
-              <tbody>
-                <tr><td>ONNX CUDA</td><td>MatMul256</td><td>0.5397 ms</td></tr>
-                <tr><td>Torch CUDA</td><td>Conv3x3</td><td>0.7028 ms</td></tr>
-              </tbody>
-            </table>
-            <div class="artifact-list"><span>summary.csv</span><span>report.md</span><span>system info</span></div>
-            <a href="results/rtx4060_laptop/report.md">View report</a>
-          </article>
-          <article class="result-card verified">
-            <span class="result-status">Verified</span>
-            <h3>CPU Baseline</h3>
-            <p>NumPy, Torch CPU, and ONNX Runtime CPU measured on the current Windows laptop environment.</p>
-            <table class="result-table">
-              <thead>
-                <tr><th>Backend</th><th>Workload</th><th>Best Latency</th></tr>
-              </thead>
-              <tbody>
-                <tr><td>ONNX CPU</td><td>MatMul128</td><td>0.2393 ms</td></tr>
-                <tr><td>Torch CPU</td><td>Conv3x3</td><td>0.6586 ms</td></tr>
-              </tbody>
-            </table>
-            <div class="artifact-list"><span>summary.csv</span><span>report.md</span><span>plots</span></div>
-            <a href="results/cpu_baseline/report.md">View report</a>
-          </article>
-          <article class="result-card experimental">
-            <span class="result-status">Template</span>
-            <h3>Any User GPU</h3>
-            <p>Install TinyEdgeBench on another laptop or server and the report becomes that machine's CPU/GPU data.</p>
-            <table class="result-table">
-              <thead>
-                <tr><th>Target</th><th>Backend</th><th>Output</th></tr>
-              </thead>
-              <tbody>
-                <tr><td>User laptop</td><td>torch_cuda</td><td>local report</td></tr>
-                <tr><td>Server GPU</td><td>onnxruntime_cuda</td><td>local CSV</td></tr>
-              </tbody>
-            </table>
-            <div class="artifact-list"><span>no cloud run</span><span>same YAML</span><span>own hardware</span></div>
-            <a href="../configs/gpu_backends.example.yaml">View GPU config</a>
-          </article>
+          <div class="pixel-relay pixel-relay-b" aria-hidden="true">
+            <img src="assets/tinyedgebench-dynamic-preview.png?v=20260603i" alt="" />
+          </div>
+          <div class="section-heading split-heading">
+            <div>
+              <p class="eyebrow">Verified CPU/GPU results</p>
+              <h2>Verified local evidence, straight from the machine that runs it.</h2>
+            </div>
+            <a class="section-link" href="results/rtx4060_laptop/summary.csv">Open RTX 4060 CSV</a>
+          </div>
+          <div class="results-grid">
+            <article class="result-card verified">
+              <span class="result-status">Verified</span>
+              <h3>RTX 4060 Laptop GPU</h3>
+              <p>Torch CUDA and ONNX Runtime CUDA compared against CPU baselines for MatMul256 and Conv3x3.</p>
+              <table class="result-table">
+                <thead>
+                  <tr><th>Backend</th><th>Workload</th><th>Best Latency</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>ONNX CUDA</td><td>MatMul256</td><td>0.5397 ms</td></tr>
+                  <tr><td>Torch CUDA</td><td>Conv3x3</td><td>0.7028 ms</td></tr>
+                </tbody>
+              </table>
+              <div class="artifact-list"><span>summary.csv</span><span>report.md</span><span>system info</span></div>
+              <a href="results/rtx4060_laptop/report.md">View report</a>
+            </article>
+            <article class="result-card verified">
+              <span class="result-status">Verified</span>
+              <h3>CPU Baseline</h3>
+              <p>NumPy, Torch CPU, and ONNX Runtime CPU measured on the current Windows laptop environment.</p>
+              <table class="result-table">
+                <thead>
+                  <tr><th>Backend</th><th>Workload</th><th>Best Latency</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>ONNX CPU</td><td>MatMul128</td><td>0.2393 ms</td></tr>
+                  <tr><td>Torch CPU</td><td>Conv3x3</td><td>0.6586 ms</td></tr>
+                </tbody>
+              </table>
+              <div class="artifact-list"><span>summary.csv</span><span>report.md</span><span>plots</span></div>
+              <a href="results/cpu_baseline/report.md">View report</a>
+            </article>
+            <article class="result-card experimental">
+              <span class="result-status">Template</span>
+              <h3>Any User GPU</h3>
+              <p>Install TinyEdgeBench on another laptop or server and the report becomes that machine's CPU/GPU data.</p>
+              <table class="result-table">
+                <thead>
+                  <tr><th>Target</th><th>Backend</th><th>Output</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>User laptop</td><td>torch_cuda</td><td>local report</td></tr>
+                  <tr><td>Server GPU</td><td>onnxruntime_cuda</td><td>local CSV</td></tr>
+                </tbody>
+              </table>
+              <div class="artifact-list"><span>no cloud run</span><span>same YAML</span><span>own hardware</span></div>
+              <a href="../configs/gpu_backends.example.yaml">View GPU config</a>
+            </article>
+          </div>
         </div>
       </section>
 
-      <section class="section intelligence-band" id="intelligence">
-        <div class="section-heading split-heading">
-          <div>
-            <p class="eyebrow">Benchmark intelligence</p>
-            <h2>Live deployment signals, organized for fast decisions.</h2>
+      <section class="section intelligence-band chapter-band chapter-band-intelligence" id="intelligence" data-turn-section="02" data-assembly-mode="reassemble">
+        <div class="section-turn-shell">
+          <canvas class="section-pixel-canvas" aria-hidden="true"></canvas>
+          <span class="turn-page-index" aria-hidden="true">02</span>
+          <div class="pixel-relay pixel-relay-a" aria-hidden="true">
+            <img src="assets/tinyedgebench-dynamic-preview.png?v=20260603i" alt="" />
           </div>
-          <div class="live-pill" aria-label="Local simulation status">
-            <span></span>
-            Local preview data
+          <div class="pixel-relay pixel-relay-b" aria-hidden="true">
+            <img src="assets/tinyedgebench-dynamic-preview.png?v=20260603i" alt="" />
           </div>
-        </div>
-        <div class="intelligence-grid">
-          <article class="run-monitor">
-            <div class="panel-header">
-              <span class="panel-kicker">Active experiment</span>
-              <strong id="live-run-label">conv2d / torch_cpu / int8_sim</strong>
+          <div class="pixel-fracture" aria-hidden="true">
+            <span><img src="assets/tinyedgebench-dynamic-preview.png?v=20260603i" alt="" /></span>
+            <span><img src="assets/tinyedgebench-dynamic-preview.png?v=20260603i" alt="" /></span>
+            <span><img src="assets/tinyedgebench-dynamic-preview.png?v=20260603i" alt="" /></span>
+            <span><img src="assets/tinyedgebench-dynamic-preview.png?v=20260603i" alt="" /></span>
+            <span><img src="assets/tinyedgebench-dynamic-preview.png?v=20260603i" alt="" /></span>
+            <span><img src="assets/tinyedgebench-dynamic-preview.png?v=20260603i" alt="" /></span>
+          </div>
+          <div class="section-heading split-heading">
+            <div>
+              <p class="eyebrow">Benchmark intelligence</p>
+              <h2>Live deployment signals, organized for fast decisions.</h2>
             </div>
-            <div class="run-dial" aria-label="Live benchmark progress">
-              <div class="dial-copy">
-                <span>Run progress</span>
-                <strong id="run-progress-label">68%</strong>
-              </div>
-              <div class="progress-track">
-                <span id="run-progress-bar"></span>
-              </div>
+            <div class="live-pill" aria-label="Local simulation status">
+              <span></span>
+              Local preview data
             </div>
-            <div class="telemetry-grid" aria-label="Live benchmark metrics">
-              <div>
-                <span>Latency</span>
-                <strong id="live-latency">2.84 ms</strong>
+          </div>
+          <div class="intelligence-grid">
+            <article class="run-monitor">
+              <div class="panel-header">
+                <span class="panel-kicker">Active experiment</span>
+                <strong id="live-run-label">conv2d / torch_cpu / int8_sim</strong>
               </div>
-              <div>
-                <span>Throughput</span>
-                <strong id="live-throughput">352 ops/s</strong>
+              <div class="run-dial" aria-label="Live benchmark progress">
+                <div class="dial-copy">
+                  <span>Run progress</span>
+                  <strong id="run-progress-label">68%</strong>
+                </div>
+                <div class="progress-track">
+                  <span id="run-progress-bar"></span>
+                </div>
               </div>
-              <div>
-                <span>Abs error</span>
-                <strong id="live-error">0.0031</strong>
+              <div class="telemetry-grid" aria-label="Live benchmark metrics">
+                <div>
+                  <span>Latency</span>
+                  <strong id="live-latency">2.84 ms</strong>
+                </div>
+                <div>
+                  <span>Throughput</span>
+                  <strong id="live-throughput">352 ops/s</strong>
+                </div>
+                <div>
+                  <span>Abs error</span>
+                  <strong id="live-error">0.0031</strong>
+                </div>
+                <div>
+                  <span>Backend</span>
+                  <strong id="live-backend">torch_cpu</strong>
+                </div>
               </div>
-              <div>
-                <span>Backend</span>
-                <strong id="live-backend">torch_cpu</strong>
-              </div>
-            </div>
-            <ol class="pipeline-list" aria-label="Benchmark pipeline">
-              <li class="complete"><span></span>Load YAML or Web UI parameters</li>
-              <li class="complete"><span></span>Warm up selected backend</li>
-              <li class="active"><span></span>Measure operator latency</li>
-              <li><span></span>Export CSV, plots, and Markdown report</li>
-            </ol>
-          </article>
+              <ol class="pipeline-list" aria-label="Benchmark pipeline">
+                <li class="complete"><span></span>Load YAML or Web UI parameters</li>
+                <li class="complete"><span></span>Warm up selected backend</li>
+                <li class="active"><span></span>Measure operator latency</li>
+                <li><span></span>Export CSV, plots, and Markdown report</li>
+              </ol>
+            </article>
 
-          <article class="latency-panel">
-            <div class="panel-header">
-              <span class="panel-kicker">Latency profile</span>
-              <strong>Backend comparison snapshot</strong>
-            </div>
-            <div class="latency-bars" aria-label="Latency comparison chart">
-              <div class="latency-row">
-                <span>NumPy CPU</span>
-                <div><i id="bar-cpu"></i></div>
-                <strong id="value-cpu">4.92 ms</strong>
+            <article class="latency-panel">
+              <div class="panel-header">
+                <span class="panel-kicker">Latency profile</span>
+                <strong>Backend comparison snapshot</strong>
               </div>
-              <div class="latency-row">
-                <span>Torch CPU</span>
-                <div><i id="bar-torch"></i></div>
-                <strong id="value-torch">2.84 ms</strong>
+              <div class="latency-bars" aria-label="Latency comparison chart">
+                <div class="latency-row">
+                  <span>NumPy CPU</span>
+                  <div><i id="bar-cpu"></i></div>
+                  <strong id="value-cpu">4.92 ms</strong>
+                </div>
+                <div class="latency-row">
+                  <span>Torch CPU</span>
+                  <div><i id="bar-torch"></i></div>
+                  <strong id="value-torch">2.84 ms</strong>
+                </div>
+                <div class="latency-row">
+                  <span>ONNX CPU</span>
+                  <div><i id="bar-onnx"></i></div>
+                  <strong id="value-onnx">2.31 ms</strong>
+                </div>
+                <div class="latency-row">
+                  <span>Torch CUDA</span>
+                  <div><i id="bar-cuda"></i></div>
+                  <strong id="value-cuda">0.71 ms</strong>
+                </div>
               </div>
-              <div class="latency-row">
-                <span>ONNX CPU</span>
-                <div><i id="bar-onnx"></i></div>
-                <strong id="value-onnx">2.31 ms</strong>
+              <div class="insight-strip">
+                <div>
+                  <span>Fastest</span>
+                  <strong id="fastest-backend">torch_cuda</strong>
+                </div>
+                <div>
+                  <span>Bottleneck</span>
+                  <strong id="bottleneck-op">matmul</strong>
+                </div>
+                <div>
+                  <span>Artifacts</span>
+                  <strong>CSV + report + plots</strong>
+                </div>
               </div>
-              <div class="latency-row">
-                <span>Torch CUDA</span>
-                <div><i id="bar-cuda"></i></div>
-                <strong id="value-cuda">0.71 ms</strong>
-              </div>
-            </div>
-            <div class="insight-strip">
-              <div>
-                <span>Fastest</span>
-                <strong id="fastest-backend">torch_cuda</strong>
-              </div>
-              <div>
-                <span>Bottleneck</span>
-                <strong id="bottleneck-op">matmul</strong>
-              </div>
-              <div>
-                <span>Artifacts</span>
-                <strong>CSV + report + plots</strong>
-              </div>
-            </div>
-          </article>
+            </article>
+          </div>
         </div>
       </section>
 
-      <section class="section hardware-band" id="hardware">
-        <div class="section-heading">
-          <p class="eyebrow">Deployment realism</p>
-          <h2>Benchmark the hardware in front of you.</h2>
-        </div>
-        <div class="hardware-grid">
-          <article class="hardware-panel">
-            <span class="panel-kicker">Execution boundary</span>
-            <h3>GitHub hosts the project. Your machine runs the benchmark.</h3>
-            <p>
-              TinyEdgeBench keeps the website static and the measurement path local, so CPU/GPU results
-              reflect the user's installed runtimes, drivers, and actual device.
-            </p>
-          </article>
-          <article class="backend-matrix" aria-label="Supported backend matrix">
-            <div class="backend-row">
-              <span>NumPy</span>
-              <strong>cpu</strong>
-              <em>default</em>
-            </div>
-            <div class="backend-row">
-              <span>PyTorch</span>
-              <strong>torch_cpu</strong>
-              <em>optional</em>
-            </div>
-            <div class="backend-row">
-              <span>PyTorch CUDA</span>
-              <strong>torch_cuda</strong>
-              <em>local GPU</em>
-            </div>
-            <div class="backend-row">
-              <span>ONNX Runtime</span>
-              <strong>onnxruntime_cpu</strong>
-              <em>optional</em>
-            </div>
-            <div class="backend-row">
-              <span>ONNX Runtime CUDA</span>
-              <strong>onnxruntime_cuda</strong>
-              <em>local GPU</em>
-            </div>
-            <div class="backend-row">
-              <span>ONNX Runtime TensorRT</span>
-              <strong>onnxruntime_tensorrt</strong>
-              <em>provider</em>
-            </div>
-            <div class="backend-row">
-              <span>OpenVINO / TVM / TensorRT</span>
-              <strong>registered targets</strong>
-              <em>roadmap</em>
-            </div>
-          </article>
+      <section class="section hardware-band chapter-band chapter-band-hardware" id="hardware" data-turn-section="03" data-assembly-mode="reassemble">
+        <div class="section-turn-shell">
+          <canvas class="section-pixel-canvas" aria-hidden="true"></canvas>
+          <span class="turn-page-index" aria-hidden="true">03</span>
+          <div class="pixel-relay pixel-relay-a" aria-hidden="true">
+            <img src="assets/tinyedgebench-dynamic-preview.png?v=20260603i" alt="" />
+          </div>
+          <div class="pixel-relay pixel-relay-b" aria-hidden="true">
+            <img src="assets/tinyedgebench-dynamic-preview.png?v=20260603i" alt="" />
+          </div>
+          <div class="pixel-fracture" aria-hidden="true">
+            <span><img src="assets/tinyedgebench-dynamic-preview.png?v=20260603i" alt="" /></span>
+            <span><img src="assets/tinyedgebench-dynamic-preview.png?v=20260603i" alt="" /></span>
+            <span><img src="assets/tinyedgebench-dynamic-preview.png?v=20260603i" alt="" /></span>
+            <span><img src="assets/tinyedgebench-dynamic-preview.png?v=20260603i" alt="" /></span>
+            <span><img src="assets/tinyedgebench-dynamic-preview.png?v=20260603i" alt="" /></span>
+            <span><img src="assets/tinyedgebench-dynamic-preview.png?v=20260603i" alt="" /></span>
+          </div>
+          <div class="section-heading">
+            <p class="eyebrow">Deployment realism</p>
+            <h2>Benchmark the hardware in front of you.</h2>
+          </div>
+          <div class="hardware-grid">
+            <article class="hardware-panel">
+              <span class="panel-kicker">Execution boundary</span>
+              <h3>GitHub hosts the project. Your machine runs the benchmark.</h3>
+              <p>
+                TinyEdgeBench keeps the website static and the measurement path local, so CPU/GPU results
+                reflect the user's installed runtimes, drivers, and actual device.
+              </p>
+            </article>
+            <article class="backend-matrix" aria-label="Supported backend matrix">
+              <div class="backend-row">
+                <span>NumPy</span>
+                <strong>cpu</strong>
+                <em>default</em>
+              </div>
+              <div class="backend-row">
+                <span>PyTorch</span>
+                <strong>torch_cpu</strong>
+                <em>optional</em>
+              </div>
+              <div class="backend-row">
+                <span>PyTorch CUDA</span>
+                <strong>torch_cuda</strong>
+                <em>local GPU</em>
+              </div>
+              <div class="backend-row">
+                <span>ONNX Runtime</span>
+                <strong>onnxruntime_cpu</strong>
+                <em>optional</em>
+              </div>
+              <div class="backend-row">
+                <span>ONNX Runtime CUDA</span>
+                <strong>onnxruntime_cuda</strong>
+                <em>local GPU</em>
+              </div>
+              <div class="backend-row">
+                <span>ONNX Runtime TensorRT</span>
+                <strong>onnxruntime_tensorrt</strong>
+                <em>provider</em>
+              </div>
+              <div class="backend-row">
+                <span>OpenVINO / TVM / TensorRT</span>
+                <strong>registered targets</strong>
+                <em>roadmap</em>
+              </div>
+            </article>
+          </div>
         </div>
       </section>
 
-      <section class="section intro-band" id="features">
-        <div class="section-heading">
-          <p class="eyebrow">Why it exists</p>
-          <h2>Local evidence before heavy profiling stacks.</h2>
-        </div>
-        <div class="feature-grid">
-          <article class="feature-card">
-            <span class="feature-index">01</span>
-            <h3>Run locally</h3>
-            <p>The website is a showcase; CLI and Web UI benchmarks execute on the user's own machine.</p>
-          </article>
-          <article class="feature-card">
-            <span class="feature-index">02</span>
-            <h3>Compare precision modes</h3>
-            <p>Benchmark FP32 baselines against simulated INT8 and shift-only approximations.</p>
-          </article>
-          <article class="feature-card">
-            <span class="feature-index">03</span>
-            <h3>Export artifacts</h3>
-            <p>Generate summary CSV, Markdown reports, latency plots, and numerical error plots.</p>
-          </article>
-          <article class="feature-card">
-            <span class="feature-index">04</span>
-            <h3>Compare real backends</h3>
-            <p>Optionally measure PyTorch and ONNX Runtime CPU/CUDA kernels against the NumPy baseline.</p>
-          </article>
+      <section class="section intro-band chapter-band chapter-band-features" id="features" data-turn-section="04">
+        <div class="section-turn-shell">
+          <canvas class="section-pixel-canvas" aria-hidden="true"></canvas>
+          <span class="turn-page-index" aria-hidden="true">04</span>
+          <div class="pixel-relay pixel-relay-a" aria-hidden="true">
+            <img src="assets/tinyedgebench-dynamic-preview.png?v=20260603i" alt="" />
+          </div>
+          <div class="pixel-relay pixel-relay-b" aria-hidden="true">
+            <img src="assets/tinyedgebench-dynamic-preview.png?v=20260603i" alt="" />
+          </div>
+          <div class="section-heading">
+            <p class="eyebrow">Why it exists</p>
+            <h2>Local evidence before heavy profiling stacks.</h2>
+          </div>
+          <div class="feature-grid">
+            <article class="feature-card">
+              <span class="feature-index">01</span>
+              <h3>Run locally</h3>
+              <p>The website is a showcase; CLI and Web UI benchmarks execute on the user's own machine.</p>
+            </article>
+            <article class="feature-card">
+              <span class="feature-index">02</span>
+              <h3>Compare precision modes</h3>
+              <p>Benchmark FP32 baselines against simulated INT8 and shift-only approximations.</p>
+            </article>
+            <article class="feature-card">
+              <span class="feature-index">03</span>
+              <h3>Export artifacts</h3>
+              <p>Generate summary CSV, Markdown reports, latency plots, and numerical error plots.</p>
+            </article>
+            <article class="feature-card">
+              <span class="feature-index">04</span>
+              <h3>Compare real backends</h3>
+              <p>Optionally measure PyTorch and ONNX Runtime CPU/CUDA kernels against the NumPy baseline.</p>
+            </article>
+          </div>
         </div>
       </section>
 
@@ -548,6 +605,6 @@ tinyedgebench web</code></pre>
       <span>Local benchmarks for edge-AI operators.</span>
     </footer>
 
-    <script src="app.js?v=20260603b"></script>
+    <script src="app.js?v=20260603i"></script>
   </body>
 </html>

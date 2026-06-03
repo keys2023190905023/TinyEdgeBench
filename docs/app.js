@@ -229,8 +229,8 @@ function initializeActiveNav() {
         sectionMap.set(entry.target.id, entry.intersectionRatio);
       });
 
-      let activeId = sections[0]?.id || "";
-      let maxRatio = -1;
+      let activeId = "";
+      let maxRatio = 0.12;
       sectionMap.forEach((ratio, id) => {
         if (ratio > maxRatio) {
           maxRatio = ratio;
@@ -332,6 +332,152 @@ function initializeHeroParallax() {
   };
 
   render();
+}
+
+function initializeInitialSectionJump() {
+  const resolveTargetId = () => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const hashTarget = window.location.hash ? window.location.hash.slice(1) : "";
+    const paramTarget = searchParams.get("section") || "";
+    return hashTarget || paramTarget;
+  };
+
+  const jumpToTarget = () => {
+    const targetId = resolveTargetId();
+    if (!targetId) return false;
+
+    const target = document.getElementById(targetId);
+    if (!target) return false;
+
+    const headerHeight = document.querySelector(".site-header")?.offsetHeight ?? 0;
+    const offset = Math.max(24, headerHeight - 12);
+    const top = Math.max(0, target.getBoundingClientRect().top + window.scrollY - offset);
+    window.scrollTo({ top, behavior: "auto" });
+    return true;
+  };
+
+  if (!resolveTargetId()) return;
+
+  [36, 160, 360, 720].forEach((delay) => {
+    window.setTimeout(jumpToTarget, delay);
+  });
+
+  window.addEventListener(
+    "load",
+    () => {
+      window.setTimeout(jumpToTarget, 64);
+    },
+    { once: true },
+  );
+
+  window.addEventListener("hashchange", () => {
+    window.setTimeout(jumpToTarget, 24);
+  });
+}
+
+function initializeTurnSections() {
+  const sections = [...document.querySelectorAll("[data-turn-section]")];
+  if (!sections.length) return;
+
+  const clamp01 = (value) => Math.max(0, Math.min(1, value));
+  const easeOutCubic = (value) => 1 - (1 - value) ** 3;
+  const easeInOutCubic = (value) =>
+    value < 0.5 ? 4 * value ** 3 : 1 - ((-2 * value + 2) ** 3) / 2;
+
+  const update = () => {
+    const viewportHeight = Math.max(window.innerHeight, 1);
+
+    sections.forEach((section, index) => {
+      const rect = section.getBoundingClientRect();
+      const nextRect = sections[index + 1]?.getBoundingClientRect();
+      const centerOffset = (rect.top + rect.height * 0.5 - viewportHeight * 0.56) / (viewportHeight * 0.92);
+      const clampedOffset = Math.max(-1, Math.min(1, centerOffset));
+      const focus = clamp01(1 - Math.abs(centerOffset));
+      const chapterDirection = (Number.parseInt(section.dataset.turnSection || "1", 10) || 1) % 2 === 0 ? -1 : 1;
+      const revealStart = viewportHeight * 0.94;
+      const revealEnd = viewportHeight * 0.18;
+      const rawEntry = prefersReducedMotion.matches
+        ? 1
+        : clamp01(1 - (rect.top - revealEnd) / Math.max(revealStart - revealEnd, 1));
+      const chapterEntry = prefersReducedMotion.matches ? 1 : easeInOutCubic(rawEntry);
+      const handoffStart = viewportHeight * 0.9;
+      const handoffEnd = viewportHeight * 0.16;
+      const rawDissolve = prefersReducedMotion.matches || !nextRect
+        ? 0
+        : clamp01(1 - (nextRect.top - handoffEnd) / Math.max(handoffStart - handoffEnd, 1));
+      const chapterDissolve = prefersReducedMotion.matches ? 0 : easeInOutCubic(rawDissolve);
+      const chapterVisibility = prefersReducedMotion.matches
+        ? 1
+        : clamp01(chapterEntry * 1.08 - chapterDissolve * 0.46);
+      const chapterCloud = prefersReducedMotion.matches
+        ? 0.22
+        : clamp01(
+            chapterEntry * 0.34 +
+              rawDissolve * 0.62 +
+              (1 - Math.min(1, Math.abs(chapterEntry - 0.56) / 0.56)) * 0.22,
+          );
+      const chapterProgress = prefersReducedMotion.matches
+        ? 1
+        : clamp01(chapterEntry * 0.72 + (1 - chapterDissolve) * 0.28);
+      const assemblyMode = section.dataset.assemblyMode || "";
+      const assemblyProgress = prefersReducedMotion.matches
+        ? 1
+        : easeOutCubic(
+            clamp01(assemblyMode === "reassemble" ? (chapterEntry - 0.12) / 0.72 : chapterEntry),
+          ) * (1 - chapterDissolve * 0.08);
+      const rotate = prefersReducedMotion.matches
+        ? 0
+        : clampedOffset * -6.4 - (1 - chapterEntry) * 2.4 + chapterDissolve * 4.6;
+      const yaw = prefersReducedMotion.matches
+        ? 0
+        : clampedOffset * chapterDirection * (3.1 + (1 - chapterEntry) * 2.5) + chapterDirection * chapterDissolve * 3.8;
+      const shift = prefersReducedMotion.matches ? 0 : clampedOffset * 14 - chapterDissolve * 22;
+      const scale = prefersReducedMotion.matches
+        ? 1
+        : 0.97 + focus * 0.016 + chapterEntry * 0.014 - chapterDissolve * 0.024;
+      const curl = prefersReducedMotion.matches
+        ? 0.16
+        : 0.16 + Math.abs(clampedOffset) * 0.52 + chapterDissolve * 0.24;
+      const chapterShift = prefersReducedMotion.matches ? 0 : (1 - chapterEntry) * 68 - chapterDissolve * 22;
+      const blur = prefersReducedMotion.matches ? 0 : (1 - chapterEntry) * 18 + chapterDissolve * 6;
+      const chapterZ = Math.max(1, sections.length - index - Math.round(chapterDissolve * 2.2));
+      const isChapterLive = chapterEntry > 0.08 && chapterDissolve < 0.98;
+      const isChapterSettled = chapterEntry >= 0.98 && chapterDissolve < 0.18;
+
+      section.style.setProperty("--turn-rotate", `${rotate.toFixed(2)}deg`);
+      section.style.setProperty("--turn-yaw", `${yaw.toFixed(2)}deg`);
+      section.style.setProperty("--turn-shift", `${shift.toFixed(2)}px`);
+      section.style.setProperty("--turn-scale", `${scale.toFixed(3)}`);
+      section.style.setProperty("--turn-glow", `${focus.toFixed(3)}`);
+      section.style.setProperty("--turn-curl", `${curl.toFixed(3)}`);
+      section.style.setProperty("--chapter-progress", `${chapterProgress.toFixed(3)}`);
+      section.style.setProperty("--chapter-entry", `${chapterEntry.toFixed(3)}`);
+      section.style.setProperty("--chapter-dissolve", `${chapterDissolve.toFixed(3)}`);
+      section.style.setProperty("--chapter-visibility", `${chapterVisibility.toFixed(3)}`);
+      section.style.setProperty("--chapter-cloud", `${chapterCloud.toFixed(3)}`);
+      section.style.setProperty("--chapter-shift", `${chapterShift.toFixed(2)}px`);
+      section.style.setProperty("--chapter-blur", `${blur.toFixed(2)}px`);
+      section.style.setProperty("--assembly-progress", `${assemblyProgress.toFixed(3)}`);
+      section.style.setProperty("--chapter-z", `${chapterZ}`);
+      section.classList.toggle("is-chapter-live", isChapterLive);
+      section.classList.toggle("is-chapter-settled", isChapterSettled);
+      section.classList.toggle("is-chapter-dissolving", chapterDissolve > 0.06);
+    });
+  };
+
+  let ticking = false;
+  const requestUpdate = () => {
+    if (ticking) return;
+    ticking = true;
+    window.requestAnimationFrame(() => {
+      update();
+      ticking = false;
+    });
+  };
+
+  window.addEventListener("scroll", requestUpdate, { passive: true });
+  window.addEventListener("resize", requestUpdate);
+  update();
 }
 
 function initializeManifestoCanvas() {
@@ -605,6 +751,209 @@ function initializeStoryCanvas() {
   }
 }
 
+function initializeChapterPixelStreams() {
+  const entries = [...document.querySelectorAll("[data-turn-section]")]
+    .map((section, index) => {
+      const shell = section.querySelector(".section-turn-shell");
+      const canvas = section.querySelector(".section-pixel-canvas");
+      const canvasCtx = canvas?.getContext("2d", { alpha: true });
+      if (!shell || !canvas || !canvasCtx) return null;
+      return {
+        section,
+        shell,
+        canvas,
+        canvasCtx,
+        index,
+        active: true,
+        width: 0,
+        height: 0,
+        cell: 0,
+        lanes: [],
+      };
+    })
+    .filter(Boolean);
+
+  if (!entries.length) return;
+
+  const pseudoRandom = (seed) => {
+    const value = Math.sin(seed * 127.1 + seed * 0.37) * 43758.5453;
+    return value - Math.floor(value);
+  };
+
+  const bezierPoint = (point0, point1, point2, point3, t) => {
+    const inverse = 1 - t;
+    const x =
+      inverse ** 3 * point0.x +
+      3 * inverse ** 2 * t * point1.x +
+      3 * inverse * t ** 2 * point2.x +
+      t ** 3 * point3.x;
+    const y =
+      inverse ** 3 * point0.y +
+      3 * inverse ** 2 * t * point1.y +
+      3 * inverse * t ** 2 * point2.y +
+      t ** 3 * point3.y;
+    return { x, y };
+  };
+
+  const resizeEntry = (entry) => {
+    const ratio = window.devicePixelRatio || 1;
+    entry.width = entry.shell.clientWidth;
+    entry.height = entry.shell.clientHeight;
+    entry.canvas.width = Math.max(1, Math.floor(entry.width * ratio));
+    entry.canvas.height = Math.max(1, Math.floor(entry.height * ratio));
+    entry.canvas.style.width = `${entry.width}px`;
+    entry.canvas.style.height = `${entry.height}px`;
+    entry.canvasCtx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    entry.cell = entry.width < 900 ? 4 : 5;
+
+    const direction = entry.index % 2 === 0 ? 1 : -1;
+    entry.lanes = Array.from({ length: 3 }, (_, laneIndex) => {
+      const laneSeed = entry.index * 10 + laneIndex;
+      const laneHeight = entry.height * (0.24 + laneIndex * 0.22);
+      const laneSwing = 36 + laneIndex * 12;
+      const startX = direction === 1 ? entry.width * 0.06 : entry.width * 0.94;
+      const endX = direction === 1 ? entry.width * 0.94 : entry.width * 0.06;
+      return {
+        phase: pseudoRandom(laneSeed + 3),
+        speed: 0.055 + laneIndex * 0.015 + entry.index * 0.006,
+        points: [
+          { x: startX, y: laneHeight + (pseudoRandom(laneSeed + 7) - 0.5) * 24 },
+          {
+            x: entry.width * (direction === 1 ? 0.28 : 0.72),
+            y: laneHeight - laneSwing + pseudoRandom(laneSeed + 11) * 40,
+          },
+          {
+            x: entry.width * (direction === 1 ? 0.72 : 0.28),
+            y: laneHeight + laneSwing - pseudoRandom(laneSeed + 17) * 38,
+          },
+          { x: endX, y: laneHeight + (pseudoRandom(laneSeed + 23) - 0.5) * 24 },
+        ],
+      };
+    });
+  };
+
+  const drawEntry = (entry, timeSeconds) => {
+    const { canvasCtx, width, height, cell } = entry;
+    const glow = parseFloat(getComputedStyle(entry.section).getPropertyValue("--turn-glow")) || 0.5;
+    const assembly = parseFloat(getComputedStyle(entry.section).getPropertyValue("--assembly-progress")) || 0;
+    const direction = entry.index % 2 === 0 ? 1 : -1;
+
+    canvasCtx.clearRect(0, 0, width, height);
+
+    const anchors = [
+      {
+        x: direction === 1 ? width * 0.11 : width * 0.89,
+        y: height * 0.18,
+        radius: Math.min(width, height) * 0.18,
+      },
+      {
+        x: direction === 1 ? width * 0.89 : width * 0.11,
+        y: height * 0.78,
+        radius: Math.min(width, height) * 0.22,
+      },
+    ];
+
+    anchors.forEach((anchor, anchorIndex) => {
+      for (let pointIndex = 0; pointIndex < 54; pointIndex += 1) {
+        const seed = entry.index * 200 + anchorIndex * 64 + pointIndex;
+        const angle = pseudoRandom(seed + 1) * Math.PI * 2 + timeSeconds * (0.08 + anchorIndex * 0.03);
+        const radiusFactor = 0.18 + pseudoRandom(seed + 5) * 0.98;
+        const drift = Math.sin(timeSeconds * 0.7 + seed) * (5 + (1 - assembly) * 11);
+        const spread = 1 + (1 - assembly) * 1.2;
+        const scatterX = (pseudoRandom(seed + 21) - 0.5) * (1 - assembly) * 88;
+        const scatterY = (pseudoRandom(seed + 27) - 0.5) * (1 - assembly) * 54;
+        const pixelX = anchor.x + Math.cos(angle) * anchor.radius * radiusFactor * spread + drift + scatterX;
+        const pixelY = anchor.y + Math.sin(angle) * anchor.radius * radiusFactor * spread + scatterY;
+        const size = cell * (1 + Math.floor(pseudoRandom(seed + 9) * 2));
+        const alpha = (0.04 + pseudoRandom(seed + 13) * 0.14) * (0.24 + glow * 0.58 + assembly * 0.42);
+        const shade = 176 + Math.round(pseudoRandom(seed + 17) * 54);
+        canvasCtx.fillStyle = `rgba(${shade}, ${shade}, ${Math.min(255, shade + 22)}, ${alpha})`;
+        canvasCtx.fillRect(Math.round(pixelX / cell) * cell, Math.round(pixelY / cell) * cell, size, size);
+      }
+    });
+
+    entry.lanes.forEach((lane, laneIndex) => {
+      for (let t = 0.03; t < 1; t += 0.034) {
+        const point = bezierPoint(lane.points[0], lane.points[1], lane.points[2], lane.points[3], t);
+        const laneScatterX = (Math.sin(timeSeconds * 0.9 + t * 14 + laneIndex) * (1 - assembly) * 28);
+        const laneScatterY = (Math.cos(timeSeconds * 0.7 + t * 12 + laneIndex) * (1 - assembly) * 16);
+        const alpha = (0.06 + Math.sin(timeSeconds * 0.8 + t * Math.PI * 2 + laneIndex) * 0.03) * (0.22 + glow * 0.56 + assembly * 0.5);
+        canvasCtx.fillStyle = `rgba(128, 176, 255, ${Math.max(0.04, alpha)})`;
+        canvasCtx.fillRect(
+          Math.round((point.x + laneScatterX) / cell) * cell,
+          Math.round((point.y + laneScatterY) / cell) * cell,
+          cell + 1,
+          cell + 1,
+        );
+      }
+
+      for (let packetIndex = 0; packetIndex < 4; packetIndex += 1) {
+        const progress = (timeSeconds * lane.speed + lane.phase + packetIndex * 0.24) % 1;
+        for (let trailIndex = 0; trailIndex < 5; trailIndex += 1) {
+          const trailProgress = (progress - trailIndex * 0.026 + 1) % 1;
+          const point = bezierPoint(lane.points[0], lane.points[1], lane.points[2], lane.points[3], trailProgress);
+          const trailScatterX = (pseudoRandom(packetIndex * 17 + trailIndex * 23 + laneIndex) - 0.5) * (1 - assembly) * 54;
+          const trailScatterY = Math.sin(timeSeconds * 1.1 + trailIndex + laneIndex) * (1 - assembly) * 20;
+          const size = cell * (trailIndex === 0 ? 3 : 2);
+          const alpha = (0.16 - trailIndex * 0.022 + assembly * 0.16) * (0.32 + glow * 0.5 + assembly * 0.42);
+          canvasCtx.fillStyle = `rgba(214, 228, 255, ${Math.max(0.04, alpha)})`;
+          canvasCtx.fillRect(
+            Math.round((point.x + trailScatterX) / cell) * cell,
+            Math.round((point.y + trailScatterY) / cell) * cell,
+            size,
+            size,
+          );
+        }
+      }
+    });
+  };
+
+  entries.forEach((entry) => {
+    resizeEntry(entry);
+  });
+
+  if (!prefersReducedMotion.matches) {
+    const entryMap = new Map(entries.map((entry) => [entry.section, entry]));
+    const sectionObserver = new IntersectionObserver(
+      (sectionEntries) => {
+        sectionEntries.forEach((sectionEntry) => {
+          const matchedEntry = entryMap.get(sectionEntry.target);
+          if (!matchedEntry) return;
+          matchedEntry.active = sectionEntry.isIntersecting;
+        });
+      },
+      { threshold: 0.06 },
+    );
+
+    entries.forEach((entry) => sectionObserver.observe(entry.section));
+  }
+
+  const resizeAll = () => {
+    entries.forEach((entry) => resizeEntry(entry));
+  };
+
+  let lastFrame = 0;
+  const render = (now) => {
+    if (!lastFrame || now - lastFrame > 48) {
+      const timeSeconds = now / 1000;
+      entries.forEach((entry) => {
+        if (entry.active || prefersReducedMotion.matches) {
+          drawEntry(entry, timeSeconds);
+        }
+      });
+      lastFrame = now;
+    }
+
+    window.requestAnimationFrame(render);
+  };
+
+  window.addEventListener("resize", resizeAll);
+  entries.forEach((entry) => drawEntry(entry, 0));
+  if (!prefersReducedMotion.matches) {
+    window.requestAnimationFrame(render);
+  }
+}
+
 function initializeCursorRing() {
   if (!cursorRing) return;
   const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)");
@@ -761,8 +1110,11 @@ initializeLivePreview();
 initializeRevealAnimations();
 initializeActiveNav();
 initializeScrollState();
+initializeInitialSectionJump();
 initializeHeroParallax();
+initializeTurnSections();
 initializeCanvasMotion();
+initializeChapterPixelStreams();
 initializeManifestoCanvas();
 initializeStoryCanvas();
 initializeCursorRing();

@@ -908,6 +908,657 @@ h3 {
   margin-bottom: 38px;
 }
 
+.chapter-band {
+  position: relative;
+  overflow: hidden;
+  min-height: clamp(940px, 136svh, 1320px);
+  padding: 24px 32px 0;
+  perspective: 2200px;
+  z-index: var(--chapter-z, 1);
+  --chapter-progress: 0;
+  --chapter-entry: 0;
+  --chapter-dissolve: 0;
+  --chapter-visibility: 0;
+  --chapter-cloud: 0;
+  --turn-rotate: 0deg;
+  --turn-yaw: 0deg;
+  --turn-shift: 0px;
+  --turn-scale: 1;
+  --turn-glow: 0.5;
+  --turn-curl: 0.22;
+  --chapter-shift: 96px;
+  --chapter-blur: 18px;
+  --assembly-progress: 0;
+}
+
+.chapter-band + .chapter-band {
+  margin-top: clamp(-320px, -18vw, -190px);
+}
+
+.chapter-band:last-of-type {
+  min-height: clamp(820px, 118svh, 1100px);
+}
+
+.section-turn-shell {
+  position: relative;
+  position: sticky;
+  top: 84px;
+  width: min(1220px, 100%);
+  margin: 0 auto;
+  padding: 34px 30px 30px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 30px;
+  overflow: hidden;
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.06), transparent 16%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.03)),
+    rgba(10, 11, 14, 0.74);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    inset 22px 0 32px rgba(255, 255, 255, 0.02),
+    0 28px 88px rgba(0, 0, 0, 0.34),
+    0 70px 160px rgba(0, 0, 0, 0.24);
+  backdrop-filter: blur(24px) saturate(165%);
+  transform-origin: center top;
+  transform-style: preserve-3d;
+  transform:
+    perspective(1800px)
+    rotateX(var(--turn-rotate))
+    rotateY(var(--turn-yaw))
+    translate3d(0, calc(var(--turn-shift) + var(--chapter-shift)), 0)
+    scale(calc(var(--turn-scale) * (0.92 + var(--chapter-visibility) * 0.08)));
+  opacity: calc(0.12 + var(--chapter-visibility) * 0.88);
+  filter:
+    saturate(calc(0.68 + var(--chapter-visibility) * 0.5))
+    brightness(calc(0.66 + var(--chapter-visibility) * 0.32))
+    blur(calc(var(--chapter-dissolve) * 1.4px));
+  transition:
+    border-color 240ms ease,
+    box-shadow 240ms ease,
+    transform 220ms ease,
+    opacity 180ms linear,
+    filter 180ms linear;
+  will-change: transform, opacity, filter;
+}
+
+.section-turn-shell::before,
+.section-turn-shell::after {
+  position: absolute;
+  content: "";
+  pointer-events: none;
+}
+
+.section-turn-shell::before {
+  top: 0;
+  left: 24px;
+  right: 24px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.28), transparent);
+}
+
+.section-turn-shell::after {
+  top: 0;
+  right: 0;
+  width: 192px;
+  height: 192px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.22), rgba(95, 157, 255, 0.08) 42%, transparent 58%);
+  clip-path: polygon(100% 0, 100% 100%, 0 0);
+  opacity: calc(0.18 + var(--turn-glow) * 0.34);
+  transform: scale(calc(0.88 + var(--turn-curl) * 0.46));
+  transform-origin: top right;
+}
+
+.chapter-band::before,
+.chapter-band::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+}
+
+.chapter-band::before {
+  background:
+    radial-gradient(circle at 50% 48%, rgba(255, 255, 255, 0.14), transparent 18%),
+    radial-gradient(circle at 22% 58%, rgba(95, 157, 255, 0.12), transparent 24%),
+    radial-gradient(circle at 78% 38%, rgba(95, 157, 255, 0.14), transparent 28%),
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.03) 0 2px,
+      transparent 2px 16px
+    ),
+    repeating-linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.02) 0 2px,
+      transparent 2px 14px
+    );
+  mix-blend-mode: screen;
+  opacity: calc(var(--chapter-cloud) * 0.24);
+  filter: blur(calc(18px + var(--chapter-dissolve) * 18px));
+  transition:
+    opacity 180ms linear,
+    filter 180ms linear;
+}
+
+.chapter-band::after {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(0, 0, 0, calc(var(--chapter-dissolve) * 0.22)) 0,
+      transparent 24%,
+      transparent 72%,
+      rgba(0, 0, 0, calc(var(--chapter-dissolve) * 0.3)) 100%
+    );
+  opacity: calc(0.1 + var(--chapter-dissolve) * 0.36);
+  transition: opacity 180ms linear;
+}
+
+.section-turn-shell > :not(.section-pixel-canvas):not(.pixel-relay):not(.pixel-fracture):not(.turn-page-index) {
+  position: relative;
+  z-index: 2;
+}
+
+.section-pixel-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  opacity: calc(0.12 + var(--chapter-entry) * 0.12 + var(--chapter-cloud) * 0.42);
+  pointer-events: none;
+  mix-blend-mode: screen;
+  filter: blur(calc((1 - var(--chapter-entry)) * 4px + var(--chapter-dissolve) * 10px));
+  transition:
+    opacity 180ms linear,
+    filter 180ms linear;
+}
+
+.chapter-band .section-heading,
+.chapter-band .results-grid,
+.chapter-band .feature-grid,
+.chapter-band .hardware-grid,
+.chapter-band .intelligence-grid {
+  width: 100%;
+  opacity: calc(0.08 + var(--chapter-visibility) * 0.92);
+  filter: blur(calc(var(--chapter-blur) + var(--chapter-dissolve) * 4px));
+  transform:
+    translate3d(
+      0,
+      calc((1 - var(--chapter-entry)) * 54px - var(--chapter-dissolve) * 34px),
+      0
+    )
+    scale(calc(0.92 + var(--chapter-visibility) * 0.08));
+  transform-origin: center top;
+  transition:
+    transform 180ms linear,
+    opacity 180ms linear,
+    filter 180ms linear;
+}
+
+.chapter-band .section-heading {
+  position: relative;
+  z-index: 2;
+  margin-bottom: 30px;
+}
+
+.chapter-band .split-heading {
+  align-items: start;
+  gap: 28px;
+}
+
+.chapter-band .section-link {
+  align-self: end;
+  transform: translate3d(calc((1 - var(--chapter-entry)) * 26px), calc((1 - var(--chapter-entry)) * 12px), 0);
+  opacity: calc(0.12 + var(--chapter-visibility) * 0.88);
+  transition:
+    transform 180ms linear,
+    opacity 180ms linear;
+}
+
+.chapter-band .section-heading h2 {
+  max-width: 820px;
+}
+
+.chapter-band .live-pill {
+  transform: translate3d(calc((1 - var(--chapter-entry)) * 34px), 0, 0);
+  opacity: calc(0.12 + var(--chapter-visibility) * 0.88);
+  transition:
+    transform 180ms linear,
+    opacity 180ms linear;
+}
+
+.pixel-relay {
+  position: absolute;
+  z-index: 1;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 18px 42px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(12px);
+  pointer-events: none;
+  opacity: calc(0.02 + var(--chapter-entry) * 0.14 + var(--turn-glow) * 0.1 - var(--chapter-dissolve) * 0.08);
+  mix-blend-mode: screen;
+  filter: blur(calc((1 - var(--assembly-progress)) * 10px + var(--chapter-dissolve) * 8px));
+  transition:
+    opacity 180ms linear,
+    filter 180ms linear;
+}
+
+.pixel-relay::before,
+.pixel-relay::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+}
+
+.pixel-relay::before {
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 6px 6px;
+  opacity: 0.5;
+}
+
+.pixel-relay::after {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.12), transparent 28%, transparent 72%, rgba(0, 0, 0, 0.36)),
+    radial-gradient(circle at 50% 50%, transparent 42%, rgba(255, 255, 255, 0.08));
+}
+
+.pixel-relay img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  image-rendering: pixelated;
+  filter: grayscale(1) contrast(175%) brightness(0.7);
+  transform: scale(calc(1.3 - var(--assembly-progress) * 0.12 + var(--chapter-dissolve) * 0.1));
+  opacity: 0.88;
+  animation: pixelRelayPan 17s steps(18) infinite;
+}
+
+.pixel-relay-a {
+  top: 26px;
+  right: 30px;
+  width: clamp(148px, 18vw, 244px);
+  aspect-ratio: 1.55;
+  clip-path: polygon(0 0, 100% 0, 100% 82%, 84% 100%, 0 100%);
+  --relay-base-rotate: -4deg;
+  --relay-enter-x: 82px;
+  --relay-enter-y: -46px;
+  --relay-idle-shift-x: 12px;
+  --relay-idle-shift-y: -10px;
+  animation: relayFloatA 16s ease-in-out infinite;
+}
+
+.pixel-relay-b {
+  bottom: 28px;
+  left: 30px;
+  width: clamp(126px, 15vw, 198px);
+  aspect-ratio: 1.18;
+  clip-path: polygon(12% 0, 100% 0, 100% 100%, 0 100%, 0 16%);
+  --relay-base-rotate: 3deg;
+  --relay-enter-x: -74px;
+  --relay-enter-y: 52px;
+  --relay-idle-shift-x: -10px;
+  --relay-idle-shift-y: 12px;
+  animation: relayFloatB 18s ease-in-out infinite;
+}
+
+.pixel-fracture {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.pixel-fracture span {
+  position: absolute;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.035);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 14px 34px rgba(0, 0, 0, 0.22);
+  opacity: calc(var(--assembly-progress) * (1 - var(--chapter-dissolve) * 0.62) * 0.82);
+  filter: blur(calc((1 - var(--assembly-progress)) * 14px + var(--chapter-dissolve) * 8px));
+  transform:
+    translate3d(
+      calc((1 - var(--assembly-progress)) * var(--fragment-shift-x, 0px) + var(--chapter-dissolve) * var(--fragment-exit-x, 0px)),
+      calc((1 - var(--assembly-progress)) * var(--fragment-shift-y, 0px) + var(--chapter-dissolve) * var(--fragment-exit-y, 0px)),
+      0
+    )
+    rotate(calc((1 - var(--assembly-progress)) * var(--fragment-rotate, 0deg) + var(--chapter-dissolve) * var(--fragment-exit-rotate, 0deg)))
+    scale(calc(0.54 + var(--assembly-progress) * 0.46 + var(--chapter-dissolve) * 0.18));
+  transform-origin: center;
+  transition:
+    opacity 180ms linear,
+    filter 180ms linear,
+    transform 180ms linear;
+}
+
+.pixel-fracture span::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 28%, transparent 72%, rgba(0, 0, 0, 0.26));
+  background-size: 7px 7px, 7px 7px, auto;
+  mix-blend-mode: screen;
+}
+
+.pixel-fracture span img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  image-rendering: pixelated;
+  filter: grayscale(1) contrast(192%) brightness(0.78);
+  transform: scale(calc(1.24 - var(--assembly-progress) * 0.1));
+  opacity: calc(0.28 + var(--assembly-progress) * 0.68);
+}
+
+.chapter-band-intelligence .pixel-fracture span:nth-child(1) {
+  top: 13%;
+  right: 15%;
+  width: 138px;
+  height: 72px;
+  --fragment-shift-x: 116px;
+  --fragment-shift-y: -74px;
+  --fragment-rotate: 16deg;
+  --fragment-exit-x: 92px;
+  --fragment-exit-y: -36px;
+  --fragment-exit-rotate: 10deg;
+}
+
+.chapter-band-intelligence .pixel-fracture span:nth-child(2) {
+  top: 20%;
+  right: 31%;
+  width: 94px;
+  height: 62px;
+  --fragment-shift-x: 86px;
+  --fragment-shift-y: -34px;
+  --fragment-rotate: -10deg;
+  --fragment-exit-x: 58px;
+  --fragment-exit-y: -24px;
+  --fragment-exit-rotate: -9deg;
+}
+
+.chapter-band-intelligence .pixel-fracture span:nth-child(3) {
+  top: 57%;
+  left: 8%;
+  width: 102px;
+  height: 68px;
+  --fragment-shift-x: -102px;
+  --fragment-shift-y: 54px;
+  --fragment-rotate: -14deg;
+  --fragment-exit-x: -92px;
+  --fragment-exit-y: 44px;
+  --fragment-exit-rotate: -12deg;
+}
+
+.chapter-band-intelligence .pixel-fracture span:nth-child(4) {
+  bottom: 13%;
+  right: 14%;
+  width: 126px;
+  height: 76px;
+  --fragment-shift-x: 74px;
+  --fragment-shift-y: 82px;
+  --fragment-rotate: 12deg;
+  --fragment-exit-x: 86px;
+  --fragment-exit-y: 66px;
+  --fragment-exit-rotate: 11deg;
+}
+
+.chapter-band-intelligence .pixel-fracture span:nth-child(5) {
+  bottom: 18%;
+  right: 34%;
+  width: 88px;
+  height: 54px;
+  --fragment-shift-x: 48px;
+  --fragment-shift-y: 68px;
+  --fragment-rotate: -8deg;
+  --fragment-exit-x: 42px;
+  --fragment-exit-y: 56px;
+  --fragment-exit-rotate: -9deg;
+}
+
+.chapter-band-intelligence .pixel-fracture span:nth-child(6) {
+  top: 11%;
+  left: 10%;
+  width: 120px;
+  height: 70px;
+  --fragment-shift-x: -82px;
+  --fragment-shift-y: -56px;
+  --fragment-rotate: 13deg;
+  --fragment-exit-x: -74px;
+  --fragment-exit-y: -44px;
+  --fragment-exit-rotate: 9deg;
+}
+
+.chapter-band-hardware .pixel-fracture span:nth-child(1) {
+  top: 15%;
+  left: 8%;
+  width: 122px;
+  height: 74px;
+  --fragment-shift-x: -108px;
+  --fragment-shift-y: -58px;
+  --fragment-rotate: -16deg;
+  --fragment-exit-x: -96px;
+  --fragment-exit-y: -28px;
+  --fragment-exit-rotate: -11deg;
+}
+
+.chapter-band-hardware .pixel-fracture span:nth-child(2) {
+  top: 11%;
+  right: 13%;
+  width: 146px;
+  height: 82px;
+  --fragment-shift-x: 118px;
+  --fragment-shift-y: -66px;
+  --fragment-rotate: 12deg;
+  --fragment-exit-x: 96px;
+  --fragment-exit-y: -22px;
+  --fragment-exit-rotate: 9deg;
+}
+
+.chapter-band-hardware .pixel-fracture span:nth-child(3) {
+  top: 33%;
+  right: 28%;
+  width: 96px;
+  height: 60px;
+  --fragment-shift-x: 92px;
+  --fragment-shift-y: -16px;
+  --fragment-rotate: -9deg;
+  --fragment-exit-x: 74px;
+  --fragment-exit-y: 6px;
+  --fragment-exit-rotate: -8deg;
+}
+
+.chapter-band-hardware .pixel-fracture span:nth-child(4) {
+  bottom: 17%;
+  left: 15%;
+  width: 112px;
+  height: 66px;
+  --fragment-shift-x: -76px;
+  --fragment-shift-y: 70px;
+  --fragment-rotate: 11deg;
+  --fragment-exit-x: -62px;
+  --fragment-exit-y: 52px;
+  --fragment-exit-rotate: 10deg;
+}
+
+.chapter-band-hardware .pixel-fracture span:nth-child(5) {
+  bottom: 10%;
+  right: 12%;
+  width: 138px;
+  height: 78px;
+  --fragment-shift-x: 88px;
+  --fragment-shift-y: 78px;
+  --fragment-rotate: 15deg;
+  --fragment-exit-x: 72px;
+  --fragment-exit-y: 56px;
+  --fragment-exit-rotate: 12deg;
+}
+
+.chapter-band-hardware .pixel-fracture span:nth-child(6) {
+  bottom: 25%;
+  right: 32%;
+  width: 90px;
+  height: 56px;
+  --fragment-shift-x: 52px;
+  --fragment-shift-y: 58px;
+  --fragment-rotate: -12deg;
+  --fragment-exit-x: 46px;
+  --fragment-exit-y: 42px;
+  --fragment-exit-rotate: -10deg;
+}
+
+.chapter-band-intelligence .pixel-fracture span:nth-child(1) img {
+  object-position: 76% 20%;
+}
+
+.chapter-band-intelligence .pixel-fracture span:nth-child(2) img {
+  object-position: 58% 38%;
+}
+
+.chapter-band-intelligence .pixel-fracture span:nth-child(3) img {
+  object-position: 22% 74%;
+}
+
+.chapter-band-intelligence .pixel-fracture span:nth-child(4) img {
+  object-position: 82% 78%;
+}
+
+.chapter-band-intelligence .pixel-fracture span:nth-child(5) img {
+  object-position: 64% 64%;
+}
+
+.chapter-band-intelligence .pixel-fracture span:nth-child(6) img {
+  object-position: 14% 26%;
+}
+
+.chapter-band-hardware .pixel-fracture span:nth-child(1) img {
+  object-position: 18% 24%;
+}
+
+.chapter-band-hardware .pixel-fracture span:nth-child(2) img {
+  object-position: 82% 20%;
+}
+
+.chapter-band-hardware .pixel-fracture span:nth-child(3) img {
+  object-position: 66% 48%;
+}
+
+.chapter-band-hardware .pixel-fracture span:nth-child(4) img {
+  object-position: 28% 76%;
+}
+
+.chapter-band-hardware .pixel-fracture span:nth-child(5) img {
+  object-position: 86% 86%;
+}
+
+.chapter-band-hardware .pixel-fracture span:nth-child(6) img {
+  object-position: 58% 70%;
+}
+
+.chapter-band-results .pixel-relay-a img {
+  object-position: 76% 30%;
+}
+
+.chapter-band-results .pixel-relay-b img {
+  object-position: 34% 78%;
+}
+
+.chapter-band-intelligence .pixel-relay-a {
+  top: auto;
+  right: 24px;
+  bottom: 22px;
+}
+
+.chapter-band-intelligence .pixel-relay-a img {
+  object-position: 78% 64%;
+}
+
+.chapter-band-intelligence .pixel-relay-b {
+  top: 34px;
+  left: auto;
+  right: 210px;
+  bottom: auto;
+}
+
+.chapter-band-intelligence .pixel-relay-b img {
+  object-position: 44% 30%;
+}
+
+.chapter-band-hardware .pixel-relay-a img {
+  object-position: 82% 26%;
+}
+
+.chapter-band-hardware .pixel-relay-b img {
+  object-position: 48% 88%;
+}
+
+.chapter-band-features .pixel-relay-a {
+  right: 44px;
+}
+
+.chapter-band-features .pixel-relay-a img {
+  object-position: 72% 34%;
+}
+
+.chapter-band-features .pixel-relay-b img {
+  object-position: 26% 68%;
+}
+
+.turn-page-index {
+  position: absolute;
+  top: 14px;
+  right: 22px;
+  z-index: 1;
+  color: rgba(255, 255, 255, 0.08);
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: clamp(58px, 8vw, 116px);
+  font-weight: 700;
+  line-height: 0.9;
+  letter-spacing: 0;
+  pointer-events: none;
+  opacity: calc(0.06 + var(--chapter-visibility) * 0.28 - var(--chapter-dissolve) * 0.08);
+  transform: translateZ(2px) scale(calc(0.8 + var(--chapter-visibility) * 0.2));
+  transition:
+    opacity 180ms linear,
+    transform 180ms linear;
+}
+
+.chapter-band-results {
+  background:
+    radial-gradient(circle at 78% 18%, rgba(95, 157, 255, 0.08), transparent 24%),
+    linear-gradient(180deg, rgba(2, 3, 5, 0.98), rgba(6, 8, 11, 0.98));
+}
+
+.chapter-band-intelligence {
+  background:
+    radial-gradient(circle at 20% 14%, rgba(255, 255, 255, 0.08), transparent 22%),
+    linear-gradient(180deg, rgba(6, 7, 9, 0.98), rgba(10, 12, 16, 0.98));
+}
+
+.chapter-band-hardware {
+  background:
+    radial-gradient(circle at 74% 18%, rgba(95, 157, 255, 0.06), transparent 26%),
+    linear-gradient(180deg, rgba(4, 5, 7, 0.98), rgba(8, 9, 12, 0.98));
+}
+
+.chapter-band-features {
+  background:
+    radial-gradient(circle at 24% 16%, rgba(95, 157, 255, 0.06), transparent 24%),
+    linear-gradient(180deg, rgba(3, 4, 6, 0.98), rgba(7, 8, 10, 0.98));
+}
+
 .story-stage {
   position: relative;
   overflow: hidden;
@@ -1029,9 +1680,9 @@ h3 {
   scroll-margin-top: 88px;
 }
 
-.intro-band,
-.workflow-band,
-.hardware-band {
+.intro-band:not(.chapter-band),
+.workflow-band:not(.chapter-band),
+.hardware-band:not(.chapter-band) {
   background:
     linear-gradient(180deg, rgba(7, 8, 10, 0.98), rgba(4, 5, 6, 0.98)),
     var(--bg);
@@ -1048,7 +1699,7 @@ h3 {
   background: transparent;
 }
 
-.results-band {
+.results-band:not(.chapter-band) {
   background:
     linear-gradient(180deg, rgba(6, 7, 8, 0.98), rgba(10, 11, 13, 0.98)),
     var(--surface);
@@ -1313,7 +1964,7 @@ h3 {
   font-weight: 650;
 }
 
-.intelligence-band {
+.intelligence-band:not(.chapter-band) {
   padding-top: 84px;
   padding-bottom: 88px;
   scroll-margin-top: 72px;
@@ -2169,6 +2820,78 @@ code {
   }
 }
 
+@keyframes pixelRelayPan {
+  0% {
+    transform: scale(1.18) translate3d(-2%, -1%, 0);
+  }
+
+  25% {
+    transform: scale(1.24) translate3d(4%, -4%, 0);
+  }
+
+  50% {
+    transform: scale(1.2) translate3d(8%, 2%, 0);
+  }
+
+  75% {
+    transform: scale(1.26) translate3d(1%, 6%, 0);
+  }
+
+  100% {
+    transform: scale(1.18) translate3d(-2%, -1%, 0);
+  }
+}
+
+@keyframes relayFloatA {
+  0%,
+  100% {
+    transform:
+      translate3d(
+        calc((1 - var(--assembly-progress)) * var(--relay-enter-x, 0px)),
+        calc((1 - var(--assembly-progress)) * var(--relay-enter-y, 0px)),
+        0
+      )
+      rotate(var(--relay-base-rotate, -4deg))
+      scale(calc(0.76 + var(--assembly-progress) * 0.24 + var(--turn-glow) * 0.1));
+  }
+
+  50% {
+    transform:
+      translate3d(
+        calc(var(--relay-idle-shift-x, 12px) + (1 - var(--assembly-progress)) * var(--relay-enter-x, 0px)),
+        calc(var(--relay-idle-shift-y, -10px) + (1 - var(--assembly-progress)) * var(--relay-enter-y, 0px)),
+        0
+      )
+      rotate(calc(var(--relay-base-rotate, -4deg) + 3deg))
+      scale(calc(0.82 + var(--assembly-progress) * 0.26 + var(--turn-glow) * 0.12));
+  }
+}
+
+@keyframes relayFloatB {
+  0%,
+  100% {
+    transform:
+      translate3d(
+        calc((1 - var(--assembly-progress)) * var(--relay-enter-x, 0px)),
+        calc((1 - var(--assembly-progress)) * var(--relay-enter-y, 0px)),
+        0
+      )
+      rotate(var(--relay-base-rotate, 3deg))
+      scale(calc(0.74 + var(--assembly-progress) * 0.24 + var(--turn-glow) * 0.1));
+  }
+
+  50% {
+    transform:
+      translate3d(
+        calc(var(--relay-idle-shift-x, -10px) + (1 - var(--assembly-progress)) * var(--relay-enter-x, 0px)),
+        calc(var(--relay-idle-shift-y, 12px) + (1 - var(--assembly-progress)) * var(--relay-enter-y, 0px)),
+        0
+      )
+      rotate(calc(var(--relay-base-rotate, 3deg) + 3deg))
+      scale(calc(0.8 + var(--assembly-progress) * 0.26 + var(--turn-glow) * 0.12));
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -2332,6 +3055,125 @@ code {
     border-radius: 26px;
   }
 
+  .chapter-band {
+    min-height: 112svh;
+    padding: 34px 18px 40px;
+  }
+
+  .chapter-band + .chapter-band {
+    margin-top: -92px;
+  }
+
+  .chapter-band:last-of-type {
+    min-height: 104svh;
+  }
+
+  .section-turn-shell {
+    top: 72px;
+    padding: 26px 20px 22px;
+    border-radius: 24px;
+  }
+
+  .section-turn-shell::after {
+    width: 132px;
+    height: 132px;
+  }
+
+  .turn-page-index {
+    top: 12px;
+    right: 16px;
+    font-size: clamp(44px, 16vw, 72px);
+  }
+
+  .pixel-relay {
+    opacity: calc(0.08 + var(--turn-glow) * 0.14);
+  }
+
+  .pixel-relay-a {
+    top: 18px;
+    right: 14px;
+    width: 110px;
+    --relay-enter-x: 38px;
+    --relay-enter-y: -26px;
+  }
+
+  .pixel-relay-b {
+    bottom: 16px;
+    left: 12px;
+    width: 92px;
+    --relay-enter-x: -36px;
+    --relay-enter-y: 24px;
+  }
+
+  .chapter-band-intelligence .pixel-relay-b {
+    top: 18px;
+    right: 132px;
+  }
+
+  .pixel-fracture span {
+    border-radius: 9px;
+  }
+
+  .pixel-fracture span:nth-child(n + 5) {
+    display: none;
+  }
+
+  .chapter-band-intelligence .pixel-fracture span:nth-child(1) {
+    top: 10%;
+    right: 8%;
+    width: 88px;
+    height: 48px;
+  }
+
+  .chapter-band-intelligence .pixel-fracture span:nth-child(2) {
+    top: 21%;
+    right: 36%;
+    width: 68px;
+    height: 44px;
+  }
+
+  .chapter-band-intelligence .pixel-fracture span:nth-child(3) {
+    top: 58%;
+    left: 6%;
+    width: 76px;
+    height: 50px;
+  }
+
+  .chapter-band-intelligence .pixel-fracture span:nth-child(4) {
+    bottom: 14%;
+    right: 8%;
+    width: 84px;
+    height: 52px;
+  }
+
+  .chapter-band-hardware .pixel-fracture span:nth-child(1) {
+    top: 14%;
+    left: 6%;
+    width: 86px;
+    height: 52px;
+  }
+
+  .chapter-band-hardware .pixel-fracture span:nth-child(2) {
+    top: 8%;
+    right: 9%;
+    width: 94px;
+    height: 56px;
+  }
+
+  .chapter-band-hardware .pixel-fracture span:nth-child(3) {
+    top: 34%;
+    right: 30%;
+    width: 70px;
+    height: 44px;
+  }
+
+  .chapter-band-hardware .pixel-fracture span:nth-child(4) {
+    bottom: 16%;
+    left: 12%;
+    width: 78px;
+    height: 48px;
+  }
+
   .hero-console-footer {
     flex-direction: column;
     align-items: stretch;
@@ -2365,6 +3207,14 @@ code {
 
   .story-heading {
     padding-bottom: 22px;
+  }
+
+  .chapter-band .section-heading {
+    margin-bottom: 22px;
+  }
+
+  .chapter-band .section-link {
+    align-self: start;
   }
 
   .backend-row {
