@@ -270,6 +270,16 @@ function initializeActiveNav() {
 }
 
 function initializeScrollState() {
+  if (motionProfile.performanceLite) {
+    const updateScrollLite = () => {
+      body.classList.toggle("is-scrolled", window.scrollY > 28);
+    };
+
+    window.addEventListener("scroll", updateScrollLite, { passive: true });
+    updateScrollLite();
+    return;
+  }
+
   let scrollIdleTimer = 0;
 
   const updateScroll = () => {
