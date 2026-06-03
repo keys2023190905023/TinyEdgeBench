@@ -49,6 +49,23 @@ if (cloud) {
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 const body = document.body;
 const cursorRing = document.querySelector(".cursor-ring");
+const motionProfile = {
+  performanceLite:
+    !prefersReducedMotion.matches &&
+    (((navigator.deviceMemory || 0) > 0 && navigator.deviceMemory <= 8) ||
+      ((navigator.hardwareConcurrency || 0) > 0 && navigator.hardwareConcurrency <= 8)),
+};
+
+body.classList.toggle("is-performance-lite", motionProfile.performanceLite);
+
+function getCanvasRatio(standardLimit = 1.5, liteLimit = 1) {
+  return Math.min(window.devicePixelRatio || 1, motionProfile.performanceLite ? liteLimit : standardLimit);
+}
+
+function getMotionFrameInterval(baseInterval, liteInterval = baseInterval * 1.4, scrollingInterval = liteInterval * 1.6) {
+  if (body.classList.contains("is-scrolling")) return scrollingInterval;
+  return motionProfile.performanceLite ? liteInterval : baseInterval;
+}
 
 const liveRuns = [
   {
@@ -253,6 +270,8 @@ function initializeActiveNav() {
 }
 
 function initializeScrollState() {
+  let scrollIdleTimer = 0;
+
   const updateScroll = () => {
     const ratio = Math.min(window.scrollY / Math.max(window.innerHeight, 1), 1);
     body.style.setProperty("--scroll-progress", ratio.toFixed(3));
@@ -261,6 +280,12 @@ function initializeScrollState() {
 
   let ticking = false;
   const handleScroll = () => {
+    body.classList.add("is-scrolling");
+    window.clearTimeout(scrollIdleTimer);
+    scrollIdleTimer = window.setTimeout(() => {
+      body.classList.remove("is-scrolling");
+    }, 140);
+
     if (ticking) return;
     ticking = true;
     window.requestAnimationFrame(() => {
@@ -275,7 +300,7 @@ function initializeScrollState() {
 
 function initializeHeroParallax() {
   const hero = document.querySelector(".hero");
-  if (!hero || prefersReducedMotion.matches) return;
+  if (!hero || prefersReducedMotion.matches || motionProfile.performanceLite) return;
 
   const state = {
     copyX: 0,
@@ -510,7 +535,7 @@ function initializeManifestoCanvas() {
   });
 
   function resizeManifestoCanvas() {
-    const ratio = window.devicePixelRatio || 1;
+    const ratio = getCanvasRatio(1.2, 1);
     canvasWidth = section.clientWidth;
     canvasHeight = section.clientHeight;
     canvas.width = Math.max(1, Math.floor(canvasWidth * ratio));
@@ -576,7 +601,7 @@ function initializeManifestoCanvas() {
   }
 
   function renderManifesto(now) {
-    if (!lastFrame || now - lastFrame > 42) {
+    if (!lastFrame || now - lastFrame > getMotionFrameInterval(42, 62, 92)) {
       if (active || prefersReducedMotion.matches) {
         drawCloud(now / 1000);
       }
@@ -609,7 +634,7 @@ function initializeStoryCanvas() {
   let lastFrame = 0;
 
   function resizeStoryCanvas() {
-    const ratio = window.devicePixelRatio || 1;
+    const ratio = getCanvasRatio(1.15, 1);
     canvasWidth = stage.clientWidth;
     canvasHeight = stage.clientHeight;
     canvas.width = Math.max(1, Math.floor(canvasWidth * ratio));
@@ -738,7 +763,7 @@ function initializeStoryCanvas() {
   }
 
   function renderStory(now) {
-    if (!lastFrame || now - lastFrame > 40) {
+    if (!lastFrame || now - lastFrame > getMotionFrameInterval(40, 58, 88)) {
       if (active || prefersReducedMotion.matches) {
         drawStory(now / 1000);
       }
@@ -800,7 +825,7 @@ function initializeChapterPixelStreams() {
   };
 
   const resizeEntry = (entry) => {
-    const ratio = window.devicePixelRatio || 1;
+    const ratio = getCanvasRatio(1.1, 1);
     entry.width = entry.shell.clientWidth;
     entry.height = entry.shell.clientHeight;
     entry.canvas.width = Math.max(1, Math.floor(entry.width * ratio));
@@ -938,7 +963,7 @@ function initializeChapterPixelStreams() {
 
   let lastFrame = 0;
   const render = (now) => {
-    if (!lastFrame || now - lastFrame > 48) {
+    if (!lastFrame || now - lastFrame > getMotionFrameInterval(48, 70, 104)) {
       const timeSeconds = now / 1000;
       entries.forEach((entry) => {
         if (entry.active || prefersReducedMotion.matches) {
@@ -961,7 +986,7 @@ function initializeChapterPixelStreams() {
 function initializeCursorRing() {
   if (!cursorRing) return;
   const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)");
-  if (!finePointer.matches || prefersReducedMotion.matches) return;
+  if (!finePointer.matches || prefersReducedMotion.matches || motionProfile.performanceLite) return;
 
   body.classList.add("has-custom-cursor");
   const state = {
@@ -1011,7 +1036,7 @@ const focus = {
 
 function resizeCanvas() {
   if (!canvas || !ctx) return;
-  const ratio = window.devicePixelRatio || 1;
+  const ratio = getCanvasRatio(1.15, 1);
   width = window.innerWidth;
   height = window.innerHeight;
   canvas.width = Math.floor(width * ratio);
@@ -1019,7 +1044,7 @@ function resizeCanvas() {
   canvas.style.width = `${width}px`;
   canvas.style.height = `${height}px`;
   ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
-  points = Array.from({ length: Math.min(96, Math.floor(width / 15)) }, () => ({
+  points = Array.from({ length: Math.min(motionProfile.performanceLite ? 56 : 96, Math.floor(width / 15)) }, () => ({
     x: Math.random() * width,
     y: Math.random() * height,
     vx: (Math.random() - 0.5) * 0.3,
@@ -1045,61 +1070,66 @@ function initializeCanvasMotion() {
     focus.targetY = height * 0.32;
   });
 
-  const draw = () => {
-    tick += 0.008;
-    focus.x += (focus.targetX - focus.x) * 0.03;
-    focus.y += (focus.targetY - focus.y) * 0.03;
+  let lastFrame = 0;
+  const draw = (now) => {
+    if (!lastFrame || now - lastFrame > getMotionFrameInterval(34, 52, 86)) {
+      lastFrame = now;
+      tick += 0.008;
+      focus.x += (focus.targetX - focus.x) * 0.03;
+      focus.y += (focus.targetY - focus.y) * 0.03;
 
-    ctx.clearRect(0, 0, width, height);
-    ctx.fillStyle = "#000000";
-    ctx.fillRect(0, 0, width, height);
+      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = "#000000";
+      ctx.fillRect(0, 0, width, height);
 
-    const halo = ctx.createRadialGradient(focus.x, focus.y, 0, focus.x, focus.y, Math.min(width, height) * 0.28);
-    halo.addColorStop(0, "rgba(255,255,255,0.08)");
-    halo.addColorStop(0.34, "rgba(95,157,255,0.06)");
-    halo.addColorStop(1, "rgba(0,0,0,0)");
-    ctx.fillStyle = halo;
-    ctx.fillRect(0, 0, width, height);
+      const halo = ctx.createRadialGradient(focus.x, focus.y, 0, focus.x, focus.y, Math.min(width, height) * 0.28);
+      halo.addColorStop(0, "rgba(255,255,255,0.08)");
+      halo.addColorStop(0.34, "rgba(95,157,255,0.06)");
+      halo.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.fillStyle = halo;
+      ctx.fillRect(0, 0, width, height);
 
-    for (const point of points) {
-      point.x += point.vx;
-      point.y += point.vy;
-      if (point.x < 0 || point.x > width) point.vx *= -1;
-      if (point.y < 0 || point.y > height) point.vy *= -1;
-    }
+      for (const point of points) {
+        point.x += point.vx;
+        point.y += point.vy;
+        if (point.x < 0 || point.x > width) point.vx *= -1;
+        if (point.y < 0 || point.y > height) point.vy *= -1;
+      }
 
-    ctx.lineWidth = 1;
-    for (let i = 0; i < points.length; i += 1) {
-      for (let j = i + 1; j < points.length; j += 1) {
-        const pointA = points[i];
-        const pointB = points[j];
-        const dx = pointA.x - pointB.x;
-        const dy = pointA.y - pointB.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        if (distance < 120) {
-          const alpha = (1 - distance / 120) * 0.08;
-          ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
-          ctx.beginPath();
-          ctx.moveTo(pointA.x, pointA.y);
-          ctx.lineTo(pointB.x, pointB.y);
-          ctx.stroke();
+      ctx.lineWidth = 1;
+      const linkDistance = motionProfile.performanceLite ? 96 : 120;
+      for (let i = 0; i < points.length; i += 1) {
+        for (let j = i + 1; j < points.length; j += 1) {
+          const pointA = points[i];
+          const pointB = points[j];
+          const dx = pointA.x - pointB.x;
+          const dy = pointA.y - pointB.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          if (distance < linkDistance) {
+            const alpha = (1 - distance / linkDistance) * 0.08;
+            ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
+            ctx.beginPath();
+            ctx.moveTo(pointA.x, pointA.y);
+            ctx.lineTo(pointB.x, pointB.y);
+            ctx.stroke();
+          }
         }
       }
-    }
 
-    for (let lineIndex = 0; lineIndex < 5; lineIndex += 1) {
-      const lineY = (tick * 180 + lineIndex * (height / 5)) % height;
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.018)";
-      ctx.beginPath();
-      ctx.moveTo(0, lineY);
-      ctx.lineTo(width, lineY);
-      ctx.stroke();
-    }
+      for (let lineIndex = 0; lineIndex < 5; lineIndex += 1) {
+        const lineY = (tick * 180 + lineIndex * (height / 5)) % height;
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.018)";
+        ctx.beginPath();
+        ctx.moveTo(0, lineY);
+        ctx.lineTo(width, lineY);
+        ctx.stroke();
+      }
 
-    for (const point of points) {
-      const pulse = 0.12 + Math.sin(tick + point.phase) * 0.05;
-      ctx.fillStyle = `rgba(180, 190, 205, ${pulse})`;
-      ctx.fillRect(point.x - 1, point.y - 1, 2, 2);
+      for (const point of points) {
+        const pulse = 0.12 + Math.sin(tick + point.phase) * 0.05;
+        ctx.fillStyle = `rgba(180, 190, 205, ${pulse})`;
+        ctx.fillRect(point.x - 1, point.y - 1, 2, 2);
+      }
     }
 
     window.requestAnimationFrame(draw);
@@ -1107,7 +1137,7 @@ function initializeCanvasMotion() {
 
   window.addEventListener("resize", resizeCanvas);
   resizeCanvas();
-  draw();
+  draw(0);
 }
 
 initializeLivePreview();
