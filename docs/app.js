@@ -415,24 +415,122 @@ function initializeTurnSections() {
   if (!sections.length) return;
 
   if (motionProfile.performanceLite) {
-    sections.forEach((section, index) => {
+    const phaseConfig = {
+      idle: {
+        progress: 0.78,
+        entry: 0.84,
+        dissolve: 0,
+        visibility: 0.74,
+        cloud: 0.12,
+        shift: 18,
+        blur: 5,
+        scale: 0.986,
+        glow: 0.14,
+        curl: 0.16,
+        assembly: 0.88,
+      },
+      previous: {
+        progress: 0.9,
+        entry: 1,
+        dissolve: 0.12,
+        visibility: 0.84,
+        cloud: 0.18,
+        shift: -12,
+        blur: 1,
+        scale: 0.992,
+        glow: 0.18,
+        curl: 0.18,
+        assembly: 1,
+      },
+      active: {
+        progress: 1,
+        entry: 1,
+        dissolve: 0,
+        visibility: 1,
+        cloud: 0.28,
+        shift: 0,
+        blur: 0,
+        scale: 1,
+        glow: 0.24,
+        curl: 0.18,
+        assembly: 1,
+      },
+      next: {
+        progress: 0.94,
+        entry: 0.95,
+        dissolve: 0,
+        visibility: 0.91,
+        cloud: 0.22,
+        shift: 8,
+        blur: 1,
+        scale: 0.994,
+        glow: 0.18,
+        curl: 0.16,
+        assembly: 0.95,
+      },
+    };
+
+    const applyPhase = (section, phase, index) => {
+      const config = phaseConfig[phase] || phaseConfig.idle;
       section.style.setProperty("--turn-rotate", "0deg");
       section.style.setProperty("--turn-yaw", "0deg");
       section.style.setProperty("--turn-shift", "0px");
-      section.style.setProperty("--turn-scale", "1");
-      section.style.setProperty("--turn-glow", "0.16");
-      section.style.setProperty("--turn-curl", "0.16");
-      section.style.setProperty("--chapter-progress", "1");
-      section.style.setProperty("--chapter-entry", "1");
-      section.style.setProperty("--chapter-dissolve", "0");
-      section.style.setProperty("--chapter-visibility", "1");
-      section.style.setProperty("--chapter-cloud", `${index === 0 ? 0.18 : 0.26}`);
-      section.style.setProperty("--chapter-shift", "0px");
-      section.style.setProperty("--chapter-blur", "0px");
-      section.style.setProperty("--assembly-progress", "1");
+      section.style.setProperty("--turn-scale", `${config.scale}`);
+      section.style.setProperty("--turn-glow", `${config.glow}`);
+      section.style.setProperty("--turn-curl", `${config.curl}`);
+      section.style.setProperty("--chapter-progress", `${config.progress}`);
+      section.style.setProperty("--chapter-entry", `${config.entry}`);
+      section.style.setProperty("--chapter-dissolve", `${config.dissolve}`);
+      section.style.setProperty("--chapter-visibility", `${config.visibility}`);
+      section.style.setProperty("--chapter-cloud", `${config.cloud}`);
+      section.style.setProperty("--chapter-shift", `${config.shift}px`);
+      section.style.setProperty("--chapter-blur", `${config.blur}px`);
+      section.style.setProperty("--assembly-progress", `${config.assembly}`);
       section.style.setProperty("--chapter-z", `${sections.length - index}`);
-      section.classList.add("is-chapter-settled");
-      section.classList.remove("is-chapter-live", "is-chapter-dissolving");
+      section.classList.toggle("is-chapter-live", phase === "active" || phase === "next");
+      section.classList.toggle("is-chapter-settled", phase === "active");
+      section.classList.toggle("is-chapter-dissolving", phase === "previous");
+    };
+
+    const visibilityMap = new Map(sections.map((section) => [section, 0]));
+
+    const syncSections = () => {
+      let activeIndex = 0;
+      let maxRatio = -1;
+
+      sections.forEach((section, index) => {
+        const ratio = visibilityMap.get(section) ?? 0;
+        if (ratio > maxRatio) {
+          maxRatio = ratio;
+          activeIndex = index;
+        }
+      });
+
+      sections.forEach((section, index) => {
+        let phase = "idle";
+        if (index === activeIndex) phase = "active";
+        else if (index === activeIndex - 1) phase = "previous";
+        else if (index === activeIndex + 1) phase = "next";
+        applyPhase(section, phase, index);
+      });
+    };
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          visibilityMap.set(entry.target, entry.intersectionRatio);
+        });
+        syncSections();
+      },
+      {
+        threshold: [0, 0.2, 0.4, 0.6, 0.8, 1],
+        rootMargin: "-12% 0px -18% 0px",
+      },
+    );
+
+    sections.forEach((section, index) => {
+      applyPhase(section, index === 0 ? "active" : index === 1 ? "next" : "idle", index);
+      observer.observe(section);
     });
     return;
   }
