@@ -310,7 +310,7 @@ function initializeScrollState() {
 
 function initializeHeroParallax() {
   const hero = document.querySelector(".hero");
-  if (!hero || prefersReducedMotion.matches || motionProfile.performanceLite) return;
+  if (!hero || prefersReducedMotion.matches) return;
 
   const state = {
     copyX: 0,
@@ -641,7 +641,6 @@ function initializeTurnSections() {
 }
 
 function initializeManifestoCanvas() {
-  if (motionProfile.performanceLite) return;
   const section = document.querySelector(".proof-band");
   const canvas = document.querySelector("#manifesto-canvas");
   const canvasCtx = canvas?.getContext("2d", { alpha: true });
@@ -751,7 +750,6 @@ function initializeManifestoCanvas() {
 }
 
 function initializeStoryCanvas() {
-  if (motionProfile.performanceLite) return;
   const stage = document.querySelector(".story-stage");
   const stack = stage?.querySelector(".story-stack");
   const canvas = document.querySelector("#story-canvas");
@@ -914,7 +912,6 @@ function initializeStoryCanvas() {
 }
 
 function initializeChapterPixelStreams() {
-  if (motionProfile.performanceLite) return;
   const entries = [...document.querySelectorAll("[data-turn-section]")]
     .map((section, index) => {
       const shell = section.querySelector(".section-turn-shell");
@@ -1120,7 +1117,7 @@ function initializeChapterPixelStreams() {
 function initializeCursorRing() {
   if (!cursorRing) return;
   const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)");
-  if (!finePointer.matches || prefersReducedMotion.matches || motionProfile.performanceLite) return;
+  if (!finePointer.matches || prefersReducedMotion.matches) return;
 
   body.classList.add("has-custom-cursor");
   const state = {
@@ -1192,7 +1189,7 @@ function resizeCanvas() {
 }
 
 function initializeCanvasMotion() {
-  if (!canvas || !ctx || motionProfile.performanceLite) return;
+  if (!canvas || !ctx) return;
 
   window.addEventListener("pointermove", (event) => {
     focus.targetX = event.clientX;

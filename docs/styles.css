@@ -310,18 +310,31 @@ body.is-scrolled .site-header {
   animation: heroHalo 10s ease-in-out infinite;
 }
 
-body.is-performance-lite .hero::before,
-body.is-performance-lite .hero-marquee,
-body.is-performance-lite .hero-vector-lines {
-  display: none;
-}
-
 body.is-performance-lite .hero::after {
   bottom: -24vh;
   height: min(460px, 40vw);
   filter: blur(16px);
   opacity: 0.42;
   animation: heroHalo 16s ease-in-out infinite;
+}
+
+body.is-performance-lite .hero::before {
+  opacity: 0.52;
+  animation-duration: 14s;
+}
+
+body.is-performance-lite .hero-marquee-a {
+  opacity: 0.44;
+  animation-duration: 30s;
+}
+
+body.is-performance-lite .hero-marquee-b {
+  opacity: 0.18;
+  animation-duration: 34s;
+}
+
+body.is-performance-lite .hero-vector-lines span {
+  opacity: 0.22;
 }
 
 .hero-image,
@@ -445,18 +458,21 @@ body.is-performance-lite .hero-eclipse-ring {
   animation: eclipsePulse 10s ease-in-out infinite;
 }
 
-body.is-performance-lite .hero-eclipse-glow,
-body.is-performance-lite .hero-intent,
+body.is-performance-lite .hero-eclipse-glow {
+  opacity: 0.42;
+}
+
+body.is-performance-lite .hero-intent {
+  animation-duration: 7.2s;
+}
+
 body.is-performance-lite .hero-dashboard::after,
 body.is-performance-lite .run-monitor::after,
 body.is-performance-lite .latency-panel::after,
 body.is-performance-lite .result-card::after,
 body.is-performance-lite .terminal-window::after {
-  animation: none;
-}
-
-body.is-performance-lite .hero-eclipse-glow {
-  opacity: 0.42;
+  animation-duration: 15s;
+  opacity: 0.72;
 }
 
 .hero-vector-lines {
@@ -912,8 +928,8 @@ body.is-performance-lite .terminal-window {
 body.is-performance-lite .metric-bar span,
 body.is-performance-lite .latency-track span,
 body.is-performance-lite .live-bar span {
-  background-size: 100% 100%;
-  animation: none;
+  background-size: 150% 100%;
+  animation-duration: 11s;
 }
 
 .metric-value {
@@ -1237,12 +1253,12 @@ body.is-scrolling .chapter-band::after {
 }
 
 body.is-performance-lite .section-pixel-canvas {
-  display: none;
+  opacity: calc(0.08 + var(--chapter-entry) * 0.06 + var(--chapter-cloud) * 0.34);
 }
 
 body.is-performance-lite .manifesto-canvas,
 body.is-performance-lite .story-canvas {
-  display: none;
+  opacity: 0.54;
 }
 
 body.is-performance-lite .story-lines span {
@@ -1357,27 +1373,24 @@ body.is-performance-lite .chapter-band .live-pill {
     filter 180ms linear;
 }
 
-body.is-performance-lite .pixel-relay-b,
-body.is-performance-lite .pixel-fracture span:nth-child(n + 5) {
-  display: none;
-}
-
 body.is-performance-lite .pixel-relay,
 body.is-performance-lite .pixel-fracture {
-  opacity: 0.08;
+  opacity: 0.14;
 }
 
-body.is-performance-lite .pixel-relay,
 body.is-performance-lite .pixel-relay::after,
 body.is-performance-lite .pixel-relay-a,
 body.is-performance-lite .pixel-relay-b {
-  animation: none;
+  animation-duration: 22s;
 }
 
 body.is-performance-lite .progress-track span,
-body.is-performance-lite .latency-row i,
+body.is-performance-lite .latency-row i {
+  animation-duration: 10.5s;
+}
+
 body.is-performance-lite .terminal-window {
-  animation-play-state: paused;
+  animation-duration: 14s;
 }
 
 body.is-scrolling .pixel-relay {
