@@ -1102,6 +1102,15 @@ body.is-performance-lite .section-turn-shell {
   will-change: auto;
 }
 
+body.is-performance-lite.is-scrolling .section-turn-shell {
+  transform: none;
+  opacity: 1;
+  filter: none;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 16px 36px rgba(0, 0, 0, 0.18);
+}
+
 body.is-scrolling .section-turn-shell {
   backdrop-filter: none;
   box-shadow:
@@ -1195,6 +1204,13 @@ body.is-performance-lite .chapter-band::before {
   filter: blur(14px);
 }
 
+body.is-performance-lite.is-scrolling .chapter-band::before,
+body.is-performance-lite.is-scrolling .chapter-band::after {
+  animation: none;
+  opacity: 0.04;
+  filter: none;
+}
+
 body.is-scrolling .chapter-band::before {
   animation: none;
   opacity: calc(0.03 + var(--chapter-cloud) * 0.16);
@@ -1254,6 +1270,11 @@ body.is-scrolling .chapter-band::after {
 
 body.is-performance-lite .section-pixel-canvas {
   opacity: calc(0.08 + var(--chapter-entry) * 0.06 + var(--chapter-cloud) * 0.34);
+}
+
+body.is-performance-lite.is-scrolling .section-pixel-canvas {
+  opacity: 0;
+  filter: none;
 }
 
 body.is-performance-lite .manifesto-canvas,
@@ -1321,6 +1342,18 @@ body.is-performance-lite .chapter-band .live-pill {
     scale(calc(0.97 + var(--chapter-visibility) * 0.03));
 }
 
+body.is-performance-lite.is-scrolling .chapter-band .section-heading,
+body.is-performance-lite.is-scrolling .chapter-band .results-grid,
+body.is-performance-lite.is-scrolling .chapter-band .feature-grid,
+body.is-performance-lite.is-scrolling .chapter-band .hardware-grid,
+body.is-performance-lite.is-scrolling .chapter-band .intelligence-grid,
+body.is-performance-lite.is-scrolling .chapter-band .section-link,
+body.is-performance-lite.is-scrolling .chapter-band .live-pill {
+  opacity: 1;
+  filter: none;
+  transform: none;
+}
+
 .chapter-band .section-heading {
   position: relative;
   z-index: 2;
@@ -1376,6 +1409,26 @@ body.is-performance-lite .chapter-band .live-pill {
 body.is-performance-lite .pixel-relay,
 body.is-performance-lite .pixel-fracture {
   opacity: 0.14;
+}
+
+body.is-performance-lite.is-scrolling .pixel-relay,
+body.is-performance-lite.is-scrolling .pixel-fracture {
+  opacity: 0;
+  filter: none;
+}
+
+body.is-performance-lite.is-scrolling .hero-marquee-a,
+body.is-performance-lite.is-scrolling .hero-marquee-b,
+body.is-performance-lite.is-scrolling .hero-vector-lines span,
+body.is-performance-lite.is-scrolling .story-lines span,
+body.is-performance-lite.is-scrolling .progress-track span,
+body.is-performance-lite.is-scrolling .latency-row i,
+body.is-performance-lite.is-scrolling .live-bar span,
+body.is-performance-lite.is-scrolling .pixel-relay,
+body.is-performance-lite.is-scrolling .pixel-relay::before,
+body.is-performance-lite.is-scrolling .pixel-relay::after,
+body.is-performance-lite.is-scrolling .pixel-relay img {
+  animation-play-state: paused !important;
 }
 
 body.is-performance-lite .pixel-relay::after,

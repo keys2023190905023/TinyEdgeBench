@@ -66,6 +66,10 @@ function getMotionFrameInterval(baseInterval, liteInterval = baseInterval * 1.4,
   return motionProfile.performanceLite ? liteInterval : baseInterval;
 }
 
+function isPerformanceLiteScrollActive() {
+  return motionProfile.performanceLite && body.classList.contains("is-scrolling");
+}
+
 const liveRuns = [
   {
     label: "conv2d / torch_cpu / int8_sim",
@@ -271,11 +275,22 @@ function initializeActiveNav() {
 
 function initializeScrollState() {
   if (motionProfile.performanceLite) {
+    let scrollIdleTimer = 0;
+
     const updateScrollLite = () => {
       body.classList.toggle("is-scrolled", window.scrollY > 28);
     };
 
-    window.addEventListener("scroll", updateScrollLite, { passive: true });
+    const handleLiteScroll = () => {
+      body.classList.add("is-scrolling");
+      window.clearTimeout(scrollIdleTimer);
+      scrollIdleTimer = window.setTimeout(() => {
+        body.classList.remove("is-scrolling");
+      }, 120);
+      updateScrollLite();
+    };
+
+    window.addEventListener("scroll", handleLiteScroll, { passive: true });
     updateScrollLite();
     return;
   }
@@ -733,7 +748,7 @@ function initializeManifestoCanvas() {
 
   function renderManifesto(now) {
     if (!lastFrame || now - lastFrame > getMotionFrameInterval(42, 62, 92)) {
-      if (active || prefersReducedMotion.matches) {
+      if ((active || prefersReducedMotion.matches) && !isPerformanceLiteScrollActive()) {
         drawCloud(now / 1000);
       }
       lastFrame = now;
@@ -895,7 +910,7 @@ function initializeStoryCanvas() {
 
   function renderStory(now) {
     if (!lastFrame || now - lastFrame > getMotionFrameInterval(40, 58, 88)) {
-      if (active || prefersReducedMotion.matches) {
+      if ((active || prefersReducedMotion.matches) && !isPerformanceLiteScrollActive()) {
         drawStory(now / 1000);
       }
       lastFrame = now;
@@ -925,6 +940,7 @@ function initializeChapterPixelStreams() {
         canvasCtx,
         index,
         active: true,
+        rendered: false,
         width: 0,
         height: 0,
         cell: 0,
@@ -992,11 +1008,30 @@ function initializeChapterPixelStreams() {
     });
   };
 
-  const drawEntry = (entry, timeSeconds) => {
+  const clearEntry = (entry) => {
+    entry.canvasCtx.clearRect(0, 0, entry.width, entry.height);
+  };
+
+  const getEntryDetailLevel = (entry) => {
+    if (prefersReducedMotion.matches) return 2;
+    if (!entry.active) return 0;
+    if (!motionProfile.performanceLite) return 2;
+    if (isPerformanceLiteScrollActive()) return 0;
+    if (entry.section.classList.contains("is-chapter-settled")) return 2;
+    if (entry.section.classList.contains("is-chapter-live")) return 1;
+    return 0;
+  };
+
+  const drawEntry = (entry, timeSeconds, detailLevel = 2) => {
     const { canvasCtx, width, height, cell } = entry;
     const glow = parseFloat(getComputedStyle(entry.section).getPropertyValue("--turn-glow")) || 0.5;
     const assembly = parseFloat(getComputedStyle(entry.section).getPropertyValue("--assembly-progress")) || 0;
     const direction = entry.index % 2 === 0 ? 1 : -1;
+    const anchorPointCount = detailLevel === 1 ? 28 : 54;
+    const laneStep = detailLevel === 1 ? 0.056 : 0.034;
+    const packetCount = detailLevel === 1 ? 2 : 4;
+    const trailCount = detailLevel === 1 ? 3 : 5;
+    const laneLimit = detailLevel === 1 ? Math.min(2, entry.lanes.length) : entry.lanes.length;
 
     canvasCtx.clearRect(0, 0, width, height);
 
@@ -1014,7 +1049,7 @@ function initializeChapterPixelStreams() {
     ];
 
     anchors.forEach((anchor, anchorIndex) => {
-      for (let pointIndex = 0; pointIndex < 54; pointIndex += 1) {
+      for (let pointIndex = 0; pointIndex < anchorPointCount; pointIndex += 1) {
         const seed = entry.index * 200 + anchorIndex * 64 + pointIndex;
         const angle = pseudoRandom(seed + 1) * Math.PI * 2 + timeSeconds * (0.08 + anchorIndex * 0.03);
         const radiusFactor = 0.18 + pseudoRandom(seed + 5) * 0.98;
@@ -1033,7 +1068,9 @@ function initializeChapterPixelStreams() {
     });
 
     entry.lanes.forEach((lane, laneIndex) => {
-      for (let t = 0.03; t < 1; t += 0.034) {
+      if (laneIndex >= laneLimit) return;
+
+      for (let t = 0.03; t < 1; t += laneStep) {
         const point = bezierPoint(lane.points[0], lane.points[1], lane.points[2], lane.points[3], t);
         const laneScatterX = (Math.sin(timeSeconds * 0.9 + t * 14 + laneIndex) * (1 - assembly) * 28);
         const laneScatterY = (Math.cos(timeSeconds * 0.7 + t * 12 + laneIndex) * (1 - assembly) * 16);
@@ -1047,9 +1084,9 @@ function initializeChapterPixelStreams() {
         );
       }
 
-      for (let packetIndex = 0; packetIndex < 4; packetIndex += 1) {
+      for (let packetIndex = 0; packetIndex < packetCount; packetIndex += 1) {
         const progress = (timeSeconds * lane.speed + lane.phase + packetIndex * 0.24) % 1;
-        for (let trailIndex = 0; trailIndex < 5; trailIndex += 1) {
+        for (let trailIndex = 0; trailIndex < trailCount; trailIndex += 1) {
           const trailProgress = (progress - trailIndex * 0.026 + 1) % 1;
           const point = bezierPoint(lane.points[0], lane.points[1], lane.points[2], lane.points[3], trailProgress);
           const trailScatterX = (pseudoRandom(packetIndex * 17 + trailIndex * 23 + laneIndex) - 0.5) * (1 - assembly) * 54;
@@ -1097,9 +1134,17 @@ function initializeChapterPixelStreams() {
     if (!lastFrame || now - lastFrame > getMotionFrameInterval(48, 70, 104)) {
       const timeSeconds = now / 1000;
       entries.forEach((entry) => {
-        if (entry.active || prefersReducedMotion.matches) {
-          drawEntry(entry, timeSeconds);
+        const detailLevel = getEntryDetailLevel(entry);
+        if (!detailLevel) {
+          if (entry.rendered) {
+            clearEntry(entry);
+            entry.rendered = false;
+          }
+          return;
         }
+
+        drawEntry(entry, timeSeconds, detailLevel);
+        entry.rendered = true;
       });
       lastFrame = now;
     }
@@ -1108,7 +1153,12 @@ function initializeChapterPixelStreams() {
   };
 
   window.addEventListener("resize", resizeAll);
-  entries.forEach((entry) => drawEntry(entry, 0));
+  entries.forEach((entry) => {
+    const detailLevel = getEntryDetailLevel(entry);
+    if (!detailLevel) return;
+    drawEntry(entry, 0, detailLevel);
+    entry.rendered = true;
+  });
   if (!prefersReducedMotion.matches) {
     window.requestAnimationFrame(render);
   }
@@ -1205,6 +1255,11 @@ function initializeCanvasMotion() {
   const draw = (now) => {
     if (!lastFrame || now - lastFrame > getMotionFrameInterval(34, 52, 86)) {
       lastFrame = now;
+      if (isPerformanceLiteScrollActive() && window.scrollY > window.innerHeight * 0.45) {
+        window.requestAnimationFrame(draw);
+        return;
+      }
+
       tick += 0.008;
       focus.x += (focus.targetX - focus.x) * 0.03;
       focus.y += (focus.targetY - focus.y) * 0.03;
